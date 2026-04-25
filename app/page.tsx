@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const holes = [
   { number: 1, par: 4, yards: 385 },
@@ -17,14 +17,16 @@ const holes = [
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [scores, setScores] = useState<Record<number, number>>({});
+  const [draftScore, setDraftScore] = useState(holes[0].par);
   const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<"scorecard" | "leaderboard" | "rules">(
     "scorecard"
   );
 
+  const hole = holes[currentHoleIndex];
+
   useEffect(() => {
     const saved = localStorage.getItem("scores");
-
     if (saved) {
       setScores(JSON.parse(saved));
     }
@@ -34,15 +36,19 @@ export default function Home() {
     localStorage.setItem("scores", JSON.stringify(scores));
   }, [scores]);
 
-  const hole = holes[currentHoleIndex];
-  const score = scores[hole.number] ?? hole.par;
+  useEffect(() => {
+    setDraftScore(scores[hole.number] ?? hole.par);
+  }, [currentHoleIndex, scores, hole.number, hole.par]);
 
-  const updateScore = (newScore: number) => {
+  const changeDraftScore = (newScore: number) => {
     if (newScore < 1) return;
+    setDraftScore(newScore);
+  };
 
+  const enterScore = () => {
     setScores((prevScores) => ({
       ...prevScores,
-      [hole.number]: newScore,
+      [hole.number]: draftScore,
     }));
   };
 
@@ -56,45 +62,57 @@ export default function Home() {
     }
   };
 
-  const totalScore = holes.reduce(
+  const holesPlayed = Object.keys(scores).length;
+
+  const grossTotal = holes.reduce(
     (total, h) => total + (scores[h.number] ?? 0),
     0
   );
 
-  const holesPlayed = Object.keys(scores).length;
+  const parPlayed = holes.reduce((total, h) => {
+    return scores[h.number] ? total + h.par : total;
+  }, 0);
+
+  const toPar = grossTotal - parPlayed;
 
   const leaderboard = [
-  {
-    name: "You",
-    thru: holesPlayed,
-    gross: totalScore,
-    net: totalScore,
-  },
-  {
-    name: "Fairway Mike",
-    thru: 6,
-    gross: 26,
-    net: -1,
-  },
-  {
-    name: "Anthony",
-    thru: 6,
-    gross: 27,
-    net: 0,
-  },
-  {
-    name: "Carlos",
-    thru: 5,
-    gross: 24,
-    net: +1,
-  },
-];
+    {
+      name: "You",
+      thru: holesPlayed,
+      gross: grossTotal,
+      net: toPar,
+    },
+    {
+      name: "Fairway Mike",
+      thru: 6,
+      gross: 26,
+      net: -1,
+    },
+    {
+      name: "Anthony",
+      thru: 6,
+      gross: 27,
+      net: 0,
+    },
+    {
+      name: "Carlos",
+      thru: 5,
+      gross: 24,
+      net: 1,
+    },
+  ];
 
-const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
 
   const openView = (selectedView: "scorecard" | "leaderboard" | "rules") => {
     setView(selectedView);
     setMenuOpen(false);
+  };
+
+  const formatScore = (score: number) => {
+    if (score > 0) return `+${score}`;
+    if (score === 0) return "E";
+    return `${score}`;
   };
 
   return (
@@ -150,7 +168,7 @@ const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
         <>
           <div className="mt-8 text-center">
             <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-              Belt Invitational Test
+              Belt Invitational
             </div>
             <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
             <p className="mt-2 text-gray-400">
@@ -160,32 +178,33 @@ const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
 
           <div className="flex flex-1 flex-col items-center justify-center">
             <button
-              onClick={() => updateScore(score + 1)}
+              onClick={() => changeDraftScore(draftScore + 1)}
               className="text-5xl text-gray-400 active:text-white"
             >
               ▲
             </button>
 
             <div className="my-4 text-[10rem] font-black leading-none">
-              {score}
+              {draftScore}
             </div>
 
             <button
-              onClick={() => updateScore(score - 1)}
+              onClick={() => changeDraftScore(draftScore - 1)}
               className="text-5xl text-gray-400 active:text-white"
             >
               ▼
             </button>
 
             <button
-              onClick={() => updateScore(score)}
+              onClick={enterScore}
               className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
             >
               ENTER SCORE
             </button>
 
             <div className="mt-6 text-center text-sm text-gray-400">
-              Through {holesPlayed} · Total: {totalScore || "--"}
+              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
+              {holesPlayed > 0 ? formatScore(toPar) : "--"}
             </div>
           </div>
 
@@ -199,7 +218,7 @@ const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
             </button>
 
             <div className="max-w-[220px] text-center text-xs text-yellow-400">
-              🔥 Live ticker: Mike birdied Hole 4 · New leader at -2
+              🔥 Live ticker: Scores update when ENTER SCORE is pressed
             </div>
 
             <button
@@ -230,12 +249,12 @@ const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
                   <div className="text-sm text-gray-500">#{index + 1}</div>
                   <div className="text-lg font-bold">{player.name}</div>
                   <div className="text-xs text-gray-500">
-                    Thru {player.thru} · Gross {player.gross}
+                    Thru {player.thru} · Gross {player.gross || "--"}
                   </div>
                 </div>
 
                 <div className="text-3xl font-black text-yellow-400">
-                  {player.net > 0 ? `+${player.net}` : player.net}
+                  {formatScore(player.net)}
                 </div>
               </div>
             ))}
