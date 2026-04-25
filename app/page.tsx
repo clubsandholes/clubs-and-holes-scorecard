@@ -72,7 +72,7 @@ export default function Home() {
         </button>
 
        <button
-  onClick={() => alert("Button works")}
+  onClick={() => updateScore(score)}
   className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
 >
   ENTER SCORE
