@@ -14,38 +14,36 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-
-
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
-  const [scores, setScores] = useState<Record<number, number>>(() => {
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("scores");
-    return saved ? JSON.parse(saved) : {};
-  }
-  return {};
-});
-
-useEffect(() => {
-  localStorage.setItem("scores", JSON.stringify(scores));
-}, [scores]);
-
+  const [scores, setScores] = useState<Record<number, number>>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<"scorecard" | "leaderboard" | "rules">(
     "scorecard"
   );
 
+  useEffect(() => {
+    const saved = localStorage.getItem("scores");
+
+    if (saved) {
+      setScores(JSON.parse(saved));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("scores", JSON.stringify(scores));
+  }, [scores]);
+
   const hole = holes[currentHoleIndex];
   const score = scores[hole.number] ?? hole.par;
 
   const updateScore = (newScore: number) => {
-  if (newScore < 1) return;
+    if (newScore < 1) return;
 
-  setScores((prevScores) => ({
-    ...prevScores,
-    [hole.number]: newScore,
-  }));
-};
+    setScores((prevScores) => ({
+      ...prevScores,
+      [hole.number]: newScore,
+    }));
   };
 
   const goPrev = () => {
@@ -53,8 +51,9 @@ useEffect(() => {
   };
 
   const goNext = () => {
-    if (currentHoleIndex < holes.length - 1)
+    if (currentHoleIndex < holes.length - 1) {
       setCurrentHoleIndex(currentHoleIndex + 1);
+    }
   };
 
   const totalScore = holes.reduce(
@@ -63,14 +62,15 @@ useEffect(() => {
   );
 
   const holesPlayed = Object.keys(scores).length;
+
   const leaderboard = [
-  {
-    name: "You",
-    thru: holesPlayed,
-    gross: totalScore,
-    net: totalScore,
-  },
-];
+    {
+      name: "You",
+      thru: holesPlayed,
+      gross: totalScore,
+      net: totalScore,
+    },
+  ];
 
   const openView = (selectedView: "scorecard" | "leaderboard" | "rules") => {
     setView(selectedView);
@@ -79,7 +79,6 @@ useEffect(() => {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
-      {/* Top Bar */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => openView("scorecard")}
@@ -93,7 +92,6 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* Slide Menu */}
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
           <div className="flex items-center justify-between">
@@ -128,7 +126,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Scorecard View */}
       {view === "scorecard" && (
         <>
           <div className="mt-8 text-center">
@@ -196,7 +193,6 @@ useEffect(() => {
         </>
       )}
 
-      {/* Leaderboard View */}
       {view === "leaderboard" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
@@ -227,7 +223,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Rules View */}
       {view === "rules" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
