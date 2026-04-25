@@ -14,14 +14,7 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-const leaderboard = [
-  {
-    name: "You",
-    thru: holesPlayed,
-    gross: totalScore,
-    net: totalScore, // we'll adjust later with handicap
-  },
-];
+
 
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
@@ -70,6 +63,14 @@ useEffect(() => {
   );
 
   const holesPlayed = Object.keys(scores).length;
+  const leaderboard = [
+  {
+    name: "You",
+    thru: holesPlayed,
+    gross: totalScore,
+    net: totalScore,
+  },
+];
 
   const openView = (selectedView: "scorecard" | "leaderboard" | "rules") => {
     setView(selectedView);
