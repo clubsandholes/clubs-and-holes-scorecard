@@ -64,13 +64,33 @@ export default function Home() {
   const holesPlayed = Object.keys(scores).length;
 
   const leaderboard = [
-    {
-      name: "You",
-      thru: holesPlayed,
-      gross: totalScore,
-      net: totalScore,
-    },
-  ];
+  {
+    name: "You",
+    thru: holesPlayed,
+    gross: totalScore,
+    net: totalScore,
+  },
+  {
+    name: "Fairway Mike",
+    thru: 6,
+    gross: 26,
+    net: -1,
+  },
+  {
+    name: "Anthony",
+    thru: 6,
+    gross: 27,
+    net: 0,
+  },
+  {
+    name: "Carlos",
+    thru: 5,
+    gross: 24,
+    net: +1,
+  },
+];
+
+const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
 
   const openView = (selectedView: "scorecard" | "leaderboard" | "rules") => {
     setView(selectedView);
@@ -201,7 +221,7 @@ export default function Home() {
           <h1 className="mt-3 text-4xl font-black">Leaderboard</h1>
 
           <div className="mt-8 space-y-3">
-            {leaderboard.map((player, index) => (
+            {sortedLeaderboard.map((player, index) => (
               <div
                 key={player.name}
                 className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4"
