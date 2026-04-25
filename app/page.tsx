@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const holes = [
   { number: 1, par: 4, yards: 385 },
@@ -23,7 +23,18 @@ const leaderboard = [
 
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
-  const [scores, setScores] = useState<Record<number, number>>({});
+  const [scores, setScores] = useState<Record<number, number>>(() => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("scores");
+    return saved ? JSON.parse(saved) : {};
+  }
+  return {};
+});
+
+useEffect(() => {
+  localStorage.setItem("scores", JSON.stringify(scores));
+}, [scores]);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState<"scorecard" | "leaderboard" | "rules">(
     "scorecard"
