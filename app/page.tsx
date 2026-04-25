@@ -15,10 +15,12 @@ const holes = [
 ];
 
 const leaderboard = [
-  { name: "Fairway Mike", thru: 6, gross: 25, net: -2 },
-  { name: "Anthony", thru: 6, gross: 26, net: -1 },
-  { name: "Carlos", thru: 5, gross: 23, net: 0 },
-  { name: "Jason", thru: 6, gross: 29, net: +2 },
+  {
+    name: "You",
+    thru: holesPlayed,
+    gross: totalScore,
+    net: totalScore, // we'll adjust later with handicap
+  },
 ];
 
 export default function Home() {
@@ -44,8 +46,13 @@ useEffect(() => {
   const score = scores[hole.number] ?? hole.par;
 
   const updateScore = (newScore: number) => {
-    if (newScore < 1) return;
-    setScores({ ...scores, [hole.number]: newScore });
+  if (newScore < 1) return;
+
+  setScores((prevScores) => ({
+    ...prevScores,
+    [hole.number]: newScore,
+  }));
+};
   };
 
   const goPrev = () => {
