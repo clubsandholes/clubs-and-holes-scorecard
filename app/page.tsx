@@ -45,12 +45,25 @@ export default function Home() {
     setDraftScore(newScore);
   };
 
-  const enterScore = () => {
-    setScores((prevScores) => ({
-      ...prevScores,
-      [hole.number]: draftScore,
-    }));
-  };
+  const [ticker, setTicker] = useState("");
+
+const enterScore = () => {
+  setScores((prevScores) => ({
+    ...prevScores,
+    [hole.number]: draftScore,
+  }));
+
+  // 🧠 Simple event logic
+  if (draftScore <= hole.par - 1) {
+    setTicker(`🔥 Birdie on Hole ${hole.number}`);
+  } else if (draftScore === hole.par) {
+    setTicker(`Par on Hole ${hole.number}`);
+  } else if (draftScore === hole.par + 1) {
+    setTicker(`Bogey on Hole ${hole.number}`);
+  } else {
+    setTicker(`😬 Double+ on Hole ${hole.number}`);
+  }
+};
 
   const goPrev = () => {
     if (currentHoleIndex > 0) setCurrentHoleIndex(currentHoleIndex - 1);
@@ -218,7 +231,9 @@ export default function Home() {
             </button>
 
             <div className="max-w-[220px] text-center text-xs text-yellow-400">
-              🔥 Live ticker: Scores update when ENTER SCORE is pressed
+              <div className="max-w-[220px] text-center text-xs text-yellow-400">
+  {ticker || "Enter a score to see updates"}
+</div>
             </div>
 
             <button
