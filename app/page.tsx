@@ -14,31 +14,25 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
+const players = ["Fairway Mike", "Anthony", "Carlos", "Jason", "Michael Lopez"];
+
+type View = "join" | "selectPlayer" | "scorecard" | "leaderboard" | "rules";
+
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [view, setView] = useState<
-  "join" | "selectPlayer" | "scorecard" | "leaderboard" | "rules"
->("join");
-
-  const hole = holes[currentHoleIndex];
+  const [view, setView] = useState<View>("join");
   const [tournamentCode, setTournamentCode] = useState("");
   const [playerName, setPlayerName] = useState("");
-  const players = [
-  "Fairway Mike",
-  "Anthony",
-  "Carlos",
-  "Jason",
-  "Michael Lopez",
-];
+  const [ticker, setTicker] = useState("");
+
+  const hole = holes[currentHoleIndex];
 
   useEffect(() => {
     const saved = localStorage.getItem("scores");
-    if (saved) {
-      setScores(JSON.parse(saved));
-    }
+    if (saved) setScores(JSON.parse(saved));
   }, []);
 
   useEffect(() => {
@@ -54,34 +48,29 @@ export default function Home() {
     setDraftScore(newScore);
   };
 
-  const [ticker, setTicker] = useState("");
+  const enterScore = () => {
+    setScores((prevScores) => ({
+      ...prevScores,
+      [hole.number]: draftScore,
+    }));
 
-const enterScore = () => {
-  setScores((prevScores) => ({
-    ...prevScores,
-    [hole.number]: draftScore,
-  }));
-
-  // 🧠 Simple event logic
-  if (draftScore <= hole.par - 1) {
-    setTicker(`🔥 Birdie on Hole ${hole.number}`);
-  } else if (draftScore === hole.par) {
-    setTicker(`Par on Hole ${hole.number}`);
-  } else if (draftScore === hole.par + 1) {
-    setTicker(`Bogey on Hole ${hole.number}`);
-  } else {
-    setTicker(`😬 Double+ on Hole ${hole.number}`);
-  }
-};
+    if (draftScore <= hole.par - 1) {
+      setTicker(`🔥 ${playerName || "Player"} birdied Hole ${hole.number}`);
+    } else if (draftScore === hole.par) {
+      setTicker(`${playerName || "Player"} made par on Hole ${hole.number}`);
+    } else if (draftScore === hole.par + 1) {
+      setTicker(`${playerName || "Player"} bogeyed Hole ${hole.number}`);
+    } else {
+      setTicker(`😬 ${playerName || "Player"} made double+ on Hole ${hole.number}`);
+    }
+  };
 
   const goPrev = () => {
     if (currentHoleIndex > 0) setCurrentHoleIndex(currentHoleIndex - 1);
   };
 
   const goNext = () => {
-    if (currentHoleIndex < holes.length - 1) {
-      setCurrentHoleIndex(currentHoleIndex + 1);
-    }
+    if (currentHoleIndex < holes.length - 1) setCurrentHoleIndex(currentHoleIndex + 1);
   };
 
   const holesPlayed = Object.keys(scores).length;
@@ -91,42 +80,23 @@ const enterScore = () => {
     0
   );
 
-  const parPlayed = holes.reduce((total, h) => {
-    return scores[h.number] ? total + h.par : total;
-  }, 0);
+  const parPlayed = holes.reduce(
+    (total, h) => (scores[h.number] ? total + h.par : total),
+    0
+  );
 
   const toPar = grossTotal - parPlayed;
 
   const leaderboard = [
-    {
-      name: "You",
-      thru: holesPlayed,
-      gross: grossTotal,
-      net: toPar,
-    },
-    {
-      name: "Fairway Mike",
-      thru: 6,
-      gross: 26,
-      net: -1,
-    },
-    {
-      name: "Anthony",
-      thru: 6,
-      gross: 27,
-      net: 0,
-    },
-    {
-      name: "Carlos",
-      thru: 5,
-      gross: 24,
-      net: 1,
-    },
+    { name: playerName || "You", thru: holesPlayed, gross: grossTotal, net: toPar },
+    { name: "Fairway Mike", thru: 6, gross: 26, net: -1 },
+    { name: "Anthony", thru: 6, gross: 27, net: 0 },
+    { name: "Carlos", thru: 5, gross: 24, net: 1 },
   ];
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
 
-  const openView = (selectedView: "scorecard" | "leaderboard" | "rules") => {
+  const openView = (selectedView: View) => {
     setView(selectedView);
     setMenuOpen(false);
   };
@@ -138,62 +108,21 @@ const enterScore = () => {
   };
 
   return (
-  <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
-    {view === "join" && (
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <h1 className="text-3xl font-black">Join Tournament</h1>
-
-        <input
-          value={tournamentCode}
-          onChange={(e) => setTournamentCode(e.target.value)}
-          placeholder="Enter Code"
-          className="mt-6 rounded bg-gray-800 p-4 text-center text-xl"
-        />
-
-        <button
-          onClick={() => setView("selectPlayer")}
-          className="mt-6 rounded bg-yellow-400 px-6 py-3 font-bold text-black"
-        >
-          ENTER
-        </button>
-      </div>
-    )}
-
-
-{view === "selectPlayer" && (
-  <div className="mt-10">
-    <h1 className="text-3xl font-black text-center">Select Your Name</h1>
-
-    <div className="mt-6 space-y-3">
-      {players.map((name) => (
-        <button
-          key={name}
-          onClick={() => {
-            setPlayerName(name);
-            setView("scorecard");
-          }}
-          className="w-full rounded border border-gray-700 p-4 text-left"
-        >
-          {name}
-        </button>
-      ))}
-    </div>
-  </div>
-)}
-
     <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => openView("scorecard")}
-          className="text-left text-lg font-black tracking-wide"
-        >
-          CLUBS & HOLES
-        </button>
+      {view !== "join" && view !== "selectPlayer" && (
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => openView("scorecard")}
+            className="text-left text-lg font-black tracking-wide"
+          >
+            CLUBS & HOLES
+          </button>
 
-        <button onClick={() => setMenuOpen(true)} className="text-3xl">
-          ☰
-        </button>
-      </div>
+          <button onClick={() => setMenuOpen(true)} className="text-3xl">
+            ☰
+          </button>
+        </div>
+      )}
 
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
@@ -205,26 +134,65 @@ const enterScore = () => {
           </div>
 
           <div className="mt-10 flex flex-col gap-4">
-            <button
-              onClick={() => openView("scorecard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("scorecard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Scorecard
             </button>
-
-            <button
-              onClick={() => openView("leaderboard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("leaderboard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Leaderboard
             </button>
-
-            <button
-              onClick={() => openView("rules")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("rules")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Tournament Rules
             </button>
+          </div>
+        </div>
+      )}
+
+      {view === "join" && (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Clubs & Holes
+          </div>
+          <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
+
+          <input
+            value={tournamentCode}
+            onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
+            placeholder="ENTER CODE"
+            className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
+          />
+
+          <button
+            onClick={() => setView("selectPlayer")}
+            className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
+          >
+            ENTER
+          </button>
+        </div>
+      )}
+
+      {view === "selectPlayer" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Code: {tournamentCode || "PLAY16"}
+          </div>
+          <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
+          <div className="mt-8 space-y-3">
+            {players.map((name) => (
+              <button
+                key={name}
+                onClick={() => {
+                  const confirmed = window.confirm(`Are you sure you are ${name}?`);
+                  if (confirmed) {
+                    setPlayerName(name);
+                    setView("scorecard");
+                  }
+                }}
+                className="w-full rounded-2xl border border-gray-800 bg-gray-950 p-4 text-left text-xl font-bold"
+              >
+                {name}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -242,10 +210,7 @@ const enterScore = () => {
           </div>
 
           <div className="flex flex-1 flex-col items-center justify-center">
-            <button
-              onClick={() => changeDraftScore(draftScore + 1)}
-              className="text-5xl text-gray-400 active:text-white"
-            >
+            <button onClick={() => changeDraftScore(draftScore + 1)} className="text-5xl text-gray-400 active:text-white">
               ▲
             </button>
 
@@ -253,17 +218,11 @@ const enterScore = () => {
               {draftScore}
             </div>
 
-            <button
-              onClick={() => changeDraftScore(draftScore - 1)}
-              className="text-5xl text-gray-400 active:text-white"
-            >
+            <button onClick={() => changeDraftScore(draftScore - 1)} className="text-5xl text-gray-400 active:text-white">
               ▼
             </button>
 
-            <button
-              onClick={enterScore}
-              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
-            >
+            <button onClick={enterScore} className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black">
               ENTER SCORE
             </button>
 
@@ -274,25 +233,15 @@ const enterScore = () => {
           </div>
 
           <div className="mb-4 flex items-center justify-between">
-            <button
-              onClick={goPrev}
-              className="text-4xl disabled:opacity-20"
-              disabled={currentHoleIndex === 0}
-            >
+            <button onClick={goPrev} className="text-4xl disabled:opacity-20" disabled={currentHoleIndex === 0}>
               ←
             </button>
 
             <div className="max-w-[220px] text-center text-xs text-yellow-400">
-              <div className="max-w-[220px] text-center text-xs text-yellow-400">
-  {ticker || "Enter a score to see updates"}
-</div>
+              {ticker || "Enter a score to see updates"}
             </div>
 
-            <button
-              onClick={goNext}
-              className="text-4xl disabled:opacity-20"
-              disabled={currentHoleIndex === holes.length - 1}
-            >
+            <button onClick={goNext} className="text-4xl disabled:opacity-20" disabled={currentHoleIndex === holes.length - 1}>
               →
             </button>
           </div>
@@ -308,10 +257,7 @@ const enterScore = () => {
 
           <div className="mt-8 space-y-3">
             {sortedLeaderboard.map((player, index) => (
-              <div
-                key={player.name}
-                className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4"
-              >
+              <div key={player.name} className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4">
                 <div>
                   <div className="text-sm text-gray-500">#{index + 1}</div>
                   <div className="text-lg font-bold">{player.name}</div>
