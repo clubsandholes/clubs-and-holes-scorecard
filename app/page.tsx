@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 
+// =========================
+// BEGIN STATIC DATA
+// =========================
+
+const tournamentName = "Belt Invitational";
+const golfCourseName = "Buena Vista Golf Course";
+
 const holes = [
   { number: 1, par: 4, yards: 385 },
   { number: 2, par: 3, yards: 165 },
@@ -24,7 +31,15 @@ type View =
   | "courseInfo"
   | "rules";
 
+// =========================
+// END STATIC DATA
+// =========================
+
 export default function Home() {
+  // =========================
+  // STATE
+  // =========================
+
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
@@ -35,6 +50,10 @@ export default function Home() {
   const [ticker, setTicker] = useState("");
 
   const hole = holes[currentHoleIndex];
+
+  // =========================
+  // EFFECTS
+  // =========================
 
   useEffect(() => {
     const saved = localStorage.getItem("scores");
@@ -47,7 +66,11 @@ export default function Home() {
 
   useEffect(() => {
     setDraftScore(scores[hole.number] ?? hole.par);
-  }, [currentHoleIndex, scores, hole.number, hole.par]);
+  }, [currentHoleIndex, scores]);
+
+  // =========================
+  // SCORE LOGIC
+  // =========================
 
   const changeDraftScore = (newScore: number) => {
     if (newScore < 1) return;
@@ -55,33 +78,36 @@ export default function Home() {
   };
 
   const enterScore = () => {
-    setScores((prevScores) => ({
-      ...prevScores,
+    const confirmed = window.confirm(
+      `Enter ${draftScore} for Hole ${hole.number}?`
+    );
+    if (!confirmed) return;
+
+    setScores((prev) => ({
+      ...prev,
       [hole.number]: draftScore,
     }));
-
-    if (draftScore <= hole.par - 1) {
-      setTicker(`🔥 ${playerName || "Player"} birdied Hole ${hole.number}`);
-    } else if (draftScore === hole.par) {
-      setTicker(`${playerName || "Player"} made par on Hole ${hole.number}`);
-    } else if (draftScore === hole.par + 1) {
-      setTicker(`${playerName || "Player"} bogeyed Hole ${hole.number}`);
-    } else {
-      setTicker(
-        `😬 ${playerName || "Player"} made double+ on Hole ${hole.number}`
-      );
-    }
   };
 
-  const goPrev = () => {
-    if (currentHoleIndex > 0) setCurrentHoleIndex(currentHoleIndex - 1);
-  };
+  // =========================
+  // NAVIGATION
+  // =========================
 
   const goNext = () => {
     if (currentHoleIndex < holes.length - 1) {
       setCurrentHoleIndex(currentHoleIndex + 1);
     }
   };
+
+  const goPrev = () => {
+    if (currentHoleIndex > 0) {
+      setCurrentHoleIndex(currentHoleIndex - 1);
+    }
+  };
+
+  // =========================
+  // SCORING CALCULATIONS
+  // =========================
 
   const holesPlayed = Object.keys(scores).length;
 
@@ -97,24 +123,68 @@ export default function Home() {
 
   const toPar = grossTotal - parPlayed;
 
-  const leaderboard = [
-    {
-      name: playerName || "You",
-      thru: holesPlayed,
-      gross: grossTotal,
-      net: toPar,
-    },
-    { name: "Fairway Mike", thru: 6, gross: 26, net: -1 },
-    { name: "Anthony", thru: 6, gross: 27, net: 0 },
-    { name: "Carlos", thru: 5, gross: 24, net: 1 },
+  // =========================
+  // TIEBREAKER LOGIC
+  // =========================
+
+  const getLastNHolesScore = (scoresObj: Record<number, number>, n: number) => {
+    const playedHoles = Object.keys(scoresObj)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    const lastHoles = playedHoles.slice(-n);
+
+    return lastHoles.reduce(
+      (total, holeNum) => total + (scoresObj[holeNum] ?? 0),
+      0
+    );
+  };
+
+  const buildPlayer = (name: string, scoresObj: Record<number, number>) => {
+    const gross = holes.reduce(
+      (total, h) => total + (scoresObj[h.number] ?? 0),
+      0
+    );
+
+    const par = holes.reduce(
+      (total, h) => (scoresObj[h.number] ? total + h.par : total),
+      0
+    );
+
+    return {
+      name,
+      thru: Object.keys(scoresObj).length,
+      gross,
+      net: gross - par,
+      last6: getLastNHolesScore(scoresObj, 6),
+      last3: getLastNHolesScore(scoresObj, 3),
+      last1: getLastNHolesScore(scoresObj, 1),
+    };
+  };
+
+  // YOUR PLAYER
+  const you = buildPlayer(playerName || "You", scores);
+
+  // FAKE PLAYERS (for now)
+  const fakePlayers = [
+    buildPlayer("Fairway Mike", { 1: 4, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
+    buildPlayer("Anthony", { 1: 5, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
+    buildPlayer("Carlos", { 1: 5, 2: 3, 3: 6, 4: 5, 5: 4 }),
   ];
 
-  const sortedLeaderboard = [...leaderboard].sort((a, b) => a.net - b.net);
+  const leaderboard = [you, ...fakePlayers];
 
-  const openView = (selectedView: View) => {
-    setView(selectedView);
-    setMenuOpen(false);
-  };
+  // =========================
+  // SORT WITH TIEBREAKERS
+  // =========================
+
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+    if (a.net !== b.net) return a.net - b.net;
+    if (a.last6 !== b.last6) return a.last6 - b.last6;
+    if (a.last3 !== b.last3) return a.last3 - b.last3;
+    if (a.last1 !== b.last1) return a.last1 - b.last1;
+    return 0;
+  });
 
   const formatScore = (score: number) => {
     if (score > 0) return `+${score}`;
@@ -122,285 +192,94 @@ export default function Home() {
     return `${score}`;
   };
 
+  // =========================
+  // VIEW SWITCH
+  // =========================
+
+  const openView = (v: View) => {
+    setView(v);
+    setMenuOpen(false);
+  };
+
+  // =========================
+  // RENDER
+  // =========================
+
   return (
     <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
+
+      {/* TOP BAR */}
       {view !== "join" && view !== "selectPlayer" && (
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => openView("scorecard")}
-            className="text-left text-lg font-black tracking-wide"
-          >
+        <div className="flex justify-between">
+          <button onClick={() => openView("scorecard")}>
             CLUBS & HOLES
           </button>
-
-          <button onClick={() => setMenuOpen(true)} className="text-3xl">
-            ☰
-          </button>
+          <button onClick={() => setMenuOpen(true)}>☰</button>
         </div>
       )}
 
+      {/* MENU */}
       {menuOpen && (
-        <div className="absolute inset-0 z-50 bg-black/95 p-6">
-          <div className="flex items-center justify-between">
-            <div className="text-lg font-black">MENU</div>
-            <button onClick={() => setMenuOpen(false)} className="text-3xl">
-              ×
-            </button>
-          </div>
-
-          <div className="mt-10 flex flex-col gap-4">
-            <button
-              onClick={() => openView("scorecard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
-              Scorecard
-            </button>
-
-            <button
-              onClick={() => openView("leaderboard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
-              Leaderboard
-            </button>
-
-            <button
-              onClick={() => openView("courseInfo")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
-              Course Info
-            </button>
-
-            <button
-              onClick={() => openView("rules")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
-              Tournament Rules
-            </button>
-          </div>
+        <div className="absolute inset-0 bg-black p-6">
+          <button onClick={() => openView("scorecard")}>Scorecard</button>
+          <button onClick={() => openView("leaderboard")}>Leaderboard</button>
+          <button onClick={() => openView("courseInfo")}>Course Info</button>
+          <button onClick={() => openView("rules")}>Rules</button>
         </div>
       )}
 
-      {view === "join" && (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Clubs & Holes
-          </div>
-
-          <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
-
-          <input
-            value={tournamentCode}
-            onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
-            placeholder="ENTER CODE"
-            className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
-          />
-
-          <button
-            onClick={() => setView("selectPlayer")}
-            className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
-          >
-            ENTER
-          </button>
-        </div>
-      )}
-
-      {view === "selectPlayer" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Code: {tournamentCode || "PLAY16"}
-          </div>
-
-          <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
-
-          <div className="mt-8 space-y-3">
-            {players.map((name) => (
-              <button
-                key={name}
-                onClick={() => {
-                  const confirmed = window.confirm(
-                    `Are you sure you are ${name}?`
-                  );
-                  if (confirmed) {
-                    setPlayerName(name);
-                    setView("scorecard");
-                  }
-                }}
-                className="w-full rounded-2xl border border-gray-800 bg-gray-950 p-4 text-left text-xl font-bold"
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* SCORECARD */}
       {view === "scorecard" && (
         <>
-          <div className="mt-8 text-center">
-            <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-              {playerName || "Belt Invitational"}
-            </div>
+          <h1 className="text-6xl font-black text-center">
+            Hole {hole.number}
+          </h1>
 
-            <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
-
-            <p className="mt-2 text-gray-400">
-              Par {hole.par} · {hole.yards} Yards
-            </p>
+          <div className="text-center text-gray-400">
+            Par {hole.par} · {hole.yards}
           </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center">
-            <button
-              onClick={() => changeDraftScore(draftScore + 1)}
-              className="text-5xl text-gray-400 active:text-white"
-            >
-              ▲
-            </button>
+          <div className="text-center text-yellow-400 mt-4">
+            {tournamentName}
+          </div>
 
-            <div className="my-4 text-[10rem] font-black leading-none">
-              {draftScore}
-            </div>
+          <div className="text-center text-gray-500">
+            {golfCourseName}
+          </div>
 
-            <button
-              onClick={() => changeDraftScore(draftScore - 1)}
-              className="text-5xl text-gray-400 active:text-white"
-            >
-              ▼
-            </button>
+          <div className="flex flex-col items-center mt-10">
+            <button onClick={() => changeDraftScore(draftScore + 1)}>▲</button>
+            <div className="text-8xl">{draftScore}</div>
+            <button onClick={() => changeDraftScore(draftScore - 1)}>▼</button>
 
-            <button
-              onClick={enterScore}
-              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
-            >
-              ENTER SCORE
-            </button>
+            <button onClick={enterScore}>ENTER SCORE</button>
 
-            <div className="mt-6 text-center text-sm text-gray-400">
-              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
-              {holesPlayed > 0 ? formatScore(toPar) : "--"}
+            <div className="mt-4 text-yellow-400">
+              {ticker || "Enter a score"}
             </div>
           </div>
 
-          <div className="mb-4 flex items-center justify-between">
-            <button
-              onClick={goPrev}
-              className="text-4xl disabled:opacity-20"
-              disabled={currentHoleIndex === 0}
-            >
-              ←
-            </button>
-
-            <div className="max-w-[220px] text-center text-xs text-yellow-400">
-              {ticker || "Enter a score to see updates"}
-            </div>
-
-            <button
-              onClick={goNext}
-              className="text-4xl disabled:opacity-20"
-              disabled={currentHoleIndex === holes.length - 1}
-            >
-              →
-            </button>
+          <div className="flex justify-between mt-10">
+            <button onClick={goPrev}>←</button>
+            <button onClick={goNext}>→</button>
           </div>
         </>
       )}
 
+      {/* LEADERBOARD */}
       {view === "leaderboard" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Live Standings
-          </div>
-
-          <h1 className="mt-3 text-4xl font-black">Leaderboard</h1>
-
-          <div className="mt-8 space-y-3">
-            {sortedLeaderboard.map((player, index) => (
-              <div
-                key={player.name}
-                className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4"
-              >
-                <div>
-                  <div className="text-sm text-gray-500">#{index + 1}</div>
-                  <div className="text-lg font-bold">{player.name}</div>
-                  <div className="text-xs text-gray-500">
-                    Thru {player.thru} · Gross {player.gross || "--"}
-                  </div>
-                </div>
-
-                <div className="text-3xl font-black text-yellow-400">
-                  {formatScore(player.net)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {view === "courseInfo" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Course Info
-          </div>
-
-          <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
-
-          <div className="mt-8 space-y-4 text-gray-300">
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Address</div>
-              <div className="mt-1 text-lg font-bold">
-                10256 Golf Course Rd, Taft, CA 93268
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Phone</div>
-              <a
-                href="tel:16617696226"
-                className="mt-1 block text-lg font-bold text-yellow-400"
-              >
-                (661) 769-6226
-              </a>
-            </div>
-
-            <a
-              href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
-              target="_blank"
-              className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
+        <div>
+          {sortedLeaderboard.map((p, i) => (
+            <div
+              key={p.name}
+              className={`p-4 border ${
+                i === 0 ? "border-yellow-400 bg-yellow-900" : ""
+              }`}
             >
-              OPEN MAP
-            </a>
-
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Tournament Start</div>
-              <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+              {i === 0 && "🏆 "}
+              {p.name} ({formatScore(p.net)})
             </div>
-
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Start Type</div>
-              <div className="mt-1 text-lg font-bold">
-                Shotgun Start / Hole 1 Start
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {view === "rules" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Belt Rules
-          </div>
-
-          <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
-
-          <div className="mt-8 space-y-4 text-gray-300">
-            <p>• Each player enters their own score after every hole.</p>
-            <p>• Scores must be called out before moving to the next tee.</p>
-            <p>• Lowest net score wins the Belt.</p>
-            <p>• Tiebreaker 1: Final 6 holes.</p>
-            <p>• Tiebreaker 2: Final 3 holes.</p>
-            <p>• Tiebreaker 3: Hole 18.</p>
-            <p>• No fake scores. No boring golf. Swing Reckless.</p>
-          </div>
+          ))}
         </div>
       )}
     </div>
