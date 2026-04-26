@@ -40,13 +40,16 @@ export default function Home() {
   // STATE
   // =========================
 
+  const [view, setView] = useState<View>("join");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [tournamentCode, setTournamentCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
+
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [view, setView] = useState<View>("join");
-  const [tournamentCode, setTournamentCode] = useState("");
-  const [playerName, setPlayerName] = useState("");
+
   const [ticker, setTicker] = useState("");
 
   const hole = holes[currentHoleIndex];
@@ -77,16 +80,27 @@ export default function Home() {
     setDraftScore(newScore);
   };
 
+  const getScoreLabel = (score: number, par: number) => {
+    const diff = score - par;
+    if (diff === -2) return "Eagle";
+    if (diff === -1) return "Birdie";
+    if (diff === 0) return "Par";
+    if (diff === 1) return "Bogey";
+    if (diff === 2) return "Double Bogey";
+    return `+${diff}`;
+  };
+
   const enterScore = () => {
-    const confirmed = window.confirm(
-      `Enter ${draftScore} for Hole ${hole.number}?`
-    );
-    if (!confirmed) return;
+    const label = getScoreLabel(draftScore, hole.par);
+
+    if (!window.confirm(`Enter ${draftScore} (${label})?`)) return;
 
     setScores((prev) => ({
       ...prev,
       [hole.number]: draftScore,
     }));
+
+    setTicker(`🔥 ${playerName || "Player"} ${label} on Hole ${hole.number}`);
   };
 
   // =========================
@@ -94,19 +108,17 @@ export default function Home() {
   // =========================
 
   const goNext = () => {
-    if (currentHoleIndex < holes.length - 1) {
+    if (currentHoleIndex < holes.length - 1)
       setCurrentHoleIndex(currentHoleIndex + 1);
-    }
   };
 
   const goPrev = () => {
-    if (currentHoleIndex > 0) {
+    if (currentHoleIndex > 0)
       setCurrentHoleIndex(currentHoleIndex - 1);
-    }
   };
 
   // =========================
-  // SCORING CALCULATIONS
+  // SCORING TOTALS
   // =========================
 
   const holesPlayed = Object.keys(scores).length;
@@ -127,56 +139,35 @@ export default function Home() {
   // TIEBREAKER LOGIC
   // =========================
 
-  const getLastNHolesScore = (scoresObj: Record<number, number>, n: number) => {
-    const playedHoles = Object.keys(scoresObj)
-      .map(Number)
-      .sort((a, b) => a - b);
-
-    const lastHoles = playedHoles.slice(-n);
-
-    return lastHoles.reduce(
-      (total, holeNum) => total + (scoresObj[holeNum] ?? 0),
-      0
-    );
+  const getLastScore = (scoresObj: Record<number, number>, count: number) => {
+    const played = Object.keys(scoresObj).map(Number).sort((a, b) => a - b);
+    const last = played.slice(-count);
+    return last.reduce((sum, h) => sum + scoresObj[h], 0);
   };
 
-  const buildPlayer = (name: string, scoresObj: Record<number, number>) => {
-    const gross = holes.reduce(
-      (total, h) => total + (scoresObj[h.number] ?? 0),
-      0
-    );
-
+  const buildPlayer = (name: string, s: Record<number, number>) => {
+    const gross = holes.reduce((t, h) => t + (s[h.number] ?? 0), 0);
     const par = holes.reduce(
-      (total, h) => (scoresObj[h.number] ? total + h.par : total),
+      (t, h) => (s[h.number] ? t + h.par : t),
       0
     );
 
     return {
       name,
-      thru: Object.keys(scoresObj).length,
-      gross,
       net: gross - par,
-      last6: getLastNHolesScore(scoresObj, 6),
-      last3: getLastNHolesScore(scoresObj, 3),
-      last1: getLastNHolesScore(scoresObj, 1),
+      last6: getLastScore(s, 6),
+      last3: getLastScore(s, 3),
+      last1: getLastScore(s, 1),
     };
   };
 
-  // YOUR PLAYER
   const you = buildPlayer(playerName || "You", scores);
 
-  // FAKE PLAYERS (for now)
-  const fakePlayers = [
+  const leaderboard = [
+    you,
     buildPlayer("Fairway Mike", { 1: 4, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
     buildPlayer("Anthony", { 1: 5, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
-    buildPlayer("Carlos", { 1: 5, 2: 3, 3: 6, 4: 5, 5: 4 }),
   ];
-
-  const leaderboard = [you, ...fakePlayers];
-
-  // =========================
-  // SORT WITH TIEBREAKERS
-  // =========================
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => {
     if (a.net !== b.net) return a.net - b.net;
@@ -186,15 +177,7 @@ export default function Home() {
     return 0;
   });
 
-  const formatScore = (score: number) => {
-    if (score > 0) return `+${score}`;
-    if (score === 0) return "E";
-    return `${score}`;
-  };
-
-  // =========================
-  // VIEW SWITCH
-  // =========================
+  const formatScore = (n: number) => (n > 0 ? `+${n}` : n === 0 ? "E" : n);
 
   const openView = (v: View) => {
     setView(v);
@@ -202,61 +185,70 @@ export default function Home() {
   };
 
   // =========================
-  // RENDER
+  // UI
   // =========================
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
+    <div className="min-h-screen bg-black text-white p-6">
 
-      {/* TOP BAR */}
-      {view !== "join" && view !== "selectPlayer" && (
-        <div className="flex justify-between">
-          <button onClick={() => openView("scorecard")}>
-            CLUBS & HOLES
+      {/* JOIN */}
+      {view === "join" && (
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h1 className="text-4xl font-black">Join Tournament</h1>
+          <input
+            value={tournamentCode}
+            onChange={(e) => setTournamentCode(e.target.value)}
+            placeholder="Enter Code"
+            className="mt-6 p-4 bg-gray-800 text-center"
+          />
+          <button
+            onClick={() => setView("selectPlayer")}
+            className="mt-6 bg-yellow-400 px-6 py-3 text-black"
+          >
+            ENTER
           </button>
-          <button onClick={() => setMenuOpen(true)}>☰</button>
         </div>
       )}
 
-      {/* MENU */}
-      {menuOpen && (
-        <div className="absolute inset-0 bg-black p-6">
-          <button onClick={() => openView("scorecard")}>Scorecard</button>
-          <button onClick={() => openView("leaderboard")}>Leaderboard</button>
-          <button onClick={() => openView("courseInfo")}>Course Info</button>
-          <button onClick={() => openView("rules")}>Rules</button>
+      {/* PLAYER SELECT */}
+      {view === "selectPlayer" && (
+        <div>
+          {players.map((p) => (
+            <button
+              key={p}
+              onClick={() => {
+                if (confirm(`Are you ${p}?`)) {
+                  setPlayerName(p);
+                  setView("scorecard");
+                }
+              }}
+            >
+              {p}
+            </button>
+          ))}
         </div>
       )}
 
       {/* SCORECARD */}
       {view === "scorecard" && (
         <>
-          <h1 className="text-6xl font-black text-center">
-            Hole {hole.number}
-          </h1>
-
-          <div className="text-center text-gray-400">
+          <h1 className="text-6xl text-center">Hole {hole.number}</h1>
+          <div className="text-center">
             Par {hole.par} · {hole.yards}
           </div>
 
-          <div className="text-center text-yellow-400 mt-4">
+          <div className="text-center mt-2 text-yellow-400">
             {tournamentName}
           </div>
-
-          <div className="text-center text-gray-500">
-            {golfCourseName}
-          </div>
+          <div className="text-center text-gray-500">{golfCourseName}</div>
 
           <div className="flex flex-col items-center mt-10">
             <button onClick={() => changeDraftScore(draftScore + 1)}>▲</button>
             <div className="text-8xl">{draftScore}</div>
+            <div>{getScoreLabel(draftScore, hole.par)}</div>
             <button onClick={() => changeDraftScore(draftScore - 1)}>▼</button>
-
             <button onClick={enterScore}>ENTER SCORE</button>
-
-            <div className="mt-4 text-yellow-400">
-              {ticker || "Enter a score"}
-            </div>
+            <div>{ticker}</div>
           </div>
 
           <div className="flex justify-between mt-10">
@@ -272,9 +264,7 @@ export default function Home() {
           {sortedLeaderboard.map((p, i) => (
             <div
               key={p.name}
-              className={`p-4 border ${
-                i === 0 ? "border-yellow-400 bg-yellow-900" : ""
-              }`}
+              className={`p-4 ${i === 0 ? "bg-yellow-600" : ""}`}
             >
               {i === 0 && "🏆 "}
               {p.name} ({formatScore(p.net)})
