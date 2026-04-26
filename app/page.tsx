@@ -198,55 +198,45 @@ export default function Home() {
       )}
 
       {view === "scorecard" && (
-        <>
-          <div className="mt-8 text-center">
-            <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-              {playerName || "Belt Invitational"}
-            </div>
-            <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
-            <p className="mt-2 text-gray-400">
-              Par {hole.par} · {hole.yards} Yards
-            </p>
-          </div>
+  <>
+    <div className="mt-8 text-center">
+      <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+        {playerName || "Belt Invitational"}
+      </div>
+      <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
+      <p className="mt-2 text-gray-400">
+        Par {hole.par} · {hole.yards} Yards
+      </p>
+    </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center">
-            <button onClick={() => changeDraftScore(draftScore + 1)} className="text-5xl text-gray-400 active:text-white">
-              ▲
-            </button>
+    <div className="flex flex-1 flex-col items-center justify-center">
+      <button
+        onClick={() => changeDraftScore(draftScore + 1)}
+        className="text-5xl text-gray-400 active:text-white"
+      >
+        ▲
+      </button>
 
-            <div className="my-4 text-[10rem] font-black leading-none">
-              {draftScore}
-            </div>
+      <div className="my-4 text-[10rem] font-black leading-none">
+        {draftScore}
+      </div>
 
-            <button onClick={() => changeDraftScore(draftScore - 1)} className="text-5xl text-gray-400 active:text-white">
-              ▼
-            </button>
+      <button
+        onClick={() => changeDraftScore(draftScore - 1)}
+        className="text-5xl text-gray-400 active:text-white"
+      >
+        ▼
+      </button>
 
-            <button onClick={enterScore} className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black">
-              ENTER SCORE
-            </button>
-
-            <div className="mt-6 text-center text-sm text-gray-400">
-              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
-              {holesPlayed > 0 ? formatScore(toPar) : "--"}
-            </div>
-          </div>
-
-          <div className="mb-4 flex items-center justify-between">
-            <button onClick={goPrev} className="text-4xl disabled:opacity-20" disabled={currentHoleIndex === 0}>
-              ←
-            </button>
-
-            <div className="max-w-[220px] text-center text-xs text-yellow-400">
-              {ticker || "Enter a score to see updates"}
-            </div>
-
-            <button onClick={goNext} className="text-4xl disabled:opacity-20" disabled={currentHoleIndex === holes.length - 1}>
-              →
-            </button>
-          </div>
-        </>
-      )}
+      <button
+        onClick={enterScore}
+        className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+      >
+        ENTER SCORE
+      </button>
+    </div>
+  </>
+)}
 
       {view === "leaderboard" && (
         <div className="mt-10">
