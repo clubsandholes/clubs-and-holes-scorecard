@@ -16,13 +16,7 @@ const holes = [
 
 const players = ["Fairway Mike", "Anthony", "Carlos", "Jason", "Michael Lopez"];
 
-type View =
-  | "join"
-  | "selectPlayer"
-  | "scorecard"
-  | "leaderboard"
-  | "courseInfo"
-  | "rules";
+type View = "join" | "selectPlayer" | "scorecard" | "leaderboard" | "rules";
 
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
@@ -140,26 +134,15 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col gap-4">
-            <button
-  onClick={() => openView("leaderboard")}
-  className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
->
-  Leaderboard
-</button>
-
-<button
-  onClick={() => openView("courseInfo")}
-  className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
->
-  Course Info
-</button>
-
-<button
-  onClick={() => openView("rules")}
-  className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
->
-  Tournament Rules
-</button>
+            <button onClick={() => openView("scorecard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+              Scorecard
+            </button>
+            <button onClick={() => openView("leaderboard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+              Leaderboard
+            </button>
+            <button onClick={() => openView("rules")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+              Tournament Rules
+            </button>
           </div>
         </div>
       )}
@@ -291,50 +274,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {view === "courseInfo" && (
-  <div className="mt-10">
-    <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-      Course Info
-    </div>
-
-    <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
-
-    <div className="mt-8 space-y-4 text-gray-300">
-      <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-        <div className="text-sm text-gray-500">Address</div>
-        <div className="mt-1 text-lg font-bold">
-          10256 Golf Course Rd, Taft, CA 93268
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-        <div className="text-sm text-gray-500">Phone</div>
-        <a href="tel:16617696226" className="mt-1 block text-lg font-bold text-yellow-400">
-          (661) 769-6226
-        </a>
-      </div>
-
-      <a
-        href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
-        target="_blank"
-        className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
-      >
-        OPEN MAP
-      </a>
-
-      <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-        <div className="text-sm text-gray-500">Tournament Start</div>
-        <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
-      </div>
-
-      <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-        <div className="text-sm text-gray-500">Start Type</div>
-        <div className="mt-1 text-lg font-bold">Shotgun Start / Hole 1 Start</div>
-      </div>
-    </div>
-  </div>
-)}  
 
       {view === "rules" && (
         <div className="mt-10">
