@@ -48,6 +48,7 @@ export default function Home() {
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [ticker, setTicker] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // =========================
   // END STATE
@@ -68,8 +69,15 @@ export default function Home() {
   // =========================
 
   useEffect(() => {
-    const saved = localStorage.getItem("scores");
-    if (saved) setScores(JSON.parse(saved));
+    const savedScores = localStorage.getItem("scores");
+    const savedPlayer = localStorage.getItem("playerName");
+
+    if (savedScores) setScores(JSON.parse(savedScores));
+
+    if (savedPlayer) {
+      setPlayerName(savedPlayer);
+      setView("scorecard");
+    }
   }, []);
 
   useEffect(() => {
@@ -116,6 +124,8 @@ export default function Home() {
   };
 
   const enterScore = () => {
+    if (isSaving) return;
+
     const label = getScoreLabel(draftScore, hole.par);
 
     const confirmed = window.confirm(
@@ -124,12 +134,26 @@ export default function Home() {
 
     if (!confirmed) return;
 
+    setIsSaving(true);
+
     setScores((prevScores) => ({
       ...prevScores,
       [hole.number]: draftScore,
     }));
 
-    setTicker(`🔥 ${playerName || "Player"} made ${label} on Hole ${hole.number}`);
+    setTicker(
+      `✅ Saved: ${playerName || "Player"} made ${label} on Hole ${hole.number}`
+    );
+
+    setTimeout(() => {
+      setIsSaving(false);
+
+      if (currentHoleIndex < holes.length - 1) {
+        setCurrentHoleIndex(currentHoleIndex + 1);
+      } else {
+        setTicker("🏁 Round complete. Check the leaderboard.");
+      }
+    }, 700);
   };
 
   // =========================
@@ -152,6 +176,35 @@ export default function Home() {
 
   // =========================
   // END HOLE NAVIGATION
+  // =========================
+
+  // =========================
+  // BEGIN PLAYER LOCK LOGIC
+  // =========================
+
+  const selectPlayer = (name: string) => {
+    const confirmed = window.confirm(`Are you sure you are ${name}?`);
+
+    if (!confirmed) return;
+
+    setPlayerName(name);
+    localStorage.setItem("playerName", name);
+    setView("scorecard");
+  };
+
+  const resetPlayer = () => {
+    localStorage.removeItem("playerName");
+    localStorage.removeItem("scores");
+    setPlayerName("");
+    setScores({});
+    setCurrentHoleIndex(0);
+    setTicker("");
+    setView("join");
+    setMenuOpen(false);
+  };
+
+  // =========================
+  // END PLAYER LOCK LOGIC
   // =========================
 
   // =========================
@@ -186,7 +239,10 @@ export default function Home() {
   // BEGIN TIEBREAKER LOGIC
   // =========================
 
-  const getLastNHolesScore = (scoresObj: Record<number, number>, count: number) => {
+  const getLastNHolesScore = (
+    scoresObj: Record<number, number>,
+    count: number
+  ) => {
     const playedHoles = Object.keys(scoresObj)
       .map(Number)
       .sort((a, b) => a - b);
@@ -351,6 +407,13 @@ export default function Home() {
             >
               Tournament Rules
             </button>
+
+            <button
+              onClick={resetPlayer}
+              className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
+            >
+              Reset Player
+            </button>
           </div>
         </div>
       )}
@@ -407,16 +470,7 @@ export default function Home() {
             {players.map((name) => (
               <button
                 key={name}
-                onClick={() => {
-                  const confirmed = window.confirm(
-                    `Are you sure you are ${name}?`
-                  );
-
-                  if (confirmed) {
-                    setPlayerName(name);
-                    setView("scorecard");
-                  }
-                }}
+                onClick={() => selectPlayer(name)}
                 className="w-full rounded-2xl border border-gray-800 bg-gray-950 p-4 text-left text-xl font-bold"
               >
                 {name}
@@ -475,13 +529,15 @@ export default function Home() {
 
             <button
               onClick={enterScore}
-              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+              disabled={isSaving}
+              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black disabled:opacity-50"
             >
-              ENTER SCORE
+              {isSaving ? "SAVING..." : "ENTER SCORE"}
             </button>
 
             <div className="mt-6 text-center text-sm text-gray-400">
-              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
+              Hole {hole.number} of {holes.length} · Through {holesPlayed} ·
+              Gross: {grossTotal || "--"} ·{" "}
               {holesPlayed > 0 ? formatScore(toPar) : "--"}
             </div>
           </div>
