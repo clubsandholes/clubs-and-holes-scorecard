@@ -37,25 +37,34 @@ type View =
 
 export default function Home() {
   // =========================
-  // STATE
+  // BEGIN STATE
   // =========================
 
   const [view, setView] = useState<View>("join");
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [tournamentCode, setTournamentCode] = useState("");
   const [playerName, setPlayerName] = useState("");
-
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
-
   const [ticker, setTicker] = useState("");
+
+  // =========================
+  // END STATE
+  // =========================
+
+  // =========================
+  // BEGIN CURRENT HOLE
+  // =========================
 
   const hole = holes[currentHoleIndex];
 
   // =========================
-  // EFFECTS
+  // END CURRENT HOLE
+  // =========================
+
+  // =========================
+  // BEGIN EFFECTS
   // =========================
 
   useEffect(() => {
@@ -69,10 +78,36 @@ export default function Home() {
 
   useEffect(() => {
     setDraftScore(scores[hole.number] ?? hole.par);
-  }, [currentHoleIndex, scores]);
+  }, [currentHoleIndex, scores, hole.number, hole.par]);
 
   // =========================
-  // SCORE LOGIC
+  // END EFFECTS
+  // =========================
+
+  // =========================
+  // BEGIN SCORE LABEL LOGIC
+  // =========================
+
+  const getScoreLabel = (score: number, par: number) => {
+    const diff = score - par;
+
+    if (diff <= -3) return "Albatross";
+    if (diff === -2) return "Eagle";
+    if (diff === -1) return "Birdie";
+    if (diff === 0) return "Par";
+    if (diff === 1) return "Bogey";
+    if (diff === 2) return "Double Bogey";
+    if (diff === 3) return "Triple Bogey";
+
+    return `+${diff}`;
+  };
+
+  // =========================
+  // END SCORE LABEL LOGIC
+  // =========================
+
+  // =========================
+  // BEGIN SCORE ENTRY LOGIC
   // =========================
 
   const changeDraftScore = (newScore: number) => {
@@ -80,45 +115,47 @@ export default function Home() {
     setDraftScore(newScore);
   };
 
-  const getScoreLabel = (score: number, par: number) => {
-    const diff = score - par;
-    if (diff === -2) return "Eagle";
-    if (diff === -1) return "Birdie";
-    if (diff === 0) return "Par";
-    if (diff === 1) return "Bogey";
-    if (diff === 2) return "Double Bogey";
-    return `+${diff}`;
-  };
-
   const enterScore = () => {
     const label = getScoreLabel(draftScore, hole.par);
 
-    if (!window.confirm(`Enter ${draftScore} (${label})?`)) return;
+    const confirmed = window.confirm(
+      `Enter ${draftScore} (${label}) for Hole ${hole.number}?`
+    );
 
-    setScores((prev) => ({
-      ...prev,
+    if (!confirmed) return;
+
+    setScores((prevScores) => ({
+      ...prevScores,
       [hole.number]: draftScore,
     }));
 
-    setTicker(`🔥 ${playerName || "Player"} ${label} on Hole ${hole.number}`);
+    setTicker(`🔥 ${playerName || "Player"} made ${label} on Hole ${hole.number}`);
   };
 
   // =========================
-  // NAVIGATION
+  // END SCORE ENTRY LOGIC
   // =========================
 
-  const goNext = () => {
-    if (currentHoleIndex < holes.length - 1)
-      setCurrentHoleIndex(currentHoleIndex + 1);
-  };
+  // =========================
+  // BEGIN HOLE NAVIGATION
+  // =========================
 
   const goPrev = () => {
-    if (currentHoleIndex > 0)
-      setCurrentHoleIndex(currentHoleIndex - 1);
+    if (currentHoleIndex > 0) setCurrentHoleIndex(currentHoleIndex - 1);
+  };
+
+  const goNext = () => {
+    if (currentHoleIndex < holes.length - 1) {
+      setCurrentHoleIndex(currentHoleIndex + 1);
+    }
   };
 
   // =========================
-  // SCORING TOTALS
+  // END HOLE NAVIGATION
+  // =========================
+
+  // =========================
+  // BEGIN SCORING TOTALS
   // =========================
 
   const holesPlayed = Object.keys(scores).length;
@@ -135,38 +172,91 @@ export default function Home() {
 
   const toPar = grossTotal - parPlayed;
 
-  // =========================
-  // TIEBREAKER LOGIC
-  // =========================
-
-  const getLastScore = (scoresObj: Record<number, number>, count: number) => {
-    const played = Object.keys(scoresObj).map(Number).sort((a, b) => a - b);
-    const last = played.slice(-count);
-    return last.reduce((sum, h) => sum + scoresObj[h], 0);
+  const formatScore = (score: number) => {
+    if (score > 0) return `+${score}`;
+    if (score === 0) return "E";
+    return `${score}`;
   };
 
-  const buildPlayer = (name: string, s: Record<number, number>) => {
-    const gross = holes.reduce((t, h) => t + (s[h.number] ?? 0), 0);
+  // =========================
+  // END SCORING TOTALS
+  // =========================
+
+  // =========================
+  // BEGIN TIEBREAKER LOGIC
+  // =========================
+
+  const getLastNHolesScore = (scoresObj: Record<number, number>, count: number) => {
+    const playedHoles = Object.keys(scoresObj)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    const lastHoles = playedHoles.slice(-count);
+
+    return lastHoles.reduce(
+      (total, holeNumber) => total + (scoresObj[holeNumber] ?? 0),
+      0
+    );
+  };
+
+  const buildLeaderboardPlayer = (
+    name: string,
+    playerScores: Record<number, number>
+  ) => {
+    const gross = holes.reduce(
+      (total, h) => total + (playerScores[h.number] ?? 0),
+      0
+    );
+
     const par = holes.reduce(
-      (t, h) => (s[h.number] ? t + h.par : t),
+      (total, h) => (playerScores[h.number] ? total + h.par : total),
       0
     );
 
     return {
       name,
+      thru: Object.keys(playerScores).length,
+      gross,
       net: gross - par,
-      last6: getLastScore(s, 6),
-      last3: getLastScore(s, 3),
-      last1: getLastScore(s, 1),
+      last6: getLastNHolesScore(playerScores, 6),
+      last3: getLastNHolesScore(playerScores, 3),
+      last1: getLastNHolesScore(playerScores, 1),
     };
   };
 
-  const you = buildPlayer(playerName || "You", scores);
+  // =========================
+  // END TIEBREAKER LOGIC
+  // =========================
+
+  // =========================
+  // BEGIN LEADERBOARD DATA
+  // =========================
 
   const leaderboard = [
-    you,
-    buildPlayer("Fairway Mike", { 1: 4, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
-    buildPlayer("Anthony", { 1: 5, 2: 3, 3: 5, 4: 4, 5: 4, 6: 6 }),
+    buildLeaderboardPlayer(playerName || "You", scores),
+    buildLeaderboardPlayer("Fairway Mike", {
+      1: 4,
+      2: 3,
+      3: 5,
+      4: 4,
+      5: 4,
+      6: 6,
+    }),
+    buildLeaderboardPlayer("Anthony", {
+      1: 5,
+      2: 3,
+      3: 5,
+      4: 4,
+      5: 4,
+      6: 6,
+    }),
+    buildLeaderboardPlayer("Carlos", {
+      1: 5,
+      2: 3,
+      3: 6,
+      4: 5,
+      5: 4,
+    }),
   ];
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => {
@@ -177,101 +267,384 @@ export default function Home() {
     return 0;
   });
 
-  const formatScore = (n: number) => (n > 0 ? `+${n}` : n === 0 ? "E" : n);
+  // =========================
+  // END LEADERBOARD DATA
+  // =========================
 
-  const openView = (v: View) => {
-    setView(v);
+  // =========================
+  // BEGIN VIEW NAVIGATION
+  // =========================
+
+  const openView = (selectedView: View) => {
+    setView(selectedView);
     setMenuOpen(false);
   };
 
   // =========================
-  // UI
+  // END VIEW NAVIGATION
   // =========================
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
+      {/* =========================
+          BEGIN TOP BAR
+      ========================= */}
 
-      {/* JOIN */}
+      {view !== "join" && view !== "selectPlayer" && (
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => openView("scorecard")}
+            className="text-left text-lg font-black tracking-wide"
+          >
+            CLUBS & HOLES
+          </button>
+
+          <button onClick={() => setMenuOpen(true)} className="text-3xl">
+            ☰
+          </button>
+        </div>
+      )}
+
+      {/* =========================
+          END TOP BAR
+      ========================= */}
+
+      {/* =========================
+          BEGIN MENU
+      ========================= */}
+
+      {menuOpen && (
+        <div className="absolute inset-0 z-50 bg-black/95 p-6">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-black">MENU</div>
+
+            <button onClick={() => setMenuOpen(false)} className="text-3xl">
+              ×
+            </button>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-4">
+            <button
+              onClick={() => openView("scorecard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Scorecard
+            </button>
+
+            <button
+              onClick={() => openView("leaderboard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Leaderboard
+            </button>
+
+            <button
+              onClick={() => openView("courseInfo")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Course Info
+            </button>
+
+            <button
+              onClick={() => openView("rules")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Tournament Rules
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END MENU
+      ========================= */}
+
+      {/* =========================
+          BEGIN JOIN VIEW
+      ========================= */}
+
       {view === "join" && (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h1 className="text-4xl font-black">Join Tournament</h1>
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Clubs & Holes
+          </div>
+
+          <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
+
           <input
             value={tournamentCode}
-            onChange={(e) => setTournamentCode(e.target.value)}
-            placeholder="Enter Code"
-            className="mt-6 p-4 bg-gray-800 text-center"
+            onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
+            placeholder="ENTER CODE"
+            className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
           />
+
           <button
             onClick={() => setView("selectPlayer")}
-            className="mt-6 bg-yellow-400 px-6 py-3 text-black"
+            className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
           >
             ENTER
           </button>
         </div>
       )}
 
-      {/* PLAYER SELECT */}
+      {/* =========================
+          END JOIN VIEW
+      ========================= */}
+
+      {/* =========================
+          BEGIN PLAYER SELECT VIEW
+      ========================= */}
+
       {view === "selectPlayer" && (
-        <div>
-          {players.map((p) => (
-            <button
-              key={p}
-              onClick={() => {
-                if (confirm(`Are you ${p}?`)) {
-                  setPlayerName(p);
-                  setView("scorecard");
-                }
-              }}
-            >
-              {p}
-            </button>
-          ))}
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Code: {tournamentCode || "PLAY16"}
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
+          <div className="mt-8 space-y-3">
+            {players.map((name) => (
+              <button
+                key={name}
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    `Are you sure you are ${name}?`
+                  );
+
+                  if (confirmed) {
+                    setPlayerName(name);
+                    setView("scorecard");
+                  }
+                }}
+                className="w-full rounded-2xl border border-gray-800 bg-gray-950 p-4 text-left text-xl font-bold"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* SCORECARD */}
+      {/* =========================
+          END PLAYER SELECT VIEW
+      ========================= */}
+
+      {/* =========================
+          BEGIN SCORECARD VIEW
+      ========================= */}
+
       {view === "scorecard" && (
         <>
-          <h1 className="text-6xl text-center">Hole {hole.number}</h1>
-          <div className="text-center">
-            Par {hole.par} · {hole.yards}
+          <div className="mt-8 text-center">
+            <h1 className="text-7xl font-black">Hole {hole.number}</h1>
+
+            <p className="mt-3 text-lg text-gray-400">
+              Par {hole.par} · {hole.yards} Yards
+            </p>
+
+            <div className="mt-5 text-sm uppercase tracking-[0.25em] text-yellow-400">
+              {tournamentName}
+            </div>
+
+            <div className="mt-1 text-sm text-gray-500">{golfCourseName}</div>
           </div>
 
-          <div className="text-center mt-2 text-yellow-400">
-            {tournamentName}
-          </div>
-          <div className="text-center text-gray-500">{golfCourseName}</div>
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <button
+              onClick={() => changeDraftScore(draftScore + 1)}
+              className="text-5xl text-gray-400 active:text-white"
+            >
+              ▲
+            </button>
 
-          <div className="flex flex-col items-center mt-10">
-            <button onClick={() => changeDraftScore(draftScore + 1)}>▲</button>
-            <div className="text-8xl">{draftScore}</div>
-            <div>{getScoreLabel(draftScore, hole.par)}</div>
-            <button onClick={() => changeDraftScore(draftScore - 1)}>▼</button>
-            <button onClick={enterScore}>ENTER SCORE</button>
-            <div>{ticker}</div>
+            <div className="my-4 text-[10rem] font-black leading-none">
+              {draftScore}
+            </div>
+
+            <div className="mb-4 rounded-full border border-yellow-400 px-6 py-2 text-lg font-black uppercase tracking-wide text-yellow-400">
+              {getScoreLabel(draftScore, hole.par)}
+            </div>
+
+            <button
+              onClick={() => changeDraftScore(draftScore - 1)}
+              className="text-5xl text-gray-400 active:text-white"
+            >
+              ▼
+            </button>
+
+            <button
+              onClick={enterScore}
+              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+            >
+              ENTER SCORE
+            </button>
+
+            <div className="mt-6 text-center text-sm text-gray-400">
+              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
+              {holesPlayed > 0 ? formatScore(toPar) : "--"}
+            </div>
           </div>
 
-          <div className="flex justify-between mt-10">
-            <button onClick={goPrev}>←</button>
-            <button onClick={goNext}>→</button>
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              onClick={goPrev}
+              className="text-4xl disabled:opacity-20"
+              disabled={currentHoleIndex === 0}
+            >
+              ←
+            </button>
+
+            <div className="max-w-[220px] text-center text-xs text-yellow-400">
+              {ticker || "Enter a score to see updates"}
+            </div>
+
+            <button
+              onClick={goNext}
+              className="text-4xl disabled:opacity-20"
+              disabled={currentHoleIndex === holes.length - 1}
+            >
+              →
+            </button>
           </div>
         </>
       )}
 
-      {/* LEADERBOARD */}
+      {/* =========================
+          END SCORECARD VIEW
+      ========================= */}
+
+      {/* =========================
+          BEGIN LEADERBOARD VIEW
+      ========================= */}
+
       {view === "leaderboard" && (
-        <div>
-          {sortedLeaderboard.map((p, i) => (
-            <div
-              key={p.name}
-              className={`p-4 ${i === 0 ? "bg-yellow-600" : ""}`}
-            >
-              {i === 0 && "🏆 "}
-              {p.name} ({formatScore(p.net)})
-            </div>
-          ))}
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Live Standings
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Leaderboard</h1>
+
+          <div className="mt-8 space-y-3">
+            {sortedLeaderboard.map((player, index) => (
+              <div
+                key={player.name}
+                className={`flex items-center justify-between rounded-2xl border p-4 ${
+                  index === 0
+                    ? "border-yellow-400 bg-yellow-400 text-black"
+                    : "border-gray-800 bg-gray-950 text-white"
+                }`}
+              >
+                <div>
+                  <div className="text-sm opacity-70">
+                    {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+                  </div>
+
+                  <div className="text-lg font-bold">{player.name}</div>
+
+                  <div className="text-xs opacity-70">
+                    Thru {player.thru} · Gross {player.gross || "--"}
+                  </div>
+                </div>
+
+                <div className="text-3xl font-black">
+                  {formatScore(player.net)}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* =========================
+          END LEADERBOARD VIEW
+      ========================= */}
+
+      {/* =========================
+          BEGIN COURSE INFO VIEW
+      ========================= */}
+
+      {view === "courseInfo" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Course Info
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+
+          <div className="mt-8 space-y-4 text-gray-300">
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Address</div>
+              <div className="mt-1 text-lg font-bold">
+                10256 Golf Course Rd, Taft, CA 93268
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Phone</div>
+              <a
+                href="tel:16617696226"
+                className="mt-1 block text-lg font-bold text-yellow-400"
+              >
+                (661) 769-6226
+              </a>
+            </div>
+
+            <a
+              href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
+              target="_blank"
+              className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
+            >
+              OPEN MAP
+            </a>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Tournament Start</div>
+              <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Start Type</div>
+              <div className="mt-1 text-lg font-bold">
+                Shotgun Start / Hole 1 Start
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END COURSE INFO VIEW
+      ========================= */}
+
+      {/* =========================
+          BEGIN RULES VIEW
+      ========================= */}
+
+      {view === "rules" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Belt Rules
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
+
+          <div className="mt-8 space-y-4 text-gray-300">
+            <p>• Each player enters their own score after every hole.</p>
+            <p>• Scores must be called out before moving to the next tee.</p>
+            <p>• Lowest net score wins the Belt.</p>
+            <p>• Tiebreaker 1: Final 6 holes.</p>
+            <p>• Tiebreaker 2: Final 3 holes.</p>
+            <p>• Tiebreaker 3: Hole 18.</p>
+            <p>• No fake scores. No boring golf. Swing Reckless.</p>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END RULES VIEW
+      ========================= */}
     </div>
   );
 }
