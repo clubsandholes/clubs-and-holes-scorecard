@@ -19,11 +19,20 @@ export default function Home() {
   const [scores, setScores] = useState<Record<number, number>>({});
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [view, setView] = useState<"scorecard" | "leaderboard" | "rules">(
-    "scorecard"
-  );
+  const [view, setView] = useState<
+  "join" | "selectPlayer" | "scorecard" | "leaderboard" | "rules"
+>("join");
 
   const hole = holes[currentHoleIndex];
+  const [tournamentCode, setTournamentCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
+  const players = [
+  "Fairway Mike",
+  "Anthony",
+  "Carlos",
+  "Jason",
+  "Michael Lopez",
+];
 
   useEffect(() => {
     const saved = localStorage.getItem("scores");
@@ -129,6 +138,49 @@ const enterScore = () => {
   };
 
   return (
+    
+{view === "join" && (
+  <div className="flex flex-1 flex-col items-center justify-center">
+    <h1 className="text-3xl font-black">Join Tournament</h1>
+
+    <input
+      value={tournamentCode}
+      onChange={(e) => setTournamentCode(e.target.value)}
+      placeholder="Enter Code"
+      className="mt-6 rounded bg-gray-800 p-4 text-center text-xl"
+    />
+
+    <button
+      onClick={() => setView("selectPlayer")}
+      className="mt-6 rounded bg-yellow-400 px-6 py-3 font-bold text-black"
+    >
+      ENTER
+    </button>
+  </div>
+)}
+
+
+{view === "selectPlayer" && (
+  <div className="mt-10">
+    <h1 className="text-3xl font-black text-center">Select Your Name</h1>
+
+    <div className="mt-6 space-y-3">
+      {players.map((name) => (
+        <button
+          key={name}
+          onClick={() => {
+            setPlayerName(name);
+            setView("scorecard");
+          }}
+          className="w-full rounded border border-gray-700 p-4 text-left"
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
     <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
       <div className="flex items-center justify-between">
         <button
@@ -181,7 +233,7 @@ const enterScore = () => {
         <>
           <div className="mt-8 text-center">
             <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-              Belt Invitational
+              {playerName || "Belt Invitational"}
             </div>
             <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
             <p className="mt-2 text-gray-400">
