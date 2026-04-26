@@ -138,26 +138,26 @@ const enterScore = () => {
   };
 
   return (
-    
-{view === "join" && (
-  <div className="flex flex-1 flex-col items-center justify-center">
-    <h1 className="text-3xl font-black">Join Tournament</h1>
+  <div className="relative flex min-h-screen flex-col bg-black p-6 text-white">
+    {view === "join" && (
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <h1 className="text-3xl font-black">Join Tournament</h1>
 
-    <input
-      value={tournamentCode}
-      onChange={(e) => setTournamentCode(e.target.value)}
-      placeholder="Enter Code"
-      className="mt-6 rounded bg-gray-800 p-4 text-center text-xl"
-    />
+        <input
+          value={tournamentCode}
+          onChange={(e) => setTournamentCode(e.target.value)}
+          placeholder="Enter Code"
+          className="mt-6 rounded bg-gray-800 p-4 text-center text-xl"
+        />
 
-    <button
-      onClick={() => setView("selectPlayer")}
-      className="mt-6 rounded bg-yellow-400 px-6 py-3 font-bold text-black"
-    >
-      ENTER
-    </button>
-  </div>
-)}
+        <button
+          onClick={() => setView("selectPlayer")}
+          className="mt-6 rounded bg-yellow-400 px-6 py-3 font-bold text-black"
+        >
+          ENTER
+        </button>
+      </div>
+    )}
 
 
 {view === "selectPlayer" && (
