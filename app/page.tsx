@@ -16,7 +16,13 @@ const holes = [
 
 const players = ["Fairway Mike", "Anthony", "Carlos", "Jason", "Michael Lopez"];
 
-type View = "join" | "selectPlayer" | "scorecard" | "leaderboard" | "rules";
+type View =
+  | "join"
+  | "selectPlayer"
+  | "scorecard"
+  | "leaderboard"
+  | "courseInfo"
+  | "rules";
 
 export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
@@ -61,7 +67,9 @@ export default function Home() {
     } else if (draftScore === hole.par + 1) {
       setTicker(`${playerName || "Player"} bogeyed Hole ${hole.number}`);
     } else {
-      setTicker(`😬 ${playerName || "Player"} made double+ on Hole ${hole.number}`);
+      setTicker(
+        `😬 ${playerName || "Player"} made double+ on Hole ${hole.number}`
+      );
     }
   };
 
@@ -70,7 +78,9 @@ export default function Home() {
   };
 
   const goNext = () => {
-    if (currentHoleIndex < holes.length - 1) setCurrentHoleIndex(currentHoleIndex + 1);
+    if (currentHoleIndex < holes.length - 1) {
+      setCurrentHoleIndex(currentHoleIndex + 1);
+    }
   };
 
   const holesPlayed = Object.keys(scores).length;
@@ -88,7 +98,12 @@ export default function Home() {
   const toPar = grossTotal - parPlayed;
 
   const leaderboard = [
-    { name: playerName || "You", thru: holesPlayed, gross: grossTotal, net: toPar },
+    {
+      name: playerName || "You",
+      thru: holesPlayed,
+      gross: grossTotal,
+      net: toPar,
+    },
     { name: "Fairway Mike", thru: 6, gross: 26, net: -1 },
     { name: "Anthony", thru: 6, gross: 27, net: 0 },
     { name: "Carlos", thru: 5, gross: 24, net: 1 },
@@ -134,13 +149,31 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col gap-4">
-            <button onClick={() => openView("scorecard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+            <button
+              onClick={() => openView("scorecard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
               Scorecard
             </button>
-            <button onClick={() => openView("leaderboard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+
+            <button
+              onClick={() => openView("leaderboard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
               Leaderboard
             </button>
-            <button onClick={() => openView("rules")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
+
+            <button
+              onClick={() => openView("courseInfo")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Course Info
+            </button>
+
+            <button
+              onClick={() => openView("rules")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
               Tournament Rules
             </button>
           </div>
@@ -152,6 +185,7 @@ export default function Home() {
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Clubs & Holes
           </div>
+
           <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
 
           <input
@@ -175,6 +209,7 @@ export default function Home() {
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Code: {tournamentCode || "PLAY16"}
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
 
           <div className="mt-8 space-y-3">
@@ -182,7 +217,9 @@ export default function Home() {
               <button
                 key={name}
                 onClick={() => {
-                  const confirmed = window.confirm(`Are you sure you are ${name}?`);
+                  const confirmed = window.confirm(
+                    `Are you sure you are ${name}?`
+                  );
                   if (confirmed) {
                     setPlayerName(name);
                     setView("scorecard");
@@ -198,56 +235,89 @@ export default function Home() {
       )}
 
       {view === "scorecard" && (
-  <>
-    <div className="mt-8 text-center">
-      <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-        {playerName || "Belt Invitational"}
-      </div>
-      <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
-      <p className="mt-2 text-gray-400">
-        Par {hole.par} · {hole.yards} Yards
-      </p>
-    </div>
+        <>
+          <div className="mt-8 text-center">
+            <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+              {playerName || "Belt Invitational"}
+            </div>
 
-    <div className="flex flex-1 flex-col items-center justify-center">
-      <button
-        onClick={() => changeDraftScore(draftScore + 1)}
-        className="text-5xl text-gray-400 active:text-white"
-      >
-        ▲
-      </button>
+            <h1 className="mt-3 text-4xl font-black">Hole {hole.number}</h1>
 
-      <div className="my-4 text-[10rem] font-black leading-none">
-        {draftScore}
-      </div>
+            <p className="mt-2 text-gray-400">
+              Par {hole.par} · {hole.yards} Yards
+            </p>
+          </div>
 
-      <button
-        onClick={() => changeDraftScore(draftScore - 1)}
-        className="text-5xl text-gray-400 active:text-white"
-      >
-        ▼
-      </button>
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <button
+              onClick={() => changeDraftScore(draftScore + 1)}
+              className="text-5xl text-gray-400 active:text-white"
+            >
+              ▲
+            </button>
 
-      <button
-        onClick={enterScore}
-        className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
-      >
-        ENTER SCORE
-      </button>
-    </div>
-  </>
-)}
+            <div className="my-4 text-[10rem] font-black leading-none">
+              {draftScore}
+            </div>
+
+            <button
+              onClick={() => changeDraftScore(draftScore - 1)}
+              className="text-5xl text-gray-400 active:text-white"
+            >
+              ▼
+            </button>
+
+            <button
+              onClick={enterScore}
+              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+            >
+              ENTER SCORE
+            </button>
+
+            <div className="mt-6 text-center text-sm text-gray-400">
+              Through {holesPlayed} · Gross: {grossTotal || "--"} ·{" "}
+              {holesPlayed > 0 ? formatScore(toPar) : "--"}
+            </div>
+          </div>
+
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              onClick={goPrev}
+              className="text-4xl disabled:opacity-20"
+              disabled={currentHoleIndex === 0}
+            >
+              ←
+            </button>
+
+            <div className="max-w-[220px] text-center text-xs text-yellow-400">
+              {ticker || "Enter a score to see updates"}
+            </div>
+
+            <button
+              onClick={goNext}
+              className="text-4xl disabled:opacity-20"
+              disabled={currentHoleIndex === holes.length - 1}
+            >
+              →
+            </button>
+          </div>
+        </>
+      )}
 
       {view === "leaderboard" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Live Standings
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Leaderboard</h1>
 
           <div className="mt-8 space-y-3">
             {sortedLeaderboard.map((player, index) => (
-              <div key={player.name} className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div
+                key={player.name}
+                className="flex items-center justify-between rounded-2xl border border-gray-800 bg-gray-950 p-4"
+              >
                 <div>
                   <div className="text-sm text-gray-500">#{index + 1}</div>
                   <div className="text-lg font-bold">{player.name}</div>
@@ -265,11 +335,61 @@ export default function Home() {
         </div>
       )}
 
+      {view === "courseInfo" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Course Info
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+
+          <div className="mt-8 space-y-4 text-gray-300">
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Address</div>
+              <div className="mt-1 text-lg font-bold">
+                10256 Golf Course Rd, Taft, CA 93268
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Phone</div>
+              <a
+                href="tel:16617696226"
+                className="mt-1 block text-lg font-bold text-yellow-400"
+              >
+                (661) 769-6226
+              </a>
+            </div>
+
+            <a
+              href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
+              target="_blank"
+              className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
+            >
+              OPEN MAP
+            </a>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Tournament Start</div>
+              <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Start Type</div>
+              <div className="mt-1 text-lg font-bold">
+                Shotgun Start / Hole 1 Start
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {view === "rules" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Belt Rules
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
 
           <div className="mt-8 space-y-4 text-gray-300">
