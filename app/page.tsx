@@ -1,5 +1,5 @@
 "use client";
-
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
 // =========================
@@ -21,7 +21,7 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-const players = ["Fairway Mike", "Anthony", "Carlos", "Jason", "Michael Lopez"];
+const [players, setPlayers] = useState<string[]>([]);
 
 type View =
   | "join"
@@ -67,6 +67,26 @@ export default function Home() {
   // =========================
   // BEGIN EFFECTS
   // =========================
+
+  useEffect(() => {
+  const fetchPlayers = async () => {
+    const { data, error } = await supabase
+      .from("tournament_players")
+      .select("name");
+
+    if (error) {
+      console.error("Error fetching players:", error);
+      return;
+    }
+
+    if (data) {
+      const names = data.map((p) => p.name);
+      setPlayers(names);
+    }
+  };
+
+  fetchPlayers();
+}, []);
 
   useEffect(() => {
     const savedScores = localStorage.getItem("scores");
