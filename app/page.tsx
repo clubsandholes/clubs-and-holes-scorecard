@@ -46,6 +46,7 @@ export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [ticker, setTicker] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const hole = holes[currentHoleIndex];
 
@@ -89,6 +90,40 @@ export default function Home() {
   // =========================
 
   // =========================
+  // BEGIN FETCH SCORES
+  // =========================
+
+  const fetchScores = async (playerId: string) => {
+    const { data, error } = await supabase
+      .from("scores")
+      .select("hole_number, strokes")
+      .eq("tournament_player_id", playerId);
+
+    if (error) {
+      console.error("Error fetching scores:", error);
+      return;
+    }
+
+    const scoreMap: Record<number, number> = {};
+
+    (data || []).forEach((score) => {
+      scoreMap[score.hole_number] = score.strokes;
+    });
+
+    setScores(scoreMap);
+  };
+
+  useEffect(() => {
+    if (selectedPlayerId) {
+      fetchScores(selectedPlayerId);
+    }
+  }, [selectedPlayerId]);
+
+  // =========================
+  // END FETCH SCORES
+  // =========================
+
+  // =========================
   // BEGIN PLAYER LOCK LOGIC
   // =========================
 
@@ -129,12 +164,12 @@ export default function Home() {
   const resetLocalPlayer = () => {
     localStorage.removeItem("selectedPlayerId");
     localStorage.removeItem("playerName");
-    localStorage.removeItem("scores");
 
     setSelectedPlayerId("");
     setPlayerName("");
     setScores({});
     setCurrentHoleIndex(0);
+    setTicker("");
     setView("join");
   };
 
@@ -155,9 +190,37 @@ export default function Home() {
     setDraftScore(n);
   };
 
-  const enterScore = () => {
+  const enterScore = async () => {
+    if (isSaving) return;
+
+    if (!selectedPlayerId) {
+      alert("No player selected.");
+      return;
+    }
+
     const confirmed = confirm(`Enter ${draftScore} for Hole ${hole.number}?`);
     if (!confirmed) return;
+
+    setIsSaving(true);
+
+    const { error } = await supabase.from("scores").upsert(
+      {
+        tournament_player_id: selectedPlayerId,
+        hole_number: hole.number,
+        strokes: draftScore,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "tournament_player_id,hole_number",
+      }
+    );
+
+    if (error) {
+      console.error("Error saving score:", error);
+      alert("Score did not save. Try again.");
+      setIsSaving(false);
+      return;
+    }
 
     setScores((prev) => ({
       ...prev,
@@ -166,9 +229,15 @@ export default function Home() {
 
     setTicker(`✅ ${playerName} saved ${draftScore} on Hole ${hole.number}`);
 
-    if (currentHoleIndex < holes.length - 1) {
-      setCurrentHoleIndex(currentHoleIndex + 1);
-    }
+    setTimeout(() => {
+      setIsSaving(false);
+
+      if (currentHoleIndex < holes.length - 1) {
+        setCurrentHoleIndex(currentHoleIndex + 1);
+      } else {
+        setTicker("🏁 Round complete. Check the leaderboard.");
+      }
+    }, 600);
   };
 
   const goNext = () => {
@@ -349,9 +418,10 @@ export default function Home() {
 
             <button
               onClick={enterScore}
-              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+              disabled={isSaving}
+              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black disabled:opacity-50"
             >
-              ENTER SCORE
+              {isSaving ? "SAVING..." : "ENTER SCORE"}
             </button>
 
             <div className="mt-6 text-center text-sm text-gray-400">
