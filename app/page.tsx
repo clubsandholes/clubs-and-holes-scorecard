@@ -19,11 +19,13 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-type View =
-  | "join"
-  | "selectPlayer"
-  | "scorecard"
-  | "leaderboard";
+type View = "join" | "selectPlayer" | "scorecard" | "leaderboard";
+
+type Player = {
+  id: string;
+  name: string;
+  claimed: boolean;
+};
 
 // =========================
 // END STATIC DATA
@@ -31,11 +33,12 @@ type View =
 
 export default function Home() {
   // =========================
-  // STATE
+  // BEGIN STATE
   // =========================
 
   const [view, setView] = useState<View>("join");
-  const [players, setPlayers] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
 
@@ -47,29 +50,105 @@ export default function Home() {
   const hole = holes[currentHoleIndex];
 
   // =========================
-  // FETCH PLAYERS
+  // END STATE
   // =========================
 
+  // =========================
+  // BEGIN FETCH PLAYERS
+  // =========================
+
+  const fetchPlayers = async () => {
+    const { data, error } = await supabase
+      .from("tournament_players")
+      .select("id, name, claimed")
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching players:", error);
+      return;
+    }
+
+    setPlayers(data || []);
+  };
+
   useEffect(() => {
-    const fetchPlayers = async () => {
-      const { data, error } = await supabase
-        .from("tournament_players")
-        .select("name");
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      setPlayers(data || []);
-    };
-
     fetchPlayers();
+
+    const savedPlayerId = localStorage.getItem("selectedPlayerId");
+    const savedPlayerName = localStorage.getItem("playerName");
+
+    if (savedPlayerId && savedPlayerName) {
+      setSelectedPlayerId(savedPlayerId);
+      setPlayerName(savedPlayerName);
+      setView("scorecard");
+    }
   }, []);
 
   // =========================
-  // SCORE LOGIC
+  // END FETCH PLAYERS
   // =========================
+
+  // =========================
+  // BEGIN PLAYER LOCK LOGIC
+  // =========================
+
+  const selectPlayer = async (player: Player) => {
+    if (player.claimed) {
+      alert(`${player.name} has already been claimed.`);
+      return;
+    }
+
+    const confirmed = confirm(`Are you sure you are ${player.name}?`);
+    if (!confirmed) return;
+
+    const { data, error } = await supabase
+      .from("tournament_players")
+      .update({
+        claimed: true,
+        claimed_at: new Date().toISOString(),
+      })
+      .eq("id", player.id)
+      .eq("claimed", false)
+      .select("id, name")
+      .single();
+
+    if (error || !data) {
+      alert("This player may have already been claimed. Please refresh.");
+      fetchPlayers();
+      return;
+    }
+
+    localStorage.setItem("selectedPlayerId", data.id);
+    localStorage.setItem("playerName", data.name);
+
+    setSelectedPlayerId(data.id);
+    setPlayerName(data.name);
+    setView("scorecard");
+  };
+
+  const resetLocalPlayer = () => {
+    localStorage.removeItem("selectedPlayerId");
+    localStorage.removeItem("playerName");
+    localStorage.removeItem("scores");
+
+    setSelectedPlayerId("");
+    setPlayerName("");
+    setScores({});
+    setCurrentHoleIndex(0);
+    setView("join");
+  };
+
+  // =========================
+  // END PLAYER LOCK LOGIC
+  // =========================
+
+  // =========================
+  // BEGIN SCORE LOGIC
+  // =========================
+
+  useEffect(() => {
+    setDraftScore(scores[hole.number] ?? hole.par);
+  }, [currentHoleIndex, scores, hole.number, hole.par]);
 
   const changeDraftScore = (n: number) => {
     if (n < 1) return;
@@ -77,7 +156,7 @@ export default function Home() {
   };
 
   const enterScore = () => {
-    const confirmed = confirm(`Enter ${draftScore}?`);
+    const confirmed = confirm(`Enter ${draftScore} for Hole ${hole.number}?`);
     if (!confirmed) return;
 
     setScores((prev) => ({
@@ -85,7 +164,7 @@ export default function Home() {
       [hole.number]: draftScore,
     }));
 
-    setTicker(`Score saved on Hole ${hole.number}`);
+    setTicker(`✅ ${playerName} saved ${draftScore} on Hole ${hole.number}`);
 
     if (currentHoleIndex < holes.length - 1) {
       setCurrentHoleIndex(currentHoleIndex + 1);
@@ -93,17 +172,23 @@ export default function Home() {
   };
 
   const goNext = () => {
-    if (currentHoleIndex < holes.length - 1)
+    if (currentHoleIndex < holes.length - 1) {
       setCurrentHoleIndex(currentHoleIndex + 1);
+    }
   };
 
   const goPrev = () => {
-    if (currentHoleIndex > 0)
+    if (currentHoleIndex > 0) {
       setCurrentHoleIndex(currentHoleIndex - 1);
+    }
   };
 
   // =========================
-  // SCORING TOTALS
+  // END SCORE LOGIC
+  // =========================
+
+  // =========================
+  // BEGIN SCORING TOTALS
   // =========================
 
   const holesPlayed = Object.keys(scores).length;
@@ -120,30 +205,44 @@ export default function Home() {
 
   const net = grossTotal - parPlayed;
 
+  const formatScore = (score: number) => {
+    if (score > 0) return `+${score}`;
+    if (score === 0) return "E";
+    return `${score}`;
+  };
+
   // =========================
-  // UI
+  // END SCORING TOTALS
+  // =========================
+
+  // =========================
+  // BEGIN UI
   // =========================
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-
+    <div className="min-h-screen bg-black p-6 text-white">
       {/* =========================
-          JOIN SCREEN
+          BEGIN JOIN SCREEN
       ========================= */}
+
       {view === "join" && (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h1 className="text-4xl font-black">Join Tournament</h1>
+        <div className="flex h-screen flex-col items-center justify-center text-center">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Clubs & Holes
+          </div>
+
+          <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
 
           <input
             value={tournamentCode}
-            onChange={(e) => setTournamentCode(e.target.value)}
-            placeholder="Enter Code"
-            className="mt-6 p-4 bg-gray-800 text-center"
+            onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
+            placeholder="ENTER CODE"
+            className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
           />
 
           <button
             onClick={() => setView("selectPlayer")}
-            className="mt-6 bg-yellow-400 px-6 py-3 text-black"
+            className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
           >
             ENTER
           </button>
@@ -151,83 +250,180 @@ export default function Home() {
       )}
 
       {/* =========================
-          PLAYER SELECT
+          END JOIN SCREEN
       ========================= */}
-      {view === "selectPlayer" && (
-        <div>
-          <h2 className="text-2xl mb-4">Select Player</h2>
 
-          {players.map((p) => (
-            <button
-              key={p.name}
-              onClick={() => {
-                if (confirm(`Are you ${p.name}?`)) {
-                  setPlayerName(p.name);
-                  setView("scorecard");
-                }
-              }}
-              className="block mb-2"
-            >
-              {p.name}
-            </button>
-          ))}
+      {/* =========================
+          BEGIN PLAYER SELECT
+      ========================= */}
+
+      {view === "selectPlayer" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Code: {tournamentCode || "PLAY16"}
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
+          <div className="mt-8 space-y-3">
+            {players.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => selectPlayer(p)}
+                disabled={p.claimed}
+                className={`w-full rounded-2xl border p-4 text-left text-xl font-bold ${
+                  p.claimed
+                    ? "border-gray-900 bg-gray-950 text-gray-600"
+                    : "border-gray-800 bg-gray-950 text-white"
+                }`}
+              >
+                {p.name}
+                {p.claimed && (
+                  <span className="ml-2 text-sm text-red-400">
+                    Already Claimed
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={fetchPlayers}
+            className="mt-6 text-sm text-yellow-400"
+          >
+            Refresh Players
+          </button>
         </div>
       )}
 
       {/* =========================
-          SCORECARD
+          END PLAYER SELECT
       ========================= */}
+
+      {/* =========================
+          BEGIN SCORECARD
+      ========================= */}
+
       {view === "scorecard" && (
         <>
-          <h1 className="text-5xl text-center">
-            Hole {hole.number}
-          </h1>
+          <div className="flex items-center justify-between">
+            <button className="text-left text-lg font-black tracking-wide">
+              CLUBS & HOLES
+            </button>
 
-          <div className="text-center">
-            Par {hole.par} · {hole.yards}
+            <button onClick={resetLocalPlayer} className="text-sm text-red-400">
+              Change Player
+            </button>
           </div>
 
-          <div className="flex flex-col items-center mt-10">
-            <button onClick={() => changeDraftScore(draftScore + 1)}>
+          <div className="mt-8 text-center">
+            <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+              {playerName}
+            </div>
+
+            <h1 className="mt-4 text-7xl font-black">Hole {hole.number}</h1>
+
+            <div className="mt-3 text-lg text-gray-400">
+              Par {hole.par} · {hole.yards} Yards
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-col items-center">
+            <button
+              onClick={() => changeDraftScore(draftScore + 1)}
+              className="text-5xl text-gray-400"
+            >
               ▲
             </button>
 
-            <div className="text-7xl">{draftScore}</div>
+            <div className="my-4 text-[10rem] font-black leading-none">
+              {draftScore}
+            </div>
 
-            <button onClick={() => changeDraftScore(draftScore - 1)}>
+            <button
+              onClick={() => changeDraftScore(draftScore - 1)}
+              className="text-5xl text-gray-400"
+            >
               ▼
             </button>
 
-            <button onClick={enterScore}>
+            <button
+              onClick={enterScore}
+              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black"
+            >
               ENTER SCORE
             </button>
 
-            <div className="mt-4">{ticker}</div>
+            <div className="mt-6 text-center text-sm text-gray-400">
+              Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
+              {formatScore(net)}
+            </div>
+
+            <div className="mt-4 max-w-xs text-center text-xs text-yellow-400">
+              {ticker || "Enter a score to see updates"}
+            </div>
           </div>
 
-          <div className="flex justify-between mt-10">
-            <button onClick={goPrev}>←</button>
-            <button onClick={goNext}>→</button>
-          </div>
+          <div className="mt-10 flex justify-between">
+            <button
+              onClick={goPrev}
+              disabled={currentHoleIndex === 0}
+              className="text-4xl disabled:opacity-20"
+            >
+              ←
+            </button>
 
-          <div className="mt-6 text-center">
-            Through {holesPlayed} · {net}
+            <button
+              onClick={() => setView("leaderboard")}
+              className="rounded-full border border-gray-700 px-4 py-2 text-sm"
+            >
+              Leaderboard
+            </button>
+
+            <button
+              onClick={goNext}
+              disabled={currentHoleIndex === holes.length - 1}
+              className="text-4xl disabled:opacity-20"
+            >
+              →
+            </button>
           </div>
         </>
       )}
 
       {/* =========================
-          LEADERBOARD
+          END SCORECARD
       ========================= */}
-      {view === "leaderboard" && (
-        <div>
-          <h1>Leaderboard</h1>
 
-          <div>
-            {playerName} ({net})
+      {/* =========================
+          BEGIN LEADERBOARD
+      ========================= */}
+
+      {view === "leaderboard" && (
+        <div className="mt-10">
+          <button
+            onClick={() => setView("scorecard")}
+            className="mb-6 text-yellow-400"
+          >
+            ← Back to Scorecard
+          </button>
+
+          <h1 className="text-4xl font-black">Leaderboard</h1>
+
+          <div className="mt-8 rounded-2xl border border-yellow-400 bg-yellow-400 p-4 text-black">
+            <div className="text-sm font-bold">🏆 Current Player</div>
+            <div className="mt-1 text-xl font-black">{playerName}</div>
+            <div className="text-4xl font-black">{formatScore(net)}</div>
+            <div className="text-sm">
+              Thru {holesPlayed} · Gross {grossTotal || "--"}
+            </div>
           </div>
         </div>
       )}
+
+      {/* =========================
+          END LEADERBOARD
+      ========================= */}
     </div>
   );
 }
