@@ -677,7 +677,11 @@ export default function Home() {
             </div>
 
             <div className="mt-4 max-w-xs text-center text-xs text-yellow-400">
-              {latestTickerMessage}
+              <div className="overflow-hidden whitespace-nowrap border-t border-gray-800 py-2">
+                <div className="animate-marquee inline-block px-4 text-yellow-400 text-sm">
+                {latestTickerMessage}
+                </div>
+              </div>
             </div>
           </div>
 
