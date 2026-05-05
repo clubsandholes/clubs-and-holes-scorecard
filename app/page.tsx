@@ -33,6 +33,13 @@ type ScoreRow = {
   strokes: number;
 };
 
+type TickerEvent = {
+  id: string;
+  message: string;
+  event_type: string;
+  created_at: string;
+};
+
 // =========================
 // END STATIC DATA
 // =========================
@@ -45,7 +52,9 @@ export default function Home() {
   const [view, setView] = useState<View>("join");
   const [players, setPlayers] = useState<Player[]>([]);
   const [allScores, setAllScores] = useState<ScoreRow[]>([]);
+  const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
 
+  const [currentTournamentId, setCurrentTournamentId] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
@@ -53,7 +62,6 @@ export default function Home() {
   const [scores, setScores] = useState<Record<number, number>>({});
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(holes[0].par);
-  const [ticker, setTicker] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const hole = holes[currentHoleIndex];
@@ -63,13 +71,56 @@ export default function Home() {
   // =========================
 
   // =========================
+  // BEGIN TOURNAMENT JOIN LOGIC
+  // =========================
+
+  const joinTournament = async () => {
+    const code = tournamentCode.trim().toUpperCase();
+
+    if (!code) {
+      alert("Enter tournament code.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select("id, name, code")
+      .eq("code", code)
+      .single();
+
+    if (error || !data) {
+      alert("Tournament not found. Check the code.");
+      return;
+    }
+
+    setCurrentTournamentId(data.id);
+    localStorage.setItem("currentTournamentId", data.id);
+    localStorage.setItem("tournamentCode", code);
+
+    await fetchPlayers(data.id);
+    await fetchAllScores(data.id);
+    await fetchTickerEvents(data.id);
+
+    setView("selectPlayer");
+  };
+
+  // =========================
+  // END TOURNAMENT JOIN LOGIC
+  // =========================
+
+  // =========================
   // BEGIN DATA FETCHING
   // =========================
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (tournamentId?: string) => {
+    const idToUse = tournamentId || currentTournamentId;
+
+    if (!idToUse) return;
+
     const { data, error } = await supabase
       .from("tournament_players")
       .select("id, name, claimed")
+      .eq("tournament_id", idToUse)
       .order("name");
 
     if (error) {
@@ -80,10 +131,32 @@ export default function Home() {
     setPlayers(data || []);
   };
 
-  const fetchAllScores = async () => {
+  const fetchAllScores = async (tournamentId?: string) => {
+    const idToUse = tournamentId || currentTournamentId;
+
+    if (!idToUse) return;
+
+    const { data: tournamentPlayers, error: playersError } = await supabase
+      .from("tournament_players")
+      .select("id")
+      .eq("tournament_id", idToUse);
+
+    if (playersError) {
+      console.error("Error fetching tournament player ids:", playersError);
+      return;
+    }
+
+    const playerIds = (tournamentPlayers || []).map((p) => p.id);
+
+    if (playerIds.length === 0) {
+      setAllScores([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("scores")
-      .select("tournament_player_id, hole_number, strokes");
+      .select("tournament_player_id, hole_number, strokes")
+      .in("tournament_player_id", playerIds);
 
     if (error) {
       console.error("Error fetching all scores:", error);
@@ -113,12 +186,40 @@ export default function Home() {
     setScores(scoreMap);
   };
 
-  useEffect(() => {
-    fetchPlayers();
-    fetchAllScores();
+  const fetchTickerEvents = async (tournamentId?: string) => {
+    const idToUse = tournamentId || currentTournamentId;
 
+    if (!idToUse) return;
+
+    const { data, error } = await supabase
+      .from("ticker_events")
+      .select("id, message, event_type, created_at")
+      .eq("tournament_id", idToUse)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error("Error fetching ticker events:", error);
+      return;
+    }
+
+    setTickerEvents(data || []);
+  };
+
+  useEffect(() => {
+    const savedTournamentId = localStorage.getItem("currentTournamentId");
+    const savedTournamentCode = localStorage.getItem("tournamentCode");
     const savedPlayerId = localStorage.getItem("selectedPlayerId");
     const savedPlayerName = localStorage.getItem("playerName");
+
+    if (savedTournamentId) {
+      setCurrentTournamentId(savedTournamentId);
+      setTournamentCode(savedTournamentCode || "");
+
+      fetchPlayers(savedTournamentId);
+      fetchAllScores(savedTournamentId);
+      fetchTickerEvents(savedTournamentId);
+    }
 
     if (savedPlayerId && savedPlayerName) {
       setSelectedPlayerId(savedPlayerId);
@@ -130,12 +231,15 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchAllScores();
-      fetchPlayers();
+      if (currentTournamentId) {
+        fetchPlayers(currentTournamentId);
+        fetchAllScores(currentTournamentId);
+        fetchTickerEvents(currentTournamentId);
+      }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentTournamentId]);
 
   // =========================
   // END DATA FETCHING
@@ -190,7 +294,6 @@ export default function Home() {
     setPlayerName("");
     setScores({});
     setCurrentHoleIndex(0);
-    setTicker("");
     setView("join");
   };
 
@@ -206,6 +309,20 @@ export default function Home() {
     setDraftScore(scores[hole.number] ?? hole.par);
   }, [currentHoleIndex, scores, hole.number, hole.par]);
 
+  const getScoreLabel = (strokes: number, par: number) => {
+    const diff = strokes - par;
+
+    if (diff <= -3) return "Albatross";
+    if (diff === -2) return "Eagle";
+    if (diff === -1) return "Birdie";
+    if (diff === 0) return "Par";
+    if (diff === 1) return "Bogey";
+    if (diff === 2) return "Double Bogey";
+    if (diff === 3) return "Triple Bogey";
+
+    return `+${diff}`;
+  };
+
   const changeDraftScore = (n: number) => {
     if (n < 1) return;
     setDraftScore(n);
@@ -219,7 +336,12 @@ export default function Home() {
       return;
     }
 
-    const confirmed = confirm(`Enter ${draftScore} for Hole ${hole.number}?`);
+    const scoreLabel = getScoreLabel(draftScore, hole.par);
+
+    const confirmed = confirm(
+      `Enter ${draftScore} (${scoreLabel}) for Hole ${hole.number}?`
+    );
+
     if (!confirmed) return;
 
     setIsSaving(true);
@@ -243,22 +365,33 @@ export default function Home() {
       return;
     }
 
+    const tickerMessage = `✅ ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+
+    if (currentTournamentId) {
+      const { error: tickerError } = await supabase.from("ticker_events").insert({
+        tournament_id: currentTournamentId,
+        message: tickerMessage,
+        event_type: "score",
+      });
+
+      if (tickerError) {
+        console.error("Error saving ticker event:", tickerError);
+      }
+    }
+
     setScores((prev) => ({
       ...prev,
       [hole.number]: draftScore,
     }));
 
-    setTicker(`✅ ${playerName} saved ${draftScore} on Hole ${hole.number}`);
-
     await fetchAllScores();
+    await fetchTickerEvents();
 
     setTimeout(() => {
       setIsSaving(false);
 
       if (currentHoleIndex < holes.length - 1) {
         setCurrentHoleIndex(currentHoleIndex + 1);
-      } else {
-        setTicker("🏁 Round complete. Check the leaderboard.");
       }
     }, 600);
   };
@@ -307,17 +440,24 @@ export default function Home() {
   };
 
   const getLastHole = (scoreMap: Record<number, number>) => {
-    const played = Object.keys(scoreMap).map(Number).sort((a, b) => a - b);
+    const played = Object.keys(scoreMap)
+      .map(Number)
+      .sort((a, b) => a - b);
+
     return played.length ? played[played.length - 1] : null;
   };
 
   const getLastNToPar = (scoreMap: Record<number, number>, count: number) => {
-    const played = Object.keys(scoreMap).map(Number).sort((a, b) => a - b);
+    const played = Object.keys(scoreMap)
+      .map(Number)
+      .sort((a, b) => a - b);
+
     const last = played.slice(-count);
 
     return last.reduce((total, holeNumber) => {
       const holeInfo = holes.find((h) => h.number === holeNumber);
       if (!holeInfo) return total;
+
       return total + (scoreMap[holeNumber] - holeInfo.par);
     }, 0);
   };
@@ -378,6 +518,11 @@ export default function Home() {
     return a.name.localeCompare(b.name);
   });
 
+  const latestTickerMessage =
+    tickerEvents.length > 0
+      ? tickerEvents.map((event) => event.message).join(" · ")
+      : "Live ticker will appear here";
+
   // =========================
   // END LIVE LEADERBOARD DATA
   // =========================
@@ -408,7 +553,7 @@ export default function Home() {
           />
 
           <button
-            onClick={() => setView("selectPlayer")}
+            onClick={joinTournament}
             className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
           >
             ENTER
@@ -455,7 +600,7 @@ export default function Home() {
           </div>
 
           <button
-            onClick={fetchPlayers}
+            onClick={() => fetchPlayers()}
             className="mt-6 text-sm text-yellow-400"
           >
             Refresh Players
@@ -507,6 +652,10 @@ export default function Home() {
               {draftScore}
             </div>
 
+            <div className="mb-4 rounded-full border border-yellow-400 px-6 py-2 text-lg font-black uppercase tracking-wide text-yellow-400">
+              {getScoreLabel(draftScore, hole.par)}
+            </div>
+
             <button
               onClick={() => changeDraftScore(draftScore - 1)}
               className="text-5xl text-gray-400"
@@ -528,7 +677,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 max-w-xs text-center text-xs text-yellow-400">
-              {ticker || "Enter a score to see updates"}
+              {latestTickerMessage}
             </div>
           </div>
 
@@ -577,6 +726,10 @@ export default function Home() {
           </button>
 
           <h1 className="text-4xl font-black">Leaderboard</h1>
+
+          <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-yellow-400">
+            {latestTickerMessage}
+          </div>
 
           <div className="mt-8 space-y-3">
             {sortedLeaderboard.map((player, index) => (
