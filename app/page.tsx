@@ -27,6 +27,12 @@ type Player = {
   claimed: boolean;
 };
 
+type ScoreRow = {
+  tournament_player_id: string;
+  hole_number: number;
+  strokes: number;
+};
+
 // =========================
 // END STATIC DATA
 // =========================
@@ -38,6 +44,8 @@ export default function Home() {
 
   const [view, setView] = useState<View>("join");
   const [players, setPlayers] = useState<Player[]>([]);
+  const [allScores, setAllScores] = useState<ScoreRow[]>([]);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
@@ -55,7 +63,7 @@ export default function Home() {
   // =========================
 
   // =========================
-  // BEGIN FETCH PLAYERS
+  // BEGIN DATA FETCHING
   // =========================
 
   const fetchPlayers = async () => {
@@ -72,35 +80,27 @@ export default function Home() {
     setPlayers(data || []);
   };
 
-  useEffect(() => {
-    fetchPlayers();
+  const fetchAllScores = async () => {
+    const { data, error } = await supabase
+      .from("scores")
+      .select("tournament_player_id, hole_number, strokes");
 
-    const savedPlayerId = localStorage.getItem("selectedPlayerId");
-    const savedPlayerName = localStorage.getItem("playerName");
-
-    if (savedPlayerId && savedPlayerName) {
-      setSelectedPlayerId(savedPlayerId);
-      setPlayerName(savedPlayerName);
-      setView("scorecard");
+    if (error) {
+      console.error("Error fetching all scores:", error);
+      return;
     }
-  }, []);
 
-  // =========================
-  // END FETCH PLAYERS
-  // =========================
+    setAllScores(data || []);
+  };
 
-  // =========================
-  // BEGIN FETCH SCORES
-  // =========================
-
-  const fetchScores = async (playerId: string) => {
+  const fetchScoresForPlayer = async (playerId: string) => {
     const { data, error } = await supabase
       .from("scores")
       .select("hole_number, strokes")
       .eq("tournament_player_id", playerId);
 
     if (error) {
-      console.error("Error fetching scores:", error);
+      console.error("Error fetching player scores:", error);
       return;
     }
 
@@ -114,13 +114,31 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (selectedPlayerId) {
-      fetchScores(selectedPlayerId);
+    fetchPlayers();
+    fetchAllScores();
+
+    const savedPlayerId = localStorage.getItem("selectedPlayerId");
+    const savedPlayerName = localStorage.getItem("playerName");
+
+    if (savedPlayerId && savedPlayerName) {
+      setSelectedPlayerId(savedPlayerId);
+      setPlayerName(savedPlayerName);
+      setView("scorecard");
+      fetchScoresForPlayer(savedPlayerId);
     }
-  }, [selectedPlayerId]);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAllScores();
+      fetchPlayers();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // =========================
-  // END FETCH SCORES
+  // END DATA FETCHING
   // =========================
 
   // =========================
@@ -159,6 +177,9 @@ export default function Home() {
     setSelectedPlayerId(data.id);
     setPlayerName(data.name);
     setView("scorecard");
+
+    fetchScoresForPlayer(data.id);
+    fetchPlayers();
   };
 
   const resetLocalPlayer = () => {
@@ -229,6 +250,8 @@ export default function Home() {
 
     setTicker(`✅ ${playerName} saved ${draftScore} on Hole ${hole.number}`);
 
+    await fetchAllScores();
+
     setTimeout(() => {
       setIsSaving(false);
 
@@ -257,22 +280,47 @@ export default function Home() {
   // =========================
 
   // =========================
-  // BEGIN SCORING TOTALS
+  // BEGIN SCORING HELPERS
   // =========================
 
-  const holesPlayed = Object.keys(scores).length;
+  const getPlayerScoreMap = (playerId: string) => {
+    const map: Record<number, number> = {};
 
-  const grossTotal = holes.reduce(
-    (t, h) => t + (scores[h.number] ?? 0),
-    0
-  );
+    allScores
+      .filter((score) => score.tournament_player_id === playerId)
+      .forEach((score) => {
+        map[score.hole_number] = score.strokes;
+      });
 
-  const parPlayed = holes.reduce(
-    (t, h) => (scores[h.number] ? t + h.par : t),
-    0
-  );
+    return map;
+  };
 
-  const net = grossTotal - parPlayed;
+  const getGrossTotal = (scoreMap: Record<number, number>) => {
+    return holes.reduce((total, h) => total + (scoreMap[h.number] ?? 0), 0);
+  };
+
+  const getParPlayed = (scoreMap: Record<number, number>) => {
+    return holes.reduce(
+      (total, h) => (scoreMap[h.number] ? total + h.par : total),
+      0
+    );
+  };
+
+  const getLastHole = (scoreMap: Record<number, number>) => {
+    const played = Object.keys(scoreMap).map(Number).sort((a, b) => a - b);
+    return played.length ? played[played.length - 1] : null;
+  };
+
+  const getLastNToPar = (scoreMap: Record<number, number>, count: number) => {
+    const played = Object.keys(scoreMap).map(Number).sort((a, b) => a - b);
+    const last = played.slice(-count);
+
+    return last.reduce((total, holeNumber) => {
+      const holeInfo = holes.find((h) => h.number === holeNumber);
+      if (!holeInfo) return total;
+      return total + (scoreMap[holeNumber] - holeInfo.par);
+    }, 0);
+  };
 
   const formatScore = (score: number) => {
     if (score > 0) return `+${score}`;
@@ -281,7 +329,57 @@ export default function Home() {
   };
 
   // =========================
-  // END SCORING TOTALS
+  // END SCORING HELPERS
+  // =========================
+
+  // =========================
+  // BEGIN CURRENT PLAYER TOTALS
+  // =========================
+
+  const holesPlayed = Object.keys(scores).length;
+  const grossTotal = getGrossTotal(scores);
+  const parPlayed = getParPlayed(scores);
+  const net = grossTotal - parPlayed;
+
+  // =========================
+  // END CURRENT PLAYER TOTALS
+  // =========================
+
+  // =========================
+  // BEGIN LIVE LEADERBOARD DATA
+  // =========================
+
+  const leaderboard = players.map((player) => {
+    const playerScores = getPlayerScoreMap(player.id);
+    const gross = getGrossTotal(playerScores);
+    const par = getParPlayed(playerScores);
+    const thru = Object.keys(playerScores).length;
+    const lastHole = getLastHole(playerScores);
+
+    return {
+      id: player.id,
+      name: player.name,
+      thru,
+      gross,
+      net: gross - par,
+      lastHole,
+      lastHoleScore: lastHole ? playerScores[lastHole] : null,
+      last6: getLastNToPar(playerScores, 6),
+      last3: getLastNToPar(playerScores, 3),
+      last1: getLastNToPar(playerScores, 1),
+    };
+  });
+
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+    if (a.net !== b.net) return a.net - b.net;
+    if (a.last6 !== b.last6) return a.last6 - b.last6;
+    if (a.last3 !== b.last3) return a.last3 - b.last3;
+    if (a.last1 !== b.last1) return a.last1 - b.last1;
+    return a.name.localeCompare(b.name);
+  });
+
+  // =========================
+  // END LIVE LEADERBOARD DATA
   // =========================
 
   // =========================
@@ -480,13 +578,40 @@ export default function Home() {
 
           <h1 className="text-4xl font-black">Leaderboard</h1>
 
-          <div className="mt-8 rounded-2xl border border-yellow-400 bg-yellow-400 p-4 text-black">
-            <div className="text-sm font-bold">🏆 Current Player</div>
-            <div className="mt-1 text-xl font-black">{playerName}</div>
-            <div className="text-4xl font-black">{formatScore(net)}</div>
-            <div className="text-sm">
-              Thru {holesPlayed} · Gross {grossTotal || "--"}
-            </div>
+          <div className="mt-8 space-y-3">
+            {sortedLeaderboard.map((player, index) => (
+              <div
+                key={player.id}
+                className={`flex items-center justify-between rounded-2xl border p-4 ${
+                  index === 0
+                    ? "border-yellow-400 bg-yellow-400 text-black"
+                    : "border-gray-800 bg-gray-950 text-white"
+                }`}
+              >
+                <div>
+                  <div className="text-sm opacity-70">
+                    {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+                  </div>
+
+                  <div className="text-lg font-bold">{player.name}</div>
+
+                  <div className="text-xs opacity-70">
+                    Thru {player.thru} · Gross {player.gross || "--"}
+                  </div>
+
+                  <div className="text-xs opacity-70">
+                    Last:{" "}
+                    {player.lastHole
+                      ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
+                      : "--"}
+                  </div>
+                </div>
+
+                <div className="text-3xl font-black">
+                  {formatScore(player.net)}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
