@@ -34,8 +34,36 @@ body {
   }
 }
 
-.animate-marquee {
-  display: inline-block;
-  white-space: nowrap;
-  animation: marquee 9s linear infinite;
+/* =========================
+   BEGIN TICKER FADE LOOP
+========================= */
+
+@keyframes tickerFade {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  10% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
+
+.animate-ticker-fade {
+  animation: tickerFade 4s ease-in-out infinite;
+}
+
+/* =========================
+   END TICKER FADE LOOP
+========================= */

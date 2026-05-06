@@ -676,11 +676,9 @@ export default function Home() {
               {formatScore(net)}
             </div>
 
-            <div className="mt-4 max-w-xs text-center text-xs text-yellow-400">
-              <div className="overflow-hidden whitespace-nowrap border-t border-gray-800 py-2">
-                <div className="animate-marquee inline-block px-4 text-yellow-400 text-sm">
+            <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
+              <div className="animate-ticker-fade text-sm font-medium text-yellow-400">
                 {latestTickerMessage}
-                </div>
               </div>
             </div>
           </div>
