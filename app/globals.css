@@ -102,3 +102,16 @@ body {
 /* =========================
    END ADMIN ALERT ANIMATION
 ========================= */
+
+
+/* =========================
+   BEGIN SUCCESS ALERT ANIMATION
+========================= */
+
+.animate-success-alert {
+  animation: adminAlertSlide 1.8s ease-in-out forwards;
+}
+
+/* =========================
+   END SUCCESS ALERT ANIMATION
+========================= */

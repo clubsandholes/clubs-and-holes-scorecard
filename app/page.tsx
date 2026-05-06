@@ -491,7 +491,11 @@ export default function Home() {
       [hole.number]: draftScore,
     }));
 
-    setSaveMessage(`✅ Score saved. Moving to Hole ${hole.number + 1}...`);
+    setSaveMessage(
+  currentHoleIndex < holes.length - 1
+    ? `Moving to Hole ${hole.number + 1}`
+    : "Round complete"
+);
 
 setTimeout(() => {
   setIsSaving(false);
@@ -659,6 +663,17 @@ setTimeout(() => {
         </div>
       )}
 
+      {saveMessage && (
+  <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
+    <div className="text-xs font-black uppercase tracking-[0.3em]">
+      ✅ Score Saved
+    </div>
+    <div className="mt-2 text-xl font-black">
+      {saveMessage}
+    </div>
+  </div>
+)}
+
       {view !== "join" && view !== "selectPlayer" && (
         <div className="flex items-center justify-between">
           <button
@@ -802,11 +817,7 @@ setTimeout(() => {
     : "ENTER SCORE"}
 </button>
             <div className="mt-6 text-center text-sm text-gray-400">
-              {saveMessage && (
-  <div className="mt-2 text-sm font-bold text-green-400">
-    {saveMessage}
-  </div>
-)}
+             
               Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
               {formatScore(net)}
             </div>
