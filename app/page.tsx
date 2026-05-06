@@ -705,7 +705,7 @@ export default function Home() {
 const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   return (
     <div
-  className="relative min-h-screen p-6 text-white transition-colors duration-700"
+  className="relative h-[100dvh] overflow-hidden p-4 text-white transition-colors duration-700"
   style={{ backgroundColor: dynamicBackground }}
 >
       {activeAdminAlert && (
