@@ -620,7 +620,7 @@ export default function Home() {
     <div className="relative min-h-screen bg-black p-6 text-white">
       {/* ADMIN BREAKING ALERT */}
       {activeAdminAlert && (
-        <div className="fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
+        <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
           <div className="text-xs font-black uppercase tracking-[0.3em]">
             🚨 Admin Alert
           </div>

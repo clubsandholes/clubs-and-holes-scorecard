@@ -67,3 +67,38 @@ body {
 /* =========================
    END TICKER FADE LOOP
 ========================= */
+
+
+/* =========================
+   BEGIN ADMIN ALERT ANIMATION
+========================= */
+
+@keyframes adminAlertSlide {
+  0% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+
+  85% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+}
+
+.animate-admin-alert {
+  animation: adminAlertSlide 5s ease-in-out forwards;
+}
+
+/* =========================
+   END ADMIN ALERT ANIMATION
+========================= */
