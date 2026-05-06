@@ -290,23 +290,23 @@ export default function Home() {
   // =========================
 
   useEffect(() => {
-    const latestAdminAlert = tickerEvents.find(
-      (event) => event.event_type === "admin"
-    );
+  const latestAdminAlert = tickerEvents.find(
+    (event) => event.event_type === "admin"
+  );
 
-    if (!latestAdminAlert) return;
+  if (!latestAdminAlert) return;
 
-    if (latestAdminAlert.id === lastAdminAlertId) return;
+  if (latestAdminAlert.id === lastAdminAlertId) return;
 
-    setLastAdminAlertId(latestAdminAlert.id);
-    setActiveAdminAlert(latestAdminAlert);
+  setLastAdminAlertId(latestAdminAlert.id);
+  setActiveAdminAlert(latestAdminAlert);
 
-    const timeout = setTimeout(() => {
-      setActiveAdminAlert(null);
-    }, 5000);
+  const timeout = setTimeout(() => {
+    setActiveAdminAlert(null);
+  }, 5000);
 
-    return () => clearTimeout(timeout);
-  }, [tickerEvents, lastAdminAlertId]);
+  return () => clearTimeout(timeout);
+}, [tickerEvents]);
 
   // =========================
   // END ADMIN ALERT LOGIC
