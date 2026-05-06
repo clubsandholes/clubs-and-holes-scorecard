@@ -81,6 +81,7 @@ export default function Home() {
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
 
   const hole = holes[currentHoleIndex];
@@ -437,6 +438,24 @@ export default function Home() {
     if (n < 1) return;
     setDraftScore(n);
   };
+  const handleScoreSwipe = (endY: number) => {
+  if (touchStartY === null) return;
+
+  const swipeDistance = touchStartY - endY;
+
+  if (Math.abs(swipeDistance) < 30) {
+    setTouchStartY(null);
+    return;
+  }
+
+  if (swipeDistance > 0) {
+    changeDraftScore(draftScore + 1);
+  } else {
+    changeDraftScore(draftScore - 1);
+  }
+
+  setTouchStartY(null);
+};
 
   const enterScore = async () => {
     if (isSaving) return;
@@ -877,28 +896,14 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
             </div>
           </div>
 
-          <div className="mt-9 flex flex-col items-center">
-            <button
-              onClick={() => changeDraftScore(draftScore + 1)}
-              className={`text-5xl ${
-  currentHoleHasScore ? "text-gray-700" : "text-gray-400"
-}`}
-            >
-              ▲
-            </button>
-
-            <div
-
-  className={`my-3 text-[8rem] font-black leading-none transition-colors ${
-
+         <div
+  onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
+  onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
+  className={`my-3 select-none text-[8rem] font-black leading-none transition-colors ${
     currentHoleHasScore ? "text-gray-500" : "text-white"
-
   }`}
-
 >
-
   {draftScore}
-
 </div>
 
             <div
