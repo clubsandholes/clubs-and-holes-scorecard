@@ -932,13 +932,15 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
 
   <button
     onClick={() => {
+      alert("Refreshing leaderboard...");
       fetchPlayers();
       fetchAllScores();
       fetchTickerEvents();
+      
     }}
     className="rounded-full border border-gray-700 px-4 py-2 text-sm text-[#ff9900]"
   >
-    Refresh
+    Refresh Scores
   </button>
 </div>
 
