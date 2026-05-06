@@ -725,14 +725,27 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
 
       {view !== "join" && view !== "selectPlayer" && (
         <div className="flex items-center justify-between">
-          <button onClick={() => openView("scorecard")}>
-            <img src="/ch-logo.png" alt="Clubs & Holes" className="h-10 w-auto" />
-          </button>
+  <button
+    onClick={() => openView("scorecard")}
+    className="flex items-center gap-3"
+  >
+    <img src="/ch-logo.png" alt="Clubs & Holes" className="h-10 w-auto" />
 
-          <button onClick={() => setMenuOpen(true)} className="text-3xl">
-            ☰
-          </button>
-        </div>
+    <div className="text-left">
+      <div className="text-xs uppercase tracking-[0.2em] text-gray-400">
+        {playerName || "Player"}
+      </div>
+    </div>
+
+    <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
+      {formatScore(net)}
+    </div>
+  </button>
+
+  <button onClick={() => setMenuOpen(true)} className="text-3xl">
+    ☰
+  </button>
+</div>
       )}
 
       {menuOpen && (
@@ -899,10 +912,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
                 : "ENTER SCORE"}
             </button>
 
-            <div className="mt-6 text-center text-sm text-gray-400">
-              Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
-              {formatScore(net)}
-            </div>
+            
 
             <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
               <div className="animate-ticker-fade text-sm font-medium text-[#ff9900]">
