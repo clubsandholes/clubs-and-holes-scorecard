@@ -81,6 +81,7 @@ export default function Home() {
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
 
   const hole = holes[currentHoleIndex];
 
@@ -668,6 +669,18 @@ export default function Home() {
   // BEGIN VIEW NAVIGATION
   // =========================
 
+  const refreshLeaderboard = async () => {
+  await fetchPlayers();
+  await fetchAllScores();
+  await fetchTickerEvents();
+
+  setLeaderboardUpdatedMessage("Updated just now");
+
+  setTimeout(() => {
+    setLeaderboardUpdatedMessage("");
+  }, 2000);
+};
+
   const openView = (selectedView: View) => {
     setView(selectedView);
     setMenuOpen(false);
@@ -931,19 +944,17 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
   <h1 className="text-4xl font-black">Leaderboard</h1>
 
   <button
-    onClick={() => {
-      alert("Refreshing leaderboard...");
-      fetchPlayers();
-      fetchAllScores();
-      fetchTickerEvents();
-      
-    }}
+    onClick={refreshLeaderboard}
     className="rounded-full border border-gray-700 px-4 py-2 text-sm text-[#ff9900]"
   >
     Refresh Scores
   </button>
 </div>
-
+{leaderboardUpdatedMessage && (
+  <div className="mt-3 text-right text-xs font-bold text-[#ff9900]">
+    {leaderboardUpdatedMessage}
+  </div>
+)}
           <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-[#ff9900]">
             {latestTickerMessage}
           </div>
@@ -959,18 +970,8 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
                 }`}
               >
                 <div>
-                  <div className="flex items-center gap-2 text-sm opacity-70">
-  <span>
-    {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
-  </span>
-
-  {getPositionMovement(player.id, index) === "up" && (
-    <span className="text-green-400">⬆</span>
-  )}
-
-  {getPositionMovement(player.id, index) === "down" && (
-    <span className="text-red-400">⬇</span>
-  )}
+                  <div className="text-sm opacity-70">
+  {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
 </div>
 
                   <div className="text-lg font-bold">{player.name}</div>
