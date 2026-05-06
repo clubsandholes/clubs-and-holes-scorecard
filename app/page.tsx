@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 // BEGIN STATIC DATA
 // =========================
 
+const accentColor = "#ff9900";
+
 const holes = [
   { number: 1, par: 4, yards: 385 },
   { number: 2, par: 3, yards: 165 },
@@ -329,7 +331,6 @@ export default function Home() {
     );
 
     if (!latestAdminAlert) return;
-
     if (latestAdminAlert.id === lastAdminAlertId) return;
 
     setLastAdminAlertId(latestAdminAlert.id);
@@ -492,19 +493,19 @@ export default function Home() {
     }));
 
     setSaveMessage(
-  currentHoleIndex < holes.length - 1
-    ? `Moving to Hole ${hole.number + 1}`
-    : "Round complete"
-);
+      currentHoleIndex < holes.length - 1
+        ? `Moving to Hole ${hole.number + 1}`
+        : "Round complete"
+    );
 
-setTimeout(() => {
-  setIsSaving(false);
-  setSaveMessage("");
+    setTimeout(() => {
+      setIsSaving(false);
+      setSaveMessage("");
 
-  if (currentHoleIndex < holes.length - 1) {
-    setCurrentHoleIndex(currentHoleIndex + 1);
-  }
-}, 1200);
+      if (currentHoleIndex < holes.length - 1) {
+        setCurrentHoleIndex(currentHoleIndex + 1);
+      }
+    }, 1200);
   };
 
   const goNext = () => {
@@ -664,23 +665,18 @@ setTimeout(() => {
       )}
 
       {saveMessage && (
-  <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
-    <div className="text-xs font-black uppercase tracking-[0.3em]">
-      ✅ Score Saved
-    </div>
-    <div className="mt-2 text-xl font-black">
-      {saveMessage}
-    </div>
-  </div>
-)}
+        <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
+          <div className="text-xs font-black uppercase tracking-[0.3em]">
+            ✅ Score Saved
+          </div>
+          <div className="mt-2 text-xl font-black">{saveMessage}</div>
+        </div>
+      )}
 
       {view !== "join" && view !== "selectPlayer" && (
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => openView("scorecard")}
-            className="text-left text-lg font-black tracking-wide"
-          >
-            CLUBS & HOLES
+          <button onClick={() => openView("scorecard")}>
+            <img src="/ch-logo.png" alt="Clubs & Holes" className="h-10 w-auto" />
           </button>
 
           <button onClick={() => setMenuOpen(true)} className="text-3xl">
@@ -692,7 +688,7 @@ setTimeout(() => {
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
           <div className="flex items-center justify-between">
-            <div className="text-lg font-black">MENU</div>
+            <img src="/ch-logo.png" alt="Clubs & Holes" className="h-12 w-auto" />
 
             <button onClick={() => setMenuOpen(false)} className="text-3xl">
               ×
@@ -700,19 +696,25 @@ setTimeout(() => {
           </div>
 
           <div className="mt-10 flex flex-col gap-4">
-            <button onClick={() => openView("scorecard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
-              Scorecard
-            </button>
-            <button onClick={() => openView("leaderboard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
-              Leaderboard
-            </button>
-            <button onClick={() => openView("courseInfo")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
-              Course Info
-            </button>
-            <button onClick={() => openView("rules")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
-              Tournament Rules
-            </button>
-            <button onClick={resetLocalPlayer} className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400">
+            {[
+              ["Scorecard", "scorecard"],
+              ["Leaderboard", "leaderboard"],
+              ["Course Info", "courseInfo"],
+              ["Tournament Rules", "rules"],
+            ].map(([label, target]) => (
+              <button
+                key={label}
+                onClick={() => openView(target as View)}
+                className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+              >
+                {label}
+              </button>
+            ))}
+
+            <button
+              onClick={resetLocalPlayer}
+              className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
+            >
               Change Player
             </button>
           </div>
@@ -721,19 +723,20 @@ setTimeout(() => {
 
       {view === "join" && (
         <div className="flex h-screen flex-col items-center justify-center text-center">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
-            Clubs & Holes
-          </div>
-          <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
+          <img src="/ch-logo.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
+
+          <h1 className="text-4xl font-black">Join Tournament</h1>
+
           <input
             value={tournamentCode}
             onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
             placeholder="ENTER CODE"
             className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
           />
+
           <button
             onClick={joinTournament}
-            className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
+            className="mt-6 w-full max-w-xs rounded-full bg-white px-6 py-4 font-black text-black"
           >
             ENTER
           </button>
@@ -742,10 +745,12 @@ setTimeout(() => {
 
       {view === "selectPlayer" && (
         <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
             Code: {tournamentCode || "PLAY16"}
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
           <div className="mt-8 space-y-3">
             {players.map((p) => (
               <button
@@ -767,9 +772,10 @@ setTimeout(() => {
               </button>
             ))}
           </div>
+
           <button
             onClick={() => fetchPlayers()}
-            className="mt-6 text-sm text-yellow-400"
+            className="mt-6 text-sm text-[#ff9900]"
           >
             Refresh Players
           </button>
@@ -777,78 +783,105 @@ setTimeout(() => {
       )}
 
       {view === "scorecard" && (
-  <>
-    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
-      <div
-        className="h-full rounded-full bg-yellow-400 transition-all duration-500"
-        style={{
-          width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
-        }}
-      />
-    </div>
+        <>
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
+                backgroundColor: accentColor,
+              }}
+            />
+          </div>
 
-    <div className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-gray-500">
-      Hole {currentHoleIndex + 1} of {holes.length}
-    </div>
+          <div className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-gray-500">
+            Hole {currentHoleIndex + 1} of {holes.length}
+          </div>
 
-    <div className="mt-8 text-center">
-            <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+          <div className="mt-7 text-center">
+            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
               {playerName}
             </div>
-            <h1 className="mt-4 text-7xl font-black">Hole {hole.number}</h1>
-            <div className="mt-3 text-lg text-gray-400">
+
+            <h1 className="mt-4 text-5xl font-black">Hole {hole.number}</h1>
+
+            <div className="mt-3 text-base text-gray-400">
               Par {hole.par} · {hole.yards} Yards
             </div>
           </div>
 
-          <div className="mt-12 flex flex-col items-center">
-            <button onClick={() => changeDraftScore(draftScore + 1)} className="text-5xl text-gray-400">
+          <div className="mt-9 flex flex-col items-center">
+            <button
+              onClick={() => changeDraftScore(draftScore + 1)}
+              className="text-5xl text-gray-400"
+            >
               ▲
             </button>
-            <div className="my-4 text-[10rem] font-black leading-none">
+
+            <div className="my-3 text-[8rem] font-black leading-none">
               {draftScore}
             </div>
-            <div className="mb-4 rounded-full border border-yellow-400 px-6 py-2 text-lg font-black uppercase tracking-wide text-yellow-400">
+
+            <div className="mb-4 rounded-full border border-[#ff9900] px-6 py-2 text-lg font-black uppercase tracking-wide text-[#ff9900]">
               {getScoreLabel(draftScore, hole.par)}
             </div>
-            <button onClick={() => changeDraftScore(draftScore - 1)} className="text-5xl text-gray-400">
+
+            <button
+              onClick={() => changeDraftScore(draftScore - 1)}
+              className="text-5xl text-gray-400"
+            >
               ▼
             </button>
+
             <button
-  onClick={enterScore}
-  disabled={isSaving}
-  className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
-    scores[hole.number]
-      ? "bg-gray-700 text-white"
-      : "bg-yellow-400 text-black"
-  }`}
->
-  {isSaving
-    ? "SAVING..."
-    : scores[hole.number]
-    ? "EDIT SCORE"
-    : "ENTER SCORE"}
-</button>
+              onClick={enterScore}
+              disabled={isSaving}
+              className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
+                scores[hole.number]
+                  ? "bg-gray-700 text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              {isSaving
+                ? "SAVING..."
+                : scores[hole.number]
+                ? "EDIT SCORE"
+                : "ENTER SCORE"}
+            </button>
+
             <div className="mt-6 text-center text-sm text-gray-400">
-             
               Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
               {formatScore(net)}
             </div>
+
             <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
-              <div className="animate-ticker-fade text-sm font-medium text-yellow-400">
+              <div className="animate-ticker-fade text-sm font-medium text-[#ff9900]">
                 {latestTickerMessage}
               </div>
             </div>
           </div>
 
           <div className="mt-10 flex justify-between">
-            <button onClick={goPrev} disabled={currentHoleIndex === 0} className="text-4xl disabled:opacity-20">
+            <button
+              onClick={goPrev}
+              disabled={currentHoleIndex === 0}
+              className="text-4xl disabled:opacity-20"
+            >
               ←
             </button>
-            <button onClick={() => openView("leaderboard")} className="rounded-full border border-gray-700 px-4 py-2 text-sm">
+
+            <button
+              onClick={() => openView("leaderboard")}
+              className="rounded-full border border-gray-700 px-4 py-2 text-sm"
+            >
               Leaderboard
             </button>
-            <button onClick={goNext} disabled={currentHoleIndex === holes.length - 1} className="text-4xl disabled:opacity-20">
+
+            <button
+              onClick={goNext}
+              disabled={currentHoleIndex === holes.length - 1}
+              className="text-4xl disabled:opacity-20"
+            >
               →
             </button>
           </div>
@@ -858,16 +891,18 @@ setTimeout(() => {
       {view === "leaderboard" && (
         <div className="mt-10">
           <h1 className="text-4xl font-black">Leaderboard</h1>
-          <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-yellow-400">
+
+          <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-[#ff9900]">
             {latestTickerMessage}
           </div>
+
           <div className="mt-8 space-y-3">
             {sortedLeaderboard.map((player, index) => (
               <div
                 key={player.id}
                 className={`flex items-center justify-between rounded-2xl border p-4 ${
                   index === 0
-                    ? "border-yellow-400 bg-yellow-400 text-black"
+                    ? "border-[#ff9900] bg-[#ff9900] text-black"
                     : "border-gray-800 bg-gray-950 text-white"
                 }`}
               >
@@ -875,10 +910,13 @@ setTimeout(() => {
                   <div className="text-sm opacity-70">
                     {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
                   </div>
+
                   <div className="text-lg font-bold">{player.name}</div>
+
                   <div className="text-xs opacity-70">
                     Thru {player.thru} · Gross {player.gross || "--"}
                   </div>
+
                   <div className="text-xs opacity-70">
                     Last:{" "}
                     {player.lastHole
@@ -886,6 +924,7 @@ setTimeout(() => {
                       : "--"}
                   </div>
                 </div>
+
                 <div className="text-3xl font-black">
                   {formatScore(player.net)}
                 </div>
@@ -897,10 +936,12 @@ setTimeout(() => {
 
       {view === "courseInfo" && (
         <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
             Course Info
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+
           <div className="mt-8 space-y-4 text-gray-300">
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Address</div>
@@ -908,19 +949,25 @@ setTimeout(() => {
                 10256 Golf Course Rd, Taft, CA 93268
               </div>
             </div>
+
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Phone</div>
-              <a href="tel:16617696226" className="mt-1 block text-lg font-bold text-yellow-400">
+              <a
+                href="tel:16617696226"
+                className="mt-1 block text-lg font-bold text-[#ff9900]"
+              >
                 (661) 769-6226
               </a>
             </div>
+
             <a
               href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
               target="_blank"
-              className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
+              className="block rounded-full bg-white px-6 py-4 text-center font-black text-black"
             >
               OPEN MAP
             </a>
+
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Tournament Start</div>
               <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
@@ -931,10 +978,12 @@ setTimeout(() => {
 
       {view === "rules" && (
         <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
             Belt Rules
           </div>
+
           <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
+
           <div className="mt-8 space-y-4 text-gray-300">
             <p>• Each player enters their own score after every hole.</p>
             <p>• Scores must be called out before moving to the next tee.</p>
