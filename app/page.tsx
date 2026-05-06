@@ -518,10 +518,24 @@ export default function Home() {
     return a.name.localeCompare(b.name);
   });
 
-  const latestTickerMessage =
-    tickerEvents.length > 0
-      ? tickerEvents.map((event) => event.message).join(" · ")
-      : "Live ticker will appear here";
+  const [tickerIndex, setTickerIndex] = useState(0);
+
+useEffect(() => {
+  if (tickerEvents.length === 0) return;
+
+  const interval = setInterval(() => {
+    setTickerIndex((currentIndex) =>
+      currentIndex >= tickerEvents.length - 1 ? 0 : currentIndex + 1
+    );
+  }, 4000);
+
+  return () => clearInterval(interval);
+}, [tickerEvents.length]);
+
+const latestTickerMessage =
+  tickerEvents.length > 0
+    ? tickerEvents[tickerIndex]?.message || "Live ticker will appear here"
+    : "Live ticker will appear here";
 
   // =========================
   // END LIVE LEADERBOARD DATA
