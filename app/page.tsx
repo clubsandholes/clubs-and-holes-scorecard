@@ -730,29 +730,31 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       )}
 
       {view !== "join" && view !== "selectPlayer" && (
-        <div className="flex items-center justify-between">
-  <button
-    onClick={() => openView("scorecard")}
-    className="flex items-center gap-3"
-  >
-    <img src="/ch-logo.png" alt="Clubs & Holes" className="h-10 w-auto" />
+  <div className="flex items-center justify-between gap-3">
+    <button
+      onClick={() => openView("scorecard")}
+      className="flex min-w-0 items-center gap-2"
+    >
+      <img src="/ch-logo.png" alt="Clubs & Holes" className="h-9 w-auto" />
 
-    <div className="text-left">
-      <div className="text-xs uppercase tracking-[0.2em] text-gray-400">
+      <div className="min-w-0 max-w-[90px] truncate text-left text-xs font-black uppercase tracking-[0.08em] text-white">
         {playerName || "Player"}
       </div>
-    </div>
 
-    <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
-      {formatScore(net)}
-    </div>
-  </button>
+      <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
+        {formatScore(net)}
+      </div>
 
-  <button onClick={() => setMenuOpen(true)} className="text-3xl">
-    ☰
-  </button>
-</div>
-      )}
+      <div className="rounded-full border border-gray-700 px-3 py-1 text-xs font-black uppercase text-gray-300">
+        H{hole.number}
+      </div>
+    </button>
+
+    <button onClick={() => setMenuOpen(true)} className="text-3xl leading-none">
+      ☰
+    </button>
+  </div>
+)}
 
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
@@ -863,11 +865,9 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
             />
           </div>
 
-          <div className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-gray-500">
-            Hole {currentHoleIndex + 1} of {holes.length}
-          </div>
+          
 
-          <div className="mt-7 text-center">
+          <div className="mt-5 text-center">
             
 
             <h1 className="mt-4 text-5xl font-black uppercase">
@@ -933,9 +933,12 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
             >
               {isSaving
                 ? "SAVING..."
-                : scores[hole.number]
-                ? "EDIT SCORE"
-                : "ENTER SCORE"}
+
+  : scores[hole.number]
+
+  ? `EDIT HOLE ${hole.number} SCORE`
+
+  : `ENTER HOLE ${hole.number} SCORE`}
             </button>
 
             
