@@ -927,7 +927,20 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
 
       {view === "leaderboard" && (
         <div className="mt-10">
-          <h1 className="text-4xl font-black">Leaderboard</h1>
+          <div className="flex items-center justify-between">
+  <h1 className="text-4xl font-black">Leaderboard</h1>
+
+  <button
+    onClick={() => {
+      fetchPlayers();
+      fetchAllScores();
+      fetchTickerEvents();
+    }}
+    className="rounded-full border border-gray-700 px-4 py-2 text-sm text-[#ff9900]"
+  >
+    Refresh
+  </button>
+</div>
 
           <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-[#ff9900]">
             {latestTickerMessage}
