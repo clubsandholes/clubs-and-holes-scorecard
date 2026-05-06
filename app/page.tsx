@@ -903,7 +903,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       <div
         onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
         onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
-        className={`my-3 select-none text-[8rem] font-black leading-none transition-colors ${
+        className={`my-3 select-none touch-none text-[8rem] font-black leading-none transition-colors ${
           currentHoleHasScore ? "text-gray-500" : "text-white"
         }`}
       >
