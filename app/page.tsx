@@ -63,6 +63,11 @@ export default function Home() {
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
 
+  const [activeAdminAlert, setActiveAdminAlert] = useState<TickerEvent | null>(
+    null
+  );
+  const [lastAdminAlertId, setLastAdminAlertId] = useState("");
+
   const [currentTournamentId, setCurrentTournamentId] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [playerName, setPlayerName] = useState("");
@@ -202,7 +207,7 @@ export default function Home() {
       .select("id, message, event_type, created_at")
       .eq("tournament_id", idToUse)
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(10);
 
     if (error) {
       console.error("Error fetching ticker events:", error);
@@ -255,25 +260,56 @@ export default function Home() {
   // BEGIN TICKER ROTATION
   // =========================
 
+  const scoreTickerEvents = tickerEvents.filter(
+    (event) => event.event_type !== "admin"
+  );
+
   useEffect(() => {
-    if (tickerEvents.length === 0) return;
+    if (scoreTickerEvents.length === 0) return;
 
     const interval = setInterval(() => {
       setTickerIndex((currentIndex) =>
-        currentIndex >= tickerEvents.length - 1 ? 0 : currentIndex + 1
+        currentIndex >= scoreTickerEvents.length - 1 ? 0 : currentIndex + 1
       );
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [tickerEvents.length]);
+  }, [scoreTickerEvents.length]);
 
   const latestTickerMessage =
-    tickerEvents.length > 0
-      ? tickerEvents[tickerIndex]?.message || "Live ticker will appear here"
+    scoreTickerEvents.length > 0
+      ? scoreTickerEvents[tickerIndex]?.message || "Live ticker will appear here"
       : "Live ticker will appear here";
 
   // =========================
   // END TICKER ROTATION
+  // =========================
+
+  // =========================
+  // BEGIN ADMIN ALERT LOGIC
+  // =========================
+
+  useEffect(() => {
+    const latestAdminAlert = tickerEvents.find(
+      (event) => event.event_type === "admin"
+    );
+
+    if (!latestAdminAlert) return;
+
+    if (latestAdminAlert.id === lastAdminAlertId) return;
+
+    setLastAdminAlertId(latestAdminAlert.id);
+    setActiveAdminAlert(latestAdminAlert);
+
+    const timeout = setTimeout(() => {
+      setActiveAdminAlert(null);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [tickerEvents, lastAdminAlertId]);
+
+  // =========================
+  // END ADMIN ALERT LOGIC
   // =========================
 
   // =========================
@@ -582,10 +618,19 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-black p-6 text-white">
-      {/* =========================
-          BEGIN TOP BAR
-      ========================= */}
+      {/* ADMIN BREAKING ALERT */}
+      {activeAdminAlert && (
+        <div className="fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
+          <div className="text-xs font-black uppercase tracking-[0.3em]">
+            🚨 Admin Alert
+          </div>
+          <div className="mt-2 text-xl font-black">
+            {activeAdminAlert.message.replace("🚨 ADMIN ALERT:", "").trim()}
+          </div>
+        </div>
+      )}
 
+      {/* TOP BAR */}
       {view !== "join" && view !== "selectPlayer" && (
         <div className="flex items-center justify-between">
           <button
@@ -601,14 +646,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END TOP BAR
-      ========================= */}
-
-      {/* =========================
-          BEGIN MENU
-      ========================= */}
-
+      {/* MENU */}
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
           <div className="flex items-center justify-between">
@@ -658,14 +696,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END MENU
-      ========================= */}
-
-      {/* =========================
-          BEGIN JOIN SCREEN
-      ========================= */}
-
+      {/* JOIN SCREEN */}
       {view === "join" && (
         <div className="flex h-screen flex-col items-center justify-center text-center">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
@@ -690,14 +721,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END JOIN SCREEN
-      ========================= */}
-
-      {/* =========================
-          BEGIN PLAYER SELECT
-      ========================= */}
-
+      {/* PLAYER SELECT */}
       {view === "selectPlayer" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
@@ -737,14 +761,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END PLAYER SELECT
-      ========================= */}
-
-      {/* =========================
-          BEGIN SCORECARD
-      ========================= */}
-
+      {/* SCORECARD */}
       {view === "scorecard" && (
         <>
           <div className="mt-8 text-center">
@@ -829,14 +846,7 @@ export default function Home() {
         </>
       )}
 
-      {/* =========================
-          END SCORECARD
-      ========================= */}
-
-      {/* =========================
-          BEGIN LEADERBOARD
-      ========================= */}
-
+      {/* LEADERBOARD */}
       {view === "leaderboard" && (
         <div className="mt-10">
           <h1 className="text-4xl font-black">Leaderboard</h1>
@@ -883,14 +893,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END LEADERBOARD
-      ========================= */}
-
-      {/* =========================
-          BEGIN COURSE INFO
-      ========================= */}
-
+      {/* COURSE INFO */}
       {view === "courseInfo" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
@@ -933,14 +936,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* =========================
-          END COURSE INFO
-      ========================= */}
-
-      {/* =========================
-          BEGIN RULES
-      ========================= */}
-
+      {/* RULES */}
       {view === "rules" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
@@ -960,10 +956,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* =========================
-          END RULES
-      ========================= */}
     </div>
   );
 }
