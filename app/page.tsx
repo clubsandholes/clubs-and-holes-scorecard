@@ -873,112 +873,109 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       )}
 
       {view === "scorecard" && (
-        <>
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
-                backgroundColor: accentColor,
-              }}
-            />
-          </div>
+  <>
+    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
+      <div
+        className="h-full rounded-full transition-all duration-500"
+        style={{
+          width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
+          backgroundColor: accentColor,
+        }}
+      />
+    </div>
 
-          
+    <div className="mt-5 text-center">
+      <div className="mt-1 text-base text-gray-400">
+        Par {hole.par} · {hole.yards} Yards
+      </div>
+    </div>
 
-          <div className="mt-5 text-center">
-            
+    <div className="mt-6 flex flex-col items-center">
+      <button
+        onClick={() => changeDraftScore(draftScore + 1)}
+        className={`text-5xl ${
+          currentHoleHasScore ? "text-gray-700" : "text-gray-400"
+        }`}
+      >
+        ▲
+      </button>
 
-             
+      <div
+        onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
+        onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
+        className={`my-3 select-none text-[8rem] font-black leading-none transition-colors ${
+          currentHoleHasScore ? "text-gray-500" : "text-white"
+        }`}
+      >
+        {draftScore}
+      </div>
 
-            <div className="mt-1 text-base text-gray-400">
-              Par {hole.par} · {hole.yards} Yards
-            </div>
-          </div>
+      <div
+        className={`mb-4 rounded-full border px-6 py-2 text-lg font-black uppercase tracking-wide ${
+          currentHoleHasScore
+            ? "border-gray-700 text-gray-500"
+            : "border-[#ff9900] text-[#ff9900]"
+        }`}
+      >
+        {getScoreLabel(draftScore, hole.par)}
+      </div>
 
-         <div
-  onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
-  onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
-  className={`my-3 select-none text-[8rem] font-black leading-none transition-colors ${
-    currentHoleHasScore ? "text-gray-500" : "text-white"
-  }`}
->
-  {draftScore}
-</div>
+      <button
+        onClick={() => changeDraftScore(draftScore - 1)}
+        className={`text-5xl ${
+          currentHoleHasScore ? "text-gray-700" : "text-gray-400"
+        }`}
+      >
+        ▼
+      </button>
 
-            <div
-  className={`mb-4 rounded-full border px-6 py-2 text-lg font-black uppercase tracking-wide ${
-    currentHoleHasScore
-      ? "border-gray-700 text-gray-500"
-      : "border-[#ff9900] text-[#ff9900]"
-  }`}
->
-              {getScoreLabel(draftScore, hole.par)}
-            </div>
+      <button
+        onClick={enterScore}
+        disabled={isSaving}
+        className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
+          scores[hole.number] ? "bg-gray-700 text-white" : "bg-white text-black"
+        }`}
+      >
+        {isSaving
+          ? "SAVING..."
+          : scores[hole.number]
+          ? `EDIT HOLE ${hole.number} SCORE`
+          : `ENTER HOLE ${hole.number} SCORE`}
+      </button>
 
-            <button
-              onClick={() => changeDraftScore(draftScore - 1)}
-              className={`text-5xl ${
-  currentHoleHasScore ? "text-gray-700" : "text-gray-400"
-}`}
-            >
-              ▼
-            </button>
+      <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
+        <div className="animate-ticker-fade text-sm font-medium text-[#ff9900]">
+          {latestTickerMessage}
+        </div>
+      </div>
+    </div>
 
-            <button
-              onClick={enterScore}
-              disabled={isSaving}
-              className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
-                scores[hole.number]
-                  ? "bg-gray-700 text-white"
-                  : "bg-white text-black"
-              }`}
-            >
-              {isSaving
-                ? "SAVING..."
+    <div className="mt-10 flex justify-between">
+      <button
+        onClick={goPrev}
+        disabled={currentHoleIndex === 0}
+        className="text-4xl disabled:opacity-20"
+      >
+        ←
+      </button>
 
-  : scores[hole.number]
+      <button
+        onClick={() => openView("leaderboard")}
+        className="rounded-full border border-gray-700 px-4 py-2 text-sm"
+      >
+        Leaderboard
+      </button>
 
-  ? `EDIT HOLE ${hole.number} SCORE`
-
-  : `ENTER HOLE ${hole.number} SCORE`}
-            </button>
-
-            
-
-            <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
-              <div className="animate-ticker-fade text-sm font-medium text-[#ff9900]">
-                {latestTickerMessage}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-10 flex justify-between">
-            <button
-              onClick={goPrev}
-              disabled={currentHoleIndex === 0}
-              className="text-4xl disabled:opacity-20"
-            >
-              ←
-            </button>
-
-            <button
-              onClick={() => openView("leaderboard")}
-              className="rounded-full border border-gray-700 px-4 py-2 text-sm"
-            >
-              Leaderboard
-            </button>
-
-            <button
-              onClick={goNext}
-              disabled={currentHoleIndex === holes.length - 1}
-              className="text-4xl disabled:opacity-20"
-            >
-              →
-            </button>
-          </div>
-        </>
-      )}
+      <button
+        onClick={goNext}
+        disabled={currentHoleIndex === holes.length - 1}
+        className="text-4xl disabled:opacity-20"
+      >
+        →
+      </button>
+    </div>
+  </>
+)}
 
       {view === "leaderboard" && (
         <div className="mt-10">
