@@ -365,14 +365,28 @@ export default function Home() {
       return;
     }
 
-    const tickerMessage = `✅ ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+    let tickerMessage = "";
 
-    if (currentTournamentId) {
-      const { error: tickerError } = await supabase.from("ticker_events").insert({
-        tournament_id: currentTournamentId,
-        message: tickerMessage,
-        event_type: "score",
-      });
+const scoreDiff = draftScore - hole.par;
+
+// 🔥 Birdie or Better
+if (scoreDiff <= -1) {
+  tickerMessage = `🔥 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+}
+
+// 😬 Double Bogey or Worse
+if (scoreDiff >= 2) {
+  tickerMessage = `😬 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+}
+
+    if (currentTournamentId && tickerMessage) {
+  const { error: tickerError } = await supabase
+    .from("ticker_events")
+    .insert({
+      tournament_id: currentTournamentId,
+      message: tickerMessage,
+      event_type: "score",
+    });
 
       if (tickerError) {
         console.error("Error saving ticker event:", tickerError);
