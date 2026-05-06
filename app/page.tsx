@@ -240,20 +240,53 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (currentTournamentId) {
-        fetchPlayers(currentTournamentId);
-        fetchAllScores(currentTournamentId);
-        fetchTickerEvents(currentTournamentId);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [currentTournamentId]);
-
   // =========================
   // END DATA FETCHING
+  // =========================
+
+  // =========================
+  // BEGIN REALTIME SUBSCRIPTIONS
+  // =========================
+
+  useEffect(() => {
+    if (!currentTournamentId) return;
+
+    const channel = supabase
+      .channel(`live-tournament-${currentTournamentId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "scores" },
+        async () => {
+          await fetchAllScores(currentTournamentId);
+
+          if (selectedPlayerId) {
+            await fetchScoresForPlayer(selectedPlayerId);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticker_events" },
+        async () => {
+          await fetchTickerEvents(currentTournamentId);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tournament_players" },
+        async () => {
+          await fetchPlayers(currentTournamentId);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentTournamentId, selectedPlayerId]);
+
+  // =========================
+  // END REALTIME SUBSCRIPTIONS
   // =========================
 
   // =========================
@@ -290,23 +323,23 @@ export default function Home() {
   // =========================
 
   useEffect(() => {
-  const latestAdminAlert = tickerEvents.find(
-    (event) => event.event_type === "admin"
-  );
+    const latestAdminAlert = tickerEvents.find(
+      (event) => event.event_type === "admin"
+    );
 
-  if (!latestAdminAlert) return;
+    if (!latestAdminAlert) return;
 
-  if (latestAdminAlert.id === lastAdminAlertId) return;
+    if (latestAdminAlert.id === lastAdminAlertId) return;
 
-  setLastAdminAlertId(latestAdminAlert.id);
-  setActiveAdminAlert(latestAdminAlert);
+    setLastAdminAlertId(latestAdminAlert.id);
+    setActiveAdminAlert(latestAdminAlert);
 
-  const timeout = setTimeout(() => {
-    setActiveAdminAlert(null);
-  }, 5000);
+    const timeout = setTimeout(() => {
+      setActiveAdminAlert(null);
+    }, 5000);
 
-  return () => clearTimeout(timeout);
-}, [tickerEvents]);
+    return () => clearTimeout(timeout);
+  }, [tickerEvents]);
 
   // =========================
   // END ADMIN ALERT LOGIC
@@ -445,24 +478,17 @@ export default function Home() {
     }
 
     if (currentTournamentId && tickerMessage) {
-      const { error: tickerError } = await supabase.from("ticker_events").insert({
+      await supabase.from("ticker_events").insert({
         tournament_id: currentTournamentId,
         message: tickerMessage,
         event_type: "score",
       });
-
-      if (tickerError) {
-        console.error("Error saving ticker event:", tickerError);
-      }
     }
 
     setScores((prev) => ({
       ...prev,
       [hole.number]: draftScore,
     }));
-
-    await fetchAllScores();
-    await fetchTickerEvents();
 
     setTimeout(() => {
       setIsSaving(false);
@@ -618,7 +644,6 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-black p-6 text-white">
-      {/* ADMIN BREAKING ALERT */}
       {activeAdminAlert && (
         <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
           <div className="text-xs font-black uppercase tracking-[0.3em]">
@@ -630,7 +655,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* TOP BAR */}
       {view !== "join" && view !== "selectPlayer" && (
         <div className="flex items-center justify-between">
           <button
@@ -646,7 +670,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* MENU */}
       {menuOpen && (
         <div className="absolute inset-0 z-50 bg-black/95 p-6">
           <div className="flex items-center justify-between">
@@ -658,60 +681,37 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col gap-4">
-            <button
-              onClick={() => openView("scorecard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("scorecard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Scorecard
             </button>
-
-            <button
-              onClick={() => openView("leaderboard")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("leaderboard")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Leaderboard
             </button>
-
-            <button
-              onClick={() => openView("courseInfo")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("courseInfo")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Course Info
             </button>
-
-            <button
-              onClick={() => openView("rules")}
-              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-            >
+            <button onClick={() => openView("rules")} className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold">
               Tournament Rules
             </button>
-
-            <button
-              onClick={resetLocalPlayer}
-              className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
-            >
+            <button onClick={resetLocalPlayer} className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400">
               Change Player
             </button>
           </div>
         </div>
       )}
 
-      {/* JOIN SCREEN */}
       {view === "join" && (
         <div className="flex h-screen flex-col items-center justify-center text-center">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Clubs & Holes
           </div>
-
           <h1 className="mt-4 text-4xl font-black">Join Tournament</h1>
-
           <input
             value={tournamentCode}
             onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
             placeholder="ENTER CODE"
             className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
           />
-
           <button
             onClick={joinTournament}
             className="mt-6 w-full max-w-xs rounded-full bg-yellow-400 px-6 py-4 font-black text-black"
@@ -721,15 +721,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* PLAYER SELECT */}
       {view === "selectPlayer" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Code: {tournamentCode || "PLAY16"}
           </div>
-
           <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
-
           <div className="mt-8 space-y-3">
             {players.map((p) => (
               <button
@@ -751,7 +748,6 @@ export default function Home() {
               </button>
             ))}
           </div>
-
           <button
             onClick={() => fetchPlayers()}
             className="mt-6 text-sm text-yellow-400"
@@ -761,44 +757,31 @@ export default function Home() {
         </div>
       )}
 
-      {/* SCORECARD */}
       {view === "scorecard" && (
         <>
           <div className="mt-8 text-center">
             <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
               {playerName}
             </div>
-
             <h1 className="mt-4 text-7xl font-black">Hole {hole.number}</h1>
-
             <div className="mt-3 text-lg text-gray-400">
               Par {hole.par} · {hole.yards} Yards
             </div>
           </div>
 
           <div className="mt-12 flex flex-col items-center">
-            <button
-              onClick={() => changeDraftScore(draftScore + 1)}
-              className="text-5xl text-gray-400"
-            >
+            <button onClick={() => changeDraftScore(draftScore + 1)} className="text-5xl text-gray-400">
               ▲
             </button>
-
             <div className="my-4 text-[10rem] font-black leading-none">
               {draftScore}
             </div>
-
             <div className="mb-4 rounded-full border border-yellow-400 px-6 py-2 text-lg font-black uppercase tracking-wide text-yellow-400">
               {getScoreLabel(draftScore, hole.par)}
             </div>
-
-            <button
-              onClick={() => changeDraftScore(draftScore - 1)}
-              className="text-5xl text-gray-400"
-            >
+            <button onClick={() => changeDraftScore(draftScore - 1)} className="text-5xl text-gray-400">
               ▼
             </button>
-
             <button
               onClick={enterScore}
               disabled={isSaving}
@@ -806,12 +789,10 @@ export default function Home() {
             >
               {isSaving ? "SAVING..." : "ENTER SCORE"}
             </button>
-
             <div className="mt-6 text-center text-sm text-gray-400">
               Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
               {formatScore(net)}
             </div>
-
             <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
               <div className="animate-ticker-fade text-sm font-medium text-yellow-400">
                 {latestTickerMessage}
@@ -820,41 +801,25 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex justify-between">
-            <button
-              onClick={goPrev}
-              disabled={currentHoleIndex === 0}
-              className="text-4xl disabled:opacity-20"
-            >
+            <button onClick={goPrev} disabled={currentHoleIndex === 0} className="text-4xl disabled:opacity-20">
               ←
             </button>
-
-            <button
-              onClick={() => openView("leaderboard")}
-              className="rounded-full border border-gray-700 px-4 py-2 text-sm"
-            >
+            <button onClick={() => openView("leaderboard")} className="rounded-full border border-gray-700 px-4 py-2 text-sm">
               Leaderboard
             </button>
-
-            <button
-              onClick={goNext}
-              disabled={currentHoleIndex === holes.length - 1}
-              className="text-4xl disabled:opacity-20"
-            >
+            <button onClick={goNext} disabled={currentHoleIndex === holes.length - 1} className="text-4xl disabled:opacity-20">
               →
             </button>
           </div>
         </>
       )}
 
-      {/* LEADERBOARD */}
       {view === "leaderboard" && (
         <div className="mt-10">
           <h1 className="text-4xl font-black">Leaderboard</h1>
-
           <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-yellow-400">
             {latestTickerMessage}
           </div>
-
           <div className="mt-8 space-y-3">
             {sortedLeaderboard.map((player, index) => (
               <div
@@ -869,13 +834,10 @@ export default function Home() {
                   <div className="text-sm opacity-70">
                     {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
                   </div>
-
                   <div className="text-lg font-bold">{player.name}</div>
-
                   <div className="text-xs opacity-70">
                     Thru {player.thru} · Gross {player.gross || "--"}
                   </div>
-
                   <div className="text-xs opacity-70">
                     Last:{" "}
                     {player.lastHole
@@ -883,7 +845,6 @@ export default function Home() {
                       : "--"}
                   </div>
                 </div>
-
                 <div className="text-3xl font-black">
                   {formatScore(player.net)}
                 </div>
@@ -893,15 +854,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* COURSE INFO */}
       {view === "courseInfo" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Course Info
           </div>
-
           <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
-
           <div className="mt-8 space-y-4 text-gray-300">
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Address</div>
@@ -909,17 +867,12 @@ export default function Home() {
                 10256 Golf Course Rd, Taft, CA 93268
               </div>
             </div>
-
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Phone</div>
-              <a
-                href="tel:16617696226"
-                className="mt-1 block text-lg font-bold text-yellow-400"
-              >
+              <a href="tel:16617696226" className="mt-1 block text-lg font-bold text-yellow-400">
                 (661) 769-6226
               </a>
             </div>
-
             <a
               href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
               target="_blank"
@@ -927,7 +880,6 @@ export default function Home() {
             >
               OPEN MAP
             </a>
-
             <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
               <div className="text-sm text-gray-500">Tournament Start</div>
               <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
@@ -936,15 +888,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* RULES */}
       {view === "rules" && (
         <div className="mt-10">
           <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
             Belt Rules
           </div>
-
           <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
-
           <div className="mt-8 space-y-4 text-gray-300">
             <p>• Each player enters their own score after every hole.</p>
             <p>• Scores must be called out before moving to the next tee.</p>
