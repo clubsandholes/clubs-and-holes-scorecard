@@ -61,6 +61,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [players, setPlayers] = useState<Player[]>([]);
+  const [previousLeaderboard, setPreviousLeaderboard] = useState<string[]>([]);
   const [allScores, setAllScores] = useState<ScoreRow[]>([]);
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
@@ -580,6 +581,25 @@ export default function Home() {
     return `${score}`;
   };
 
+  const getPositionMovement = (
+  playerId: string,
+  currentIndex: number
+) => {
+  const previousIndex = previousLeaderboard.indexOf(playerId);
+
+  if (previousIndex === -1) return null;
+
+  if (currentIndex < previousIndex) {
+    return "up";
+  }
+
+  if (currentIndex > previousIndex) {
+    return "down";
+  }
+
+  return "same";
+};
+
   // =========================
   // END SCORING HELPERS
   // =========================
@@ -629,6 +649,16 @@ export default function Home() {
     if (a.last1 !== b.last1) return a.last1 - b.last1;
     return a.name.localeCompare(b.name);
   });
+  useEffect(() => {
+  const currentOrder = sortedLeaderboard.map((player) => player.id);
+
+  if (previousLeaderboard.length === 0) {
+    setPreviousLeaderboard(currentOrder);
+    return;
+  }
+
+  setPreviousLeaderboard(currentOrder);
+}, [allScores]);
 
   // =========================
   // END LIVE LEADERBOARD DATA
@@ -914,9 +944,19 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
                 }`}
               >
                 <div>
-                  <div className="text-sm opacity-70">
-                    {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
-                  </div>
+                  <div className="flex items-center gap-2 text-sm opacity-70">
+  <span>
+    {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+  </span>
+
+  {getPositionMovement(player.id, index) === "up" && (
+    <span className="text-green-400">⬆</span>
+  )}
+
+  {getPositionMovement(player.id, index) === "down" && (
+    <span className="text-red-400">⬇</span>
+  )}
+</div>
 
                   <div className="text-lg font-bold">{player.name}</div>
 
