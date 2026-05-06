@@ -650,9 +650,16 @@ export default function Home() {
   // =========================
   // BEGIN UI
   // =========================
+  const backgroundShade = Math.round(
+  36 - (currentHoleIndex / (holes.length - 1)) * 36
+);
 
+const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   return (
-    <div className="relative min-h-screen bg-black p-6 text-white">
+    <div
+  className="relative min-h-screen p-6 text-white transition-colors duration-700"
+  style={{ backgroundColor: dynamicBackground }}
+>
       {activeAdminAlert && (
         <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
           <div className="text-xs font-black uppercase tracking-[0.3em]">
