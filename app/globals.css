@@ -109,7 +109,7 @@ body {
 ========================= */
 
 .animate-success-alert {
-  animation: adminAlertSlide 5.8s ease-in-out forwards;
+  animation: adminAlertSlide 4s ease-in-out forwards;
 }
 
 /* =========================

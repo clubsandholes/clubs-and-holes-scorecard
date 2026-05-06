@@ -862,11 +862,11 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
           </div>
 
           <div className="mt-7 text-center">
-            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-              {playerName}
-            </div>
+            
 
-            <h1 className="mt-4 text-5xl font-black">Hole {hole.number}</h1>
+            <h1 className="mt-4 text-5xl font-black uppercase">
+              HOLE {hole.number}
+            </h1> 
 
             <div className="mt-3 text-base text-gray-400">
               Par {hole.par} · {hole.yards} Yards
