@@ -507,7 +507,7 @@ export default function Home() {
       if (currentHoleIndex < holes.length - 1) {
         setCurrentHoleIndex(currentHoleIndex + 1);
       }
-    }, 1200);
+    }, 10000);
   };
 
   const goNext = () => {
