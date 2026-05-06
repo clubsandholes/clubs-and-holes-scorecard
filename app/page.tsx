@@ -84,6 +84,7 @@ export default function Home() {
   const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
 
   const hole = holes[currentHoleIndex];
+  const currentHoleHasScore = scores[hole.number] !== undefined;
 
   // =========================
   // END STATE
@@ -413,6 +414,10 @@ export default function Home() {
   useEffect(() => {
     setDraftScore(scores[hole.number] ?? hole.par);
   }, [currentHoleIndex, scores, hole.number, hole.par]);
+
+
+
+
 
   const getScoreLabel = (strokes: number, par: number) => {
     const diff = strokes - par;
@@ -876,22 +881,42 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
           <div className="mt-9 flex flex-col items-center">
             <button
               onClick={() => changeDraftScore(draftScore + 1)}
-              className="text-5xl text-gray-400"
+              className={`text-5xl ${
+  currentHoleHasScore ? "text-gray-700" : "text-gray-400"
+}`}
             >
               ▲
             </button>
 
-            <div className="my-3 text-[8rem] font-black leading-none">
-              {draftScore}
-            </div>
+            <div
 
-            <div className="mb-4 rounded-full border border-[#ff9900] px-6 py-2 text-lg font-black uppercase tracking-wide text-[#ff9900]">
+  className={`my-3 text-[8rem] font-black leading-none transition-colors ${
+
+    currentHoleHasScore ? "text-gray-500" : "text-white"
+
+  }`}
+
+>
+
+  {draftScore}
+
+</div>
+
+            <div
+  className={`mb-4 rounded-full border px-6 py-2 text-lg font-black uppercase tracking-wide ${
+    currentHoleHasScore
+      ? "border-gray-700 text-gray-500"
+      : "border-[#ff9900] text-[#ff9900]"
+  }`}
+>
               {getScoreLabel(draftScore, hole.par)}
             </div>
 
             <button
               onClick={() => changeDraftScore(draftScore - 1)}
-              className="text-5xl text-gray-400"
+              className={`text-5xl ${
+  currentHoleHasScore ? "text-gray-700" : "text-gray-400"
+}`}
             >
               ▼
             </button>
