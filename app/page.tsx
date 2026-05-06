@@ -77,6 +77,7 @@ export default function Home() {
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const hole = holes[currentHoleIndex];
 
@@ -490,13 +491,16 @@ export default function Home() {
       [hole.number]: draftScore,
     }));
 
-    setTimeout(() => {
-      setIsSaving(false);
+    setSaveMessage(`✅ Score saved. Moving to Hole ${hole.number + 1}...`);
 
-      if (currentHoleIndex < holes.length - 1) {
-        setCurrentHoleIndex(currentHoleIndex + 1);
-      }
-    }, 600);
+setTimeout(() => {
+  setIsSaving(false);
+  setSaveMessage("");
+
+  if (currentHoleIndex < holes.length - 1) {
+    setCurrentHoleIndex(currentHoleIndex + 1);
+  }
+}, 1200);
   };
 
   const goNext = () => {
@@ -783,13 +787,26 @@ export default function Home() {
               ▼
             </button>
             <button
-              onClick={enterScore}
-              disabled={isSaving}
-              className="mt-8 w-full max-w-xs rounded-full bg-yellow-400 px-8 py-4 text-lg font-black text-black disabled:opacity-50"
-            >
-              {isSaving ? "SAVING..." : "ENTER SCORE"}
-            </button>
+  onClick={enterScore}
+  disabled={isSaving}
+  className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
+    scores[hole.number]
+      ? "bg-gray-700 text-white"
+      : "bg-yellow-400 text-black"
+  }`}
+>
+  {isSaving
+    ? "SAVING..."
+    : scores[hole.number]
+    ? "EDIT SCORE"
+    : "ENTER SCORE"}
+</button>
             <div className="mt-6 text-center text-sm text-gray-400">
+              {saveMessage && (
+  <div className="mt-2 text-sm font-bold text-green-400">
+    {saveMessage}
+  </div>
+)}
               Hole {hole.number} of {holes.length} · Through {holesPlayed} ·{" "}
               {formatScore(net)}
             </div>
