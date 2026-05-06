@@ -777,8 +777,21 @@ setTimeout(() => {
       )}
 
       {view === "scorecard" && (
-        <>
-          <div className="mt-8 text-center">
+  <>
+    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
+      <div
+        className="h-full rounded-full bg-yellow-400 transition-all duration-500"
+        style={{
+          width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
+        }}
+      />
+    </div>
+
+    <div className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-gray-500">
+      Hole {currentHoleIndex + 1} of {holes.length}
+    </div>
+
+    <div className="mt-8 text-center">
             <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
               {playerName}
             </div>
