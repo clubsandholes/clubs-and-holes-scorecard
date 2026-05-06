@@ -19,7 +19,13 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-type View = "join" | "selectPlayer" | "scorecard" | "leaderboard";
+type View =
+  | "join"
+  | "selectPlayer"
+  | "scorecard"
+  | "leaderboard"
+  | "courseInfo"
+  | "rules";
 
 type Player = {
   id: string;
@@ -50,9 +56,12 @@ export default function Home() {
   // =========================
 
   const [view, setView] = useState<View>("join");
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [allScores, setAllScores] = useState<ScoreRow[]>([]);
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
+  const [tickerIndex, setTickerIndex] = useState(0);
 
   const [currentTournamentId, setCurrentTournamentId] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
@@ -114,7 +123,6 @@ export default function Home() {
 
   const fetchPlayers = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
-
     if (!idToUse) return;
 
     const { data, error } = await supabase
@@ -133,7 +141,6 @@ export default function Home() {
 
   const fetchAllScores = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
-
     if (!idToUse) return;
 
     const { data: tournamentPlayers, error: playersError } = await supabase
@@ -188,7 +195,6 @@ export default function Home() {
 
   const fetchTickerEvents = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
-
     if (!idToUse) return;
 
     const { data, error } = await supabase
@@ -246,6 +252,31 @@ export default function Home() {
   // =========================
 
   // =========================
+  // BEGIN TICKER ROTATION
+  // =========================
+
+  useEffect(() => {
+    if (tickerEvents.length === 0) return;
+
+    const interval = setInterval(() => {
+      setTickerIndex((currentIndex) =>
+        currentIndex >= tickerEvents.length - 1 ? 0 : currentIndex + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [tickerEvents.length]);
+
+  const latestTickerMessage =
+    tickerEvents.length > 0
+      ? tickerEvents[tickerIndex]?.message || "Live ticker will appear here"
+      : "Live ticker will appear here";
+
+  // =========================
+  // END TICKER ROTATION
+  // =========================
+
+  // =========================
   // BEGIN PLAYER LOCK LOGIC
   // =========================
 
@@ -294,6 +325,7 @@ export default function Home() {
     setPlayerName("");
     setScores({});
     setCurrentHoleIndex(0);
+    setMenuOpen(false);
     setView("join");
   };
 
@@ -365,28 +397,23 @@ export default function Home() {
       return;
     }
 
+    const scoreDiff = draftScore - hole.par;
     let tickerMessage = "";
 
-const scoreDiff = draftScore - hole.par;
+    if (scoreDiff <= -1) {
+      tickerMessage = `🔥 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+    }
 
-// 🔥 Birdie or Better
-if (scoreDiff <= -1) {
-  tickerMessage = `🔥 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
-}
-
-// 😬 Double Bogey or Worse
-if (scoreDiff >= 2) {
-  tickerMessage = `😬 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
-}
+    if (scoreDiff >= 2) {
+      tickerMessage = `😬 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+    }
 
     if (currentTournamentId && tickerMessage) {
-  const { error: tickerError } = await supabase
-    .from("ticker_events")
-    .insert({
-      tournament_id: currentTournamentId,
-      message: tickerMessage,
-      event_type: "score",
-    });
+      const { error: tickerError } = await supabase.from("ticker_events").insert({
+        tournament_id: currentTournamentId,
+        message: tickerMessage,
+        event_type: "score",
+      });
 
       if (tickerError) {
         console.error("Error saving ticker event:", tickerError);
@@ -532,27 +559,21 @@ if (scoreDiff >= 2) {
     return a.name.localeCompare(b.name);
   });
 
-  const [tickerIndex, setTickerIndex] = useState(0);
-
-useEffect(() => {
-  if (tickerEvents.length === 0) return;
-
-  const interval = setInterval(() => {
-    setTickerIndex((currentIndex) =>
-      currentIndex >= tickerEvents.length - 1 ? 0 : currentIndex + 1
-    );
-  }, 4000);
-
-  return () => clearInterval(interval);
-}, [tickerEvents.length]);
-
-const latestTickerMessage =
-  tickerEvents.length > 0
-    ? tickerEvents[tickerIndex]?.message || "Live ticker will appear here"
-    : "Live ticker will appear here";
-
   // =========================
   // END LIVE LEADERBOARD DATA
+  // =========================
+
+  // =========================
+  // BEGIN VIEW NAVIGATION
+  // =========================
+
+  const openView = (selectedView: View) => {
+    setView(selectedView);
+    setMenuOpen(false);
+  };
+
+  // =========================
+  // END VIEW NAVIGATION
   // =========================
 
   // =========================
@@ -560,7 +581,87 @@ const latestTickerMessage =
   // =========================
 
   return (
-    <div className="min-h-screen bg-black p-6 text-white">
+    <div className="relative min-h-screen bg-black p-6 text-white">
+      {/* =========================
+          BEGIN TOP BAR
+      ========================= */}
+
+      {view !== "join" && view !== "selectPlayer" && (
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => openView("scorecard")}
+            className="text-left text-lg font-black tracking-wide"
+          >
+            CLUBS & HOLES
+          </button>
+
+          <button onClick={() => setMenuOpen(true)} className="text-3xl">
+            ☰
+          </button>
+        </div>
+      )}
+
+      {/* =========================
+          END TOP BAR
+      ========================= */}
+
+      {/* =========================
+          BEGIN MENU
+      ========================= */}
+
+      {menuOpen && (
+        <div className="absolute inset-0 z-50 bg-black/95 p-6">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-black">MENU</div>
+
+            <button onClick={() => setMenuOpen(false)} className="text-3xl">
+              ×
+            </button>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-4">
+            <button
+              onClick={() => openView("scorecard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Scorecard
+            </button>
+
+            <button
+              onClick={() => openView("leaderboard")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Leaderboard
+            </button>
+
+            <button
+              onClick={() => openView("courseInfo")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Course Info
+            </button>
+
+            <button
+              onClick={() => openView("rules")}
+              className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+            >
+              Tournament Rules
+            </button>
+
+            <button
+              onClick={resetLocalPlayer}
+              className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
+            >
+              Change Player
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END MENU
+      ========================= */}
+
       {/* =========================
           BEGIN JOIN SCREEN
       ========================= */}
@@ -646,16 +747,6 @@ const latestTickerMessage =
 
       {view === "scorecard" && (
         <>
-          <div className="flex items-center justify-between">
-            <button className="text-left text-lg font-black tracking-wide">
-              CLUBS & HOLES
-            </button>
-
-            <button onClick={resetLocalPlayer} className="text-sm text-red-400">
-              Change Player
-            </button>
-          </div>
-
           <div className="mt-8 text-center">
             <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
               {playerName}
@@ -721,7 +812,7 @@ const latestTickerMessage =
             </button>
 
             <button
-              onClick={() => setView("leaderboard")}
+              onClick={() => openView("leaderboard")}
               className="rounded-full border border-gray-700 px-4 py-2 text-sm"
             >
               Leaderboard
@@ -748,13 +839,6 @@ const latestTickerMessage =
 
       {view === "leaderboard" && (
         <div className="mt-10">
-          <button
-            onClick={() => setView("scorecard")}
-            className="mb-6 text-yellow-400"
-          >
-            ← Back to Scorecard
-          </button>
-
           <h1 className="text-4xl font-black">Leaderboard</h1>
 
           <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-yellow-400">
@@ -801,6 +885,84 @@ const latestTickerMessage =
 
       {/* =========================
           END LEADERBOARD
+      ========================= */}
+
+      {/* =========================
+          BEGIN COURSE INFO
+      ========================= */}
+
+      {view === "courseInfo" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Course Info
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+
+          <div className="mt-8 space-y-4 text-gray-300">
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Address</div>
+              <div className="mt-1 text-lg font-bold">
+                10256 Golf Course Rd, Taft, CA 93268
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Phone</div>
+              <a
+                href="tel:16617696226"
+                className="mt-1 block text-lg font-bold text-yellow-400"
+              >
+                (661) 769-6226
+              </a>
+            </div>
+
+            <a
+              href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
+              target="_blank"
+              className="block rounded-full bg-yellow-400 px-6 py-4 text-center font-black text-black"
+            >
+              OPEN MAP
+            </a>
+
+            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+              <div className="text-sm text-gray-500">Tournament Start</div>
+              <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END COURSE INFO
+      ========================= */}
+
+      {/* =========================
+          BEGIN RULES
+      ========================= */}
+
+      {view === "rules" && (
+        <div className="mt-10">
+          <div className="text-sm uppercase tracking-[0.3em] text-yellow-400">
+            Belt Rules
+          </div>
+
+          <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
+
+          <div className="mt-8 space-y-4 text-gray-300">
+            <p>• Each player enters their own score after every hole.</p>
+            <p>• Scores must be called out before moving to the next tee.</p>
+            <p>• Lowest net score wins the Belt.</p>
+            <p>• Tiebreaker 1: Final 6 holes.</p>
+            <p>• Tiebreaker 2: Final 3 holes.</p>
+            <p>• Tiebreaker 3: Hole 18.</p>
+            <p>• No fake scores. No boring golf. Swing Reckless.</p>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          END RULES
       ========================= */}
     </div>
   );
