@@ -884,7 +884,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
 
       {view === "scorecard" && (
   <>
-    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-900">
+    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
       <div
         className="h-full rounded-full transition-all duration-500"
         style={{
@@ -894,84 +894,90 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       />
     </div>
 
-    <div className="mt-5 text-center">
-      <div className="mt-1 text-base text-gray-400">
+    <div className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 text-center shadow-2xl backdrop-blur-md">
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Hole Details
+      </div>
+
+      <div className="mt-2 text-base font-bold text-white">
         Par {hole.par} · {hole.yards} Yards
       </div>
-    </div>
 
-    <div className="mt-6 flex flex-col items-center">
-      <button
-        onClick={() => changeDraftScore(draftScore + 1)}
-        className={`text-5xl ${
-          currentHoleHasScore ? "text-gray-700" : "text-gray-400"
-        }`}
-      >
-        ▲
-      </button>
+      <div className="mt-5 flex flex-col items-center">
+        <button
+          onClick={() => changeDraftScore(draftScore + 1)}
+          className={`text-4xl leading-none ${
+            currentHoleHasScore ? "text-white/20" : "text-white/45"
+          }`}
+        >
+          ▲
+        </button>
 
-      <div
-        onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
-        onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
-        className={`my-3 select-none touch-none text-[8rem] font-black leading-none transition-colors ${
-          currentHoleHasScore ? "text-gray-500" : "text-white"
-        }`}
-      >
-        {draftScore}
-      </div>
-
-      <div
-        className={`mb-4 rounded-full border px-6 py-2 text-lg font-black uppercase tracking-wide ${
-          currentHoleHasScore
-            ? "border-gray-700 text-gray-500"
-            : "border-[#ff9900] text-[#ff9900]"
-        }`}
-      >
-        {getScoreLabel(draftScore, hole.par)}
-      </div>
-
-      <button
-        onClick={() => changeDraftScore(draftScore - 1)}
-        className={`text-5xl ${
-          currentHoleHasScore ? "text-gray-700" : "text-gray-400"
-        }`}
-      >
-        ▼
-      </button>
-
-      <button
-        onClick={enterScore}
-        disabled={isSaving}
-        className={`mt-8 w-full max-w-xs rounded-full px-8 py-4 text-lg font-black transition-all disabled:opacity-50 ${
-          scores[hole.number] ? "bg-gray-700 text-white" : "bg-white text-black"
-        }`}
-      >
-        {isSaving
-          ? "SAVING..."
-          : scores[hole.number]
-          ? `EDIT HOLE ${hole.number} SCORE`
-          : `ENTER HOLE ${hole.number} SCORE`}
-      </button>
-
-      <div className="mt-4 w-full border-t border-gray-800 py-3 text-center">
-        <div className="animate-ticker-fade text-sm font-medium text-[#ff9900]">
-          {latestTickerMessage}
+        <div
+          onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
+          onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
+          className={`my-1 select-none touch-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
+            currentHoleHasScore ? "text-white/45" : "text-white"
+          }`}
+        >
+          {draftScore}
         </div>
+
+        <div
+          className={`rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
+            currentHoleHasScore
+              ? "border-white/10 bg-white/5 text-white/35"
+              : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
+          }`}
+        >
+          {getScoreLabel(draftScore, hole.par)}
+        </div>
+
+        <button
+          onClick={() => changeDraftScore(draftScore - 1)}
+          className={`mt-4 text-4xl leading-none ${
+            currentHoleHasScore ? "text-white/20" : "text-white/45"
+          }`}
+        >
+          ▼
+        </button>
+
+        <button
+          onClick={enterScore}
+          disabled={isSaving}
+          className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
+            scores[hole.number]
+              ? "bg-white/10 text-white"
+              : "bg-white text-black"
+          }`}
+        >
+          {isSaving
+            ? "SAVING..."
+            : scores[hole.number]
+            ? `EDIT HOLE ${hole.number} SCORE`
+            : `ENTER HOLE ${hole.number} SCORE`}
+        </button>
       </div>
     </div>
 
-    <div className="mt-10 flex justify-between">
+    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
+        {latestTickerMessage}
+      </div>
+    </div>
+
+    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
       <button
         onClick={goPrev}
         disabled={currentHoleIndex === 0}
-        className="text-4xl disabled:opacity-20"
+        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
         ←
       </button>
 
       <button
         onClick={() => openView("leaderboard")}
-        className="rounded-full border border-gray-700 px-4 py-2 text-sm"
+        className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
       >
         Leaderboard
       </button>
@@ -979,7 +985,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       <button
         onClick={goNext}
         disabled={currentHoleIndex === holes.length - 1}
-        className="text-4xl disabled:opacity-20"
+        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
         →
       </button>
