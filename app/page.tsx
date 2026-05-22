@@ -993,64 +993,71 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
   </>
 )}
 
-      {view === "leaderboard" && (
-        <div className="mt-10">
-          <div className="flex items-center justify-between">
-  <h1 className="text-4xl font-black">Leaderboard</h1>
+     {view === "leaderboard" && (
+  <div className="mt-8">
+    <div className="flex items-center justify-between">
+      <div>
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Live Standings
+        </div>
+        <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
+      </div>
 
-  <button
-    onClick={refreshLeaderboard}
-    className="rounded-full border border-gray-700 px-4 py-2 text-sm text-[#ff9900]"
-  >
-    Refresh Scores
-  </button>
-</div>
-{leaderboardUpdatedMessage && (
-  <div className="mt-3 text-right text-xs font-bold text-[#ff9900]">
-    {leaderboardUpdatedMessage}
+      <button
+        onClick={refreshLeaderboard}
+        className="rounded-full border border-white/10 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#ff9900] backdrop-blur-md"
+      >
+        Refresh
+      </button>
+    </div>
+
+    {leaderboardUpdatedMessage && (
+      <div className="mt-3 text-right text-xs font-bold text-[#ff9900]">
+        {leaderboardUpdatedMessage}
+      </div>
+    )}
+
+    <div className="mt-5 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
+        {latestTickerMessage}
+      </div>
+    </div>
+
+    <div className="mt-6 space-y-3">
+      {sortedLeaderboard.map((player, index) => (
+        <div
+          key={player.id}
+          className={`flex items-center justify-between rounded-[1.5rem] border p-4 shadow-xl backdrop-blur-md ${
+            index === 0
+              ? "border-[#ff9900] bg-[#ff9900]/90 text-black"
+              : "border-white/10 bg-black/55 text-white"
+          }`}
+        >
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
+              {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+            </div>
+
+            <div className="mt-1 text-lg font-black">{player.name}</div>
+
+            <div className="mt-1 text-xs opacity-70">
+              Thru {player.thru} · Gross {player.gross || "--"}
+            </div>
+
+            <div className="text-xs opacity-70">
+              Last:{" "}
+              {player.lastHole
+                ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
+                : "--"}
+            </div>
+          </div>
+
+          <div className="text-4xl font-black">{formatScore(player.net)}</div>
+        </div>
+      ))}
+    </div>
   </div>
 )}
-          <div className="mt-4 rounded-xl border border-gray-800 bg-gray-950 p-3 text-xs text-[#ff9900]">
-            {latestTickerMessage}
-          </div>
-
-          <div className="mt-8 space-y-3">
-            {sortedLeaderboard.map((player, index) => (
-              <div
-                key={player.id}
-                className={`flex items-center justify-between rounded-2xl border p-4 ${
-                  index === 0
-                    ? "border-[#ff9900] bg-[#ff9900] text-black"
-                    : "border-gray-800 bg-gray-950 text-white"
-                }`}
-              >
-                <div>
-                  <div className="text-sm opacity-70">
-  {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
-</div>
-
-                  <div className="text-lg font-bold">{player.name}</div>
-
-                  <div className="text-xs opacity-70">
-                    Thru {player.thru} · Gross {player.gross || "--"}
-                  </div>
-
-                  <div className="text-xs opacity-70">
-                    Last:{" "}
-                    {player.lastHole
-                      ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
-                      : "--"}
-                  </div>
-                </div>
-
-                <div className="text-3xl font-black">
-                  {formatScore(player.net)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {view === "courseInfo" && (
         <div className="mt-10">
