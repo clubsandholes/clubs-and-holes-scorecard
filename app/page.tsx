@@ -730,7 +730,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
   <div
     className="absolute inset-0 bg-cover bg-center opacity-25 blur-[1px]"
     style={{
-      backgroundImage: "url('/burning-cart.jpg')",
+      backgroundImage: "url('/burn-cart.jpg')",
     }}
   />
 
