@@ -724,10 +724,20 @@ export default function Home() {
 const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   return (
     <div
-  className="relative min-h-[100dvh] p-4 text-white transition-colors duration-700"
-
+  className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
   style={{ backgroundColor: dynamicBackground }}
 >
+  <div
+    className="absolute inset-0 bg-cover bg-center opacity-25 blur-[1px]"
+    style={{
+      backgroundImage: "url('/burning-cart.jpg')",
+    }}
+  />
+
+  <div className="absolute inset-0 bg-black/75" />
+  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+
+  <div className="relative z-10">
       {activeAdminAlert && (
         <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
           <div className="text-xs font-black uppercase tracking-[0.3em]">
@@ -1097,6 +1107,7 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
