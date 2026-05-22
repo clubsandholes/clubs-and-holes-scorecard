@@ -728,14 +728,14 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
   style={{ backgroundColor: dynamicBackground }}
 >
   <div
-    className="absolute inset-0 bg-cover bg-center opacity-80 blur-[1px]"
+    className="fixed inset-0 bg-cover bg-center opacity-90 blur-[1px]"
     style={{
       backgroundImage: "url('/burn-cart.jpg')",
     }}
   />
 
-  <div className="absolute inset-0 bg-black/20" />
-  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/60" />
+  <div className="fixed inset-0 bg-black/20" />
+  <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/60" />
 
   <div className="relative z-10">
       {activeAdminAlert && (
