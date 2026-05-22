@@ -1,62 +1,233 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import Link from "next/link";
+
+import { supabase } from "@/lib/supabase";
+
+type Tournament = {
+
+  id: string;
+
+  name: string;
+
+  code: string;
+
+};
 
 export default function AdminPage() {
+
   const [password, setPassword] = useState("");
+
   const [isUnlocked, setIsUnlocked] = useState(false);
 
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
   const unlockAdmin = () => {
+
     if (password === "swingreckless") {
+
       setIsUnlocked(true);
+
     } else {
+
       alert("Wrong password.");
+
     }
+
   };
 
+  const fetchTournaments = async () => {
+
+    const { data, error } = await supabase
+
+      .from("tournaments")
+
+      .select("id, name, code")
+
+      .order("created_at", { ascending: false });
+
+    if (error) {
+
+      console.error(error);
+
+      return;
+
+    }
+
+    setTournaments(data || []);
+
+    setLoading(false);
+
+  };
+
+  useEffect(() => {
+
+    if (isUnlocked) {
+
+      fetchTournaments();
+
+    }
+
+  }, [isUnlocked]);
+
   if (!isUnlocked) {
+
     return (
+
       <div className="min-h-screen bg-black p-6 text-white">
+
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center">
+
           <h1 className="text-4xl font-black">Admin</h1>
-          <p className="mt-2 text-gray-400">Tournament Control Panel</p>
+
+          <p className="mt-2 text-gray-400">
+
+            Tournament Control Panel
+
+          </p>
 
           <input
+
             type="password"
+
             value={password}
+
             onChange={(e) => setPassword(e.target.value)}
+
             placeholder="ENTER ADMIN PASSWORD"
+
             className="mt-8 rounded-xl bg-gray-900 p-4 text-center font-bold uppercase outline-none"
+
           />
 
           <button
+
             onClick={unlockAdmin}
+
             className="mt-4 rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+
           >
+
             ENTER ADMIN
+
           </button>
+
         </div>
+
       </div>
+
     );
+
   }
 
   return (
-    <div className="min-h-screen bg-black p-6 text-white">
-      <h1 className="text-4xl font-black">Tournament Control Panel</h1>
-      <p className="mt-2 text-gray-400">Clubs & Holes Admin</p>
 
-      <div className="mt-8 grid gap-4">
-        {["Tournament Setup", "Players", "Live Controls", "Reset Tools"].map(
-          (item) => (
-            <button
-              key={item}
-              className="rounded-2xl border border-gray-800 bg-gray-950 p-5 text-left text-xl font-black"
-            >
-              {item}
-            </button>
-          )
-        )}
+    <div className="min-h-screen bg-black p-6 text-white">
+
+      <div className="flex items-center justify-between">
+
+        <div>
+
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+
+            Clubs & Holes
+
+          </div>
+
+          <h1 className="mt-1 text-4xl font-black">
+
+            Tournament Manager
+
+          </h1>
+
+        </div>
+
+        <button className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
+
+          + New Tournament
+
+        </button>
+
       </div>
+
+      <div className="mt-8">
+
+        {loading ? (
+
+          <div className="text-gray-500">Loading tournaments...</div>
+
+        ) : tournaments.length === 0 ? (
+
+          <div className="rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-gray-400">
+
+            No tournaments found.
+
+          </div>
+
+        ) : (
+
+          <div className="space-y-4">
+
+            {tournaments.map((tournament) => (
+
+              <Link
+
+                key={tournament.id}
+
+                href={`/admin/tournament/${tournament.id}`}
+
+                className="block rounded-[2rem] border border-white/10 bg-black/50 p-5 shadow-xl backdrop-blur-md transition-all hover:border-[#ff9900]"
+
+              >
+
+                <div className="flex items-center justify-between">
+
+                  <div>
+
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+
+                      Tournament
+
+                    </div>
+
+                    <div className="mt-1 text-2xl font-black">
+
+                      {tournament.name}
+
+                    </div>
+
+                    <div className="mt-2 text-sm uppercase tracking-[0.18em] text-white/60">
+
+                      Code: {tournament.code}
+
+                    </div>
+
+                  </div>
+
+                  <div className="text-3xl text-white/30">
+
+                    →
+
+                  </div>
+
+                </div>
+
+              </Link>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
     </div>
+
   );
+
 }
