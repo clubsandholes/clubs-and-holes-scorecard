@@ -924,44 +924,52 @@ const currentHoleImage = `/hole-${hole.number}.png`;
   </div>
 </div>
 
-      <div className="mt-5 flex flex-col items-center">
-        <button
-          onClick={() => changeDraftScore(draftScore + 1)}
-          className={`text-4xl leading-none ${
-            currentHoleHasScore ? "text-white/20" : "text-white/45"
-          }`}
-        >
-          ▲
-        </button>
+      <div className="mt-6 flex flex-col items-center">
+  <div className="flex items-center justify-center gap-6">
+    <button
+      onClick={() => changeDraftScore(draftScore - 1)}
+      className={`flex h-16 w-16 items-center justify-center rounded-full border text-4xl font-black transition-all ${
+        currentHoleHasScore
+          ? "border-white/10 text-white/20"
+          : "border-[#ff9900] text-[#ff9900]"
+      }`}
+    >
+      −
+    </button>
 
-        <div
-          onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
-          onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
-          className={`my-1 select-none touch-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
-            currentHoleHasScore ? "text-white/45" : "text-white"
-          }`}
-        >
-          {draftScore}
-        </div>
+    <div
+      onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
+      onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
+      className={`select-none touch-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
+        currentHoleHasScore ? "text-white/45" : "text-white"
+      }`}
+    >
+      {draftScore}
+    </div>
 
-        <div
-          className={`rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
-            currentHoleHasScore
-              ? "border-white/10 bg-white/5 text-white/35"
-              : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
-          }`}
-        >
-          {getScoreLabel(draftScore, hole.par)}
-        </div>
+    <button
+      onClick={() => changeDraftScore(draftScore + 1)}
+      className={`flex h-16 w-16 items-center justify-center rounded-full border text-4xl font-black transition-all ${
+        currentHoleHasScore
+          ? "border-white/10 text-white/20"
+          : "border-[#ff9900] text-[#ff9900]"
+      }`}
+    >
+      +
+    </button>
+  </div>
 
-        <button
-          onClick={() => changeDraftScore(draftScore - 1)}
-          className={`mt-4 text-4xl leading-none ${
-            currentHoleHasScore ? "text-white/20" : "text-white/45"
-          }`}
-        >
-          ▼
-        </button>
+  <div
+    className={`mt-4 rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
+      currentHoleHasScore
+        ? "border-white/10 bg-white/5 text-white/35"
+        : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
+    }`}
+  >
+    {getScoreLabel(draftScore, hole.par)}
+  </div>
+
+  
 
         <button
           onClick={enterScore}
