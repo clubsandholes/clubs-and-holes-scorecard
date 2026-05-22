@@ -928,7 +928,7 @@ const currentHoleImage = `/hole-${hole.number}.png`;
   <div className="flex items-center justify-center gap-6">
     <button
       onClick={() => changeDraftScore(draftScore - 1)}
-      className={`flex h-16 w-16 items-center justify-center rounded-full border text-4xl font-black transition-all ${
+      className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
         currentHoleHasScore
           ? "border-white/10 text-white/20"
           : "border-[#ff9900] text-[#ff9900]"
@@ -949,7 +949,7 @@ const currentHoleImage = `/hole-${hole.number}.png`;
 
     <button
       onClick={() => changeDraftScore(draftScore + 1)}
-      className={`flex h-16 w-16 items-center justify-center rounded-full border text-4xl font-black transition-all ${
+      className={`flex h-10 w-10items-center justify-center rounded-full border text-2xl font-black transition-all ${
         currentHoleHasScore
           ? "border-white/10 text-white/20"
           : "border-[#ff9900] text-[#ff9900]"
