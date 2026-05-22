@@ -899,19 +899,23 @@ const currentHoleImage = `/hole-${hole.number}.png`;
       <div className="flex items-center justify-between gap-4">
   <div>
     <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-      Hole Details
-    </div>
+  HOLE {hole.number}
+</div>
 
-    <div className="mt-2 text-2xl font-black text-white">
-      PAR {hole.par}
-    </div>
+<div className="mt-2 text-xl font-black text-white">
+  Sundale Country Club
+</div>
 
-    <div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
-      {hole.yards} Yards
-    </div>
+<div className="mt-3 text-2xl font-black text-white">
+  PAR {hole.par}
+</div>
+
+<div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
+  {hole.yards} Yards
+</div>
   </div>
 
-  <div className="flex h-40 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+  <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
     <img
       src={currentHoleImage}
       alt={`Hole ${hole.number}`}
