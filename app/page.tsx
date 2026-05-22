@@ -722,6 +722,7 @@ export default function Home() {
 );
 
 const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
+const currentHoleImage = `/hole-${hole.number}.png`;
   return (
     <div
   className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
@@ -894,14 +895,30 @@ const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgro
       />
     </div>
 
-    <div className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 text-center shadow-2xl backdrop-blur-md">
-      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-        Hole Details
-      </div>
+   <div className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl backdrop-blur-md">
+      <div className="flex items-center justify-between gap-4">
+  <div>
+    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+      Hole Details
+    </div>
 
-      <div className="mt-2 text-base font-bold text-white">
-        Par {hole.par} · {hole.yards} Yards
-      </div>
+    <div className="mt-2 text-2xl font-black text-white">
+      PAR {hole.par}
+    </div>
+
+    <div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
+      {hole.yards} Yards
+    </div>
+  </div>
+
+  <div className="flex h-40 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+    <img
+      src={currentHoleImage}
+      alt={`Hole ${hole.number}`}
+      className="h-full w-auto object-contain"
+    />
+  </div>
+</div>
 
       <div className="mt-5 flex flex-col items-center">
         <button
