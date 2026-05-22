@@ -3,10 +3,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-// =========================
-// BEGIN STATIC DATA
-// =========================
-
 const accentColor = "#ff9900";
 
 const holes = [
@@ -21,13 +17,7 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-type View =
-  | "join"
-  | "selectPlayer"
-  | "scorecard"
-  | "leaderboard"
-  | "courseInfo"
-  | "rules";
+type View = "join" | "selectPlayer" | "scorecard" | "leaderboard" | "courseInfo" | "rules";
 
 type Player = {
   id: string;
@@ -48,15 +38,7 @@ type TickerEvent = {
   created_at: string;
 };
 
-// =========================
-// END STATIC DATA
-// =========================
-
 export default function Home() {
-  // =========================
-  // BEGIN STATE
-  // =========================
-
   const [view, setView] = useState<View>("join");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -66,9 +48,7 @@ export default function Home() {
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
 
-  const [activeAdminAlert, setActiveAdminAlert] = useState<TickerEvent | null>(
-    null
-  );
+  const [activeAdminAlert, setActiveAdminAlert] = useState<TickerEvent | null>(null);
   const [lastAdminAlertId, setLastAdminAlertId] = useState("");
 
   const [currentTournamentId, setCurrentTournamentId] = useState("");
@@ -81,19 +61,11 @@ export default function Home() {
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const hole = holes[currentHoleIndex];
   const currentHoleHasScore = scores[hole.number] !== undefined;
-
-  // =========================
-  // END STATE
-  // =========================
-
-  // =========================
-  // BEGIN TOURNAMENT JOIN LOGIC
-  // =========================
 
   const joinTournament = async () => {
     const code = tournamentCode.trim().toUpperCase();
@@ -124,14 +96,6 @@ export default function Home() {
 
     setView("selectPlayer");
   };
-
-  // =========================
-  // END TOURNAMENT JOIN LOGIC
-  // =========================
-
-  // =========================
-  // BEGIN DATA FETCHING
-  // =========================
 
   const fetchPlayers = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
@@ -247,44 +211,24 @@ export default function Home() {
     }
   }, []);
 
-  // =========================
-  // END DATA FETCHING
-  // =========================
-
-  // =========================
-  // BEGIN REALTIME SUBSCRIPTIONS
-  // =========================
-
   useEffect(() => {
     if (!currentTournamentId) return;
 
     const channel = supabase
       .channel(`live-tournament-${currentTournamentId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "scores" },
-        async () => {
-          await fetchAllScores(currentTournamentId);
+      .on("postgres_changes", { event: "*", schema: "public", table: "scores" }, async () => {
+        await fetchAllScores(currentTournamentId);
 
-          if (selectedPlayerId) {
-            await fetchScoresForPlayer(selectedPlayerId);
-          }
+        if (selectedPlayerId) {
+          await fetchScoresForPlayer(selectedPlayerId);
         }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "ticker_events" },
-        async () => {
-          await fetchTickerEvents(currentTournamentId);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "tournament_players" },
-        async () => {
-          await fetchPlayers(currentTournamentId);
-        }
-      )
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "ticker_events" }, async () => {
+        await fetchTickerEvents(currentTournamentId);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "tournament_players" }, async () => {
+        await fetchPlayers(currentTournamentId);
+      })
       .subscribe();
 
     return () => {
@@ -292,17 +236,7 @@ export default function Home() {
     };
   }, [currentTournamentId, selectedPlayerId]);
 
-  // =========================
-  // END REALTIME SUBSCRIPTIONS
-  // =========================
-
-  // =========================
-  // BEGIN TICKER ROTATION
-  // =========================
-
-  const scoreTickerEvents = tickerEvents.filter(
-    (event) => event.event_type !== "admin"
-  );
+  const scoreTickerEvents = tickerEvents.filter((event) => event.event_type !== "admin");
 
   useEffect(() => {
     if (scoreTickerEvents.length === 0) return;
@@ -321,18 +255,8 @@ export default function Home() {
       ? scoreTickerEvents[tickerIndex]?.message || "Live ticker will appear here"
       : "Live ticker will appear here";
 
-  // =========================
-  // END TICKER ROTATION
-  // =========================
-
-  // =========================
-  // BEGIN ADMIN ALERT LOGIC
-  // =========================
-
   useEffect(() => {
-    const latestAdminAlert = tickerEvents.find(
-      (event) => event.event_type === "admin"
-    );
+    const latestAdminAlert = tickerEvents.find((event) => event.event_type === "admin");
 
     if (!latestAdminAlert) return;
     if (latestAdminAlert.id === lastAdminAlertId) return;
@@ -346,14 +270,6 @@ export default function Home() {
 
     return () => clearTimeout(timeout);
   }, [tickerEvents]);
-
-  // =========================
-  // END ADMIN ALERT LOGIC
-  // =========================
-
-  // =========================
-  // BEGIN PLAYER LOCK LOGIC
-  // =========================
 
   const selectPlayer = async (player: Player) => {
     if (player.claimed) {
@@ -404,21 +320,9 @@ export default function Home() {
     setView("join");
   };
 
-  // =========================
-  // END PLAYER LOCK LOGIC
-  // =========================
-
-  // =========================
-  // BEGIN SCORE LOGIC
-  // =========================
-
   useEffect(() => {
     setDraftScore(scores[hole.number] ?? hole.par);
   }, [currentHoleIndex, scores, hole.number, hole.par]);
-
-
-
-
 
   const getScoreLabel = (strokes: number, par: number) => {
     const diff = strokes - par;
@@ -438,24 +342,6 @@ export default function Home() {
     if (n < 1) return;
     setDraftScore(n);
   };
-  const handleScoreSwipe = (endY: number) => {
-  if (touchStartY === null) return;
-
-  const swipeDistance = touchStartY - endY;
-
-  if (Math.abs(swipeDistance) < 30) {
-    setTouchStartY(null);
-    return;
-  }
-
-  if (swipeDistance > 0) {
-    changeDraftScore(draftScore + 1);
-  } else {
-    changeDraftScore(draftScore - 1);
-  }
-
-  setTouchStartY(null);
-};
 
   const enterScore = async () => {
     if (isSaving) return;
@@ -546,13 +432,24 @@ export default function Home() {
     }
   };
 
-  // =========================
-  // END SCORE LOGIC
-  // =========================
+  const handleHoleSwipe = (endX: number) => {
+    if (touchStartX === null) return;
 
-  // =========================
-  // BEGIN SCORING HELPERS
-  // =========================
+    const swipeDistance = touchStartX - endX;
+
+    if (Math.abs(swipeDistance) < 50) {
+      setTouchStartX(null);
+      return;
+    }
+
+    if (swipeDistance > 0) {
+      goNext();
+    } else {
+      goPrev();
+    }
+
+    setTouchStartX(null);
+  };
 
   const getPlayerScoreMap = (playerId: string) => {
     const map: Record<number, number> = {};
@@ -606,45 +503,10 @@ export default function Home() {
     return `${score}`;
   };
 
-  const getPositionMovement = (
-  playerId: string,
-  currentIndex: number
-) => {
-  const previousIndex = previousLeaderboard.indexOf(playerId);
-
-  if (previousIndex === -1) return null;
-
-  if (currentIndex < previousIndex) {
-    return "up";
-  }
-
-  if (currentIndex > previousIndex) {
-    return "down";
-  }
-
-  return "same";
-};
-
-  // =========================
-  // END SCORING HELPERS
-  // =========================
-
-  // =========================
-  // BEGIN CURRENT PLAYER TOTALS
-  // =========================
-
   const holesPlayed = Object.keys(scores).length;
   const grossTotal = getGrossTotal(scores);
   const parPlayed = getParPlayed(scores);
   const net = grossTotal - parPlayed;
-
-  // =========================
-  // END CURRENT PLAYER TOTALS
-  // =========================
-
-  // =========================
-  // BEGIN LIVE LEADERBOARD DATA
-  // =========================
 
   const leaderboard = players.map((player) => {
     const playerScores = getPlayerScoreMap(player.id);
@@ -674,482 +536,469 @@ export default function Home() {
     if (a.last1 !== b.last1) return a.last1 - b.last1;
     return a.name.localeCompare(b.name);
   });
+
   useEffect(() => {
-  const currentOrder = sortedLeaderboard.map((player) => player.id);
+    const currentOrder = sortedLeaderboard.map((player) => player.id);
 
-  if (previousLeaderboard.length === 0) {
+    if (previousLeaderboard.length === 0) {
+      setPreviousLeaderboard(currentOrder);
+      return;
+    }
+
     setPreviousLeaderboard(currentOrder);
-    return;
-  }
-
-  setPreviousLeaderboard(currentOrder);
-}, [allScores]);
-
-  // =========================
-  // END LIVE LEADERBOARD DATA
-  // =========================
-
-  // =========================
-  // BEGIN VIEW NAVIGATION
-  // =========================
+  }, [allScores]);
 
   const refreshLeaderboard = async () => {
-  await fetchPlayers();
-  await fetchAllScores();
-  await fetchTickerEvents();
+    await fetchPlayers();
+    await fetchAllScores();
+    await fetchTickerEvents();
 
-  setLeaderboardUpdatedMessage("Updated just now");
+    setLeaderboardUpdatedMessage("Updated just now");
 
-  setTimeout(() => {
-    setLeaderboardUpdatedMessage("");
-  }, 2000);
-};
+    setTimeout(() => {
+      setLeaderboardUpdatedMessage("");
+    }, 2000);
+  };
 
   const openView = (selectedView: View) => {
     setView(selectedView);
     setMenuOpen(false);
   };
 
-  // =========================
-  // END VIEW NAVIGATION
-  // =========================
-
-  // =========================
-  // BEGIN UI
-  // =========================
   const backgroundShade = Math.round(
-  36 - (currentHoleIndex / (holes.length - 1)) * 36
-);
+    36 - (currentHoleIndex / (holes.length - 1)) * 36
+  );
 
-const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
-const currentHoleImage = `/hole-${hole.number}.png`;
+  const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
+  const currentHoleImage = `/hole-${hole.number}.png`;
+
   return (
     <div
-  className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
-  style={{ backgroundColor: dynamicBackground }}
->
-  <div
-    className="fixed inset-0 bg-cover bg-center opacity-90 blur-[1px]"
-    style={{
-      backgroundImage: "url('/burn-cart.jpg')",
-    }}
-  />
-
-  <div className="fixed inset-0 bg-black/20" />
-  <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/60" />
-
-  <div className="relative z-10">
-      {activeAdminAlert && (
-        <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
-          <div className="text-xs font-black uppercase tracking-[0.3em]">
-            🚨 Admin Alert
-          </div>
-          <div className="mt-2 text-xl font-black">
-            {activeAdminAlert.message.replace("🚨 ADMIN ALERT:", "").trim()}
-          </div>
-        </div>
-      )}
-
-      {saveMessage && (
-        <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
-          <div className="text-xs font-black uppercase tracking-[0.3em]">
-            ✅ Score Saved
-          </div>
-          <div className="mt-2 text-xl font-black">{saveMessage}</div>
-        </div>
-      )}
-
-      {view !== "join" && view !== "selectPlayer" && (
-  <div className="flex items-center justify-between gap-3">
-    <button
-      onClick={() => openView("scorecard")}
-      className="flex min-w-0 items-center gap-2"
+      className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
+      style={{ backgroundColor: dynamicBackground }}
     >
-      <img src="/ch-logo.png" alt="Clubs & Holes" className="h-9 w-auto" />
-
-      <div className="min-w-0 max-w-[90px] truncate text-left text-xs font-black uppercase tracking-[0.08em] text-white">
-        {playerName || "Player"}
-      </div>
-
-      <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
-        {formatScore(net)}
-      </div>
-
-      <div className="rounded-full border border-gray-700 px-3 py-1 text-xs font-black uppercase text-gray-300">
-        H{hole.number}
-      </div>
-    </button>
-
-    <button onClick={() => setMenuOpen(true)} className="text-3xl leading-none">
-      ☰
-    </button>
-  </div>
-)}
-
-      {menuOpen && (
-        <div className="absolute inset-0 z-50 bg-black/95 p-6">
-          <div className="flex items-center justify-between">
-            <img src="/ch-logo.png" alt="Clubs & Holes" className="h-12 w-auto" />
-
-            <button onClick={() => setMenuOpen(false)} className="text-3xl">
-              ×
-            </button>
-          </div>
-
-          <div className="mt-10 flex flex-col gap-4">
-            {[
-              ["Scorecard", "scorecard"],
-              ["Leaderboard", "leaderboard"],
-              ["Course Info", "courseInfo"],
-              ["Tournament Rules", "rules"],
-            ].map(([label, target]) => (
-              <button
-                key={label}
-                onClick={() => openView(target as View)}
-                className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
-              >
-                {label}
-              </button>
-            ))}
-
-            <button
-              onClick={resetLocalPlayer}
-              className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
-            >
-              Change Player
-            </button>
-          </div>
-        </div>
-      )}
-
-      {view === "join" && (
-        <div className="flex h-screen flex-col items-center justify-center text-center">
-          <img src="/ch-logo.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
-
-          <h1 className="text-4xl font-black">Join Tournament</h1>
-
-          <input
-            value={tournamentCode}
-            onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
-            placeholder="ENTER CODE"
-            className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
-          />
-
-          <button
-            onClick={joinTournament}
-            className="mt-6 w-full max-w-xs rounded-full bg-white px-6 py-4 font-black text-black"
-          >
-            ENTER
-          </button>
-        </div>
-      )}
-
-      {view === "selectPlayer" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-            Code: {tournamentCode || "PLAY16"}
-          </div>
-
-          <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
-
-          <div className="mt-8 space-y-3">
-            {players.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => selectPlayer(p)}
-                disabled={p.claimed}
-                className={`w-full rounded-2xl border p-4 text-left text-xl font-bold ${
-                  p.claimed
-                    ? "border-gray-900 bg-gray-950 text-gray-600"
-                    : "border-gray-800 bg-gray-950 text-white"
-                }`}
-              >
-                {p.name}
-                {p.claimed && (
-                  <span className="ml-2 text-sm text-red-400">
-                    Already Claimed
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => fetchPlayers()}
-            className="mt-6 text-sm text-[#ff9900]"
-          >
-            Refresh Players
-          </button>
-        </div>
-      )}
-
-      {view === "scorecard" && (
-  <>
-    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
       <div
-        className="h-full rounded-full transition-all duration-500"
+        className="fixed inset-0 bg-cover bg-center opacity-90 blur-[1px]"
         style={{
-          width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
-          backgroundColor: accentColor,
+          backgroundImage: "url('/burn-cart.jpg')",
         }}
       />
-    </div>
 
-   <div className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl backdrop-blur-md">
-      <div className="flex items-center justify-between gap-4">
-  <div>
-    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-  HOLE {hole.number}
-</div>
+      <div className="fixed inset-0 bg-black/20" />
+      <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/60" />
 
-<div className="mt-2 text-xl font-black text-white">
-  Sundale Country Club
-</div>
-
-<div className="mt-3 text-2xl font-black text-white">
-  PAR {hole.par}
-</div>
-
-<div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
-  {hole.yards} Yards
-</div>
-  </div>
-
-  <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-    <img
-      src={currentHoleImage}
-      alt={`Hole ${hole.number}`}
-      className="h-full w-auto object-contain"
-    />
-  </div>
-</div>
-
-      <div className="mt-6 flex flex-col items-center">
-  <div className="flex items-center justify-center gap-6">
-    <button
-      onClick={() => changeDraftScore(draftScore - 1)}
-      className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
-        currentHoleHasScore
-          ? "border-white/10 text-white/20"
-          : "border-[#ff9900] text-[#ff9900]"
-      }`}
-    >
-      −
-    </button>
-
-    <div
-      onTouchStart={(e) => setTouchStartY(e.touches[0].clientY)}
-      onTouchEnd={(e) => handleScoreSwipe(e.changedTouches[0].clientY)}
-      className={`select-none touch-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
-        currentHoleHasScore ? "text-white/45" : "text-white"
-      }`}
-    >
-      {draftScore}
-    </div>
-
-    <button
-      onClick={() => changeDraftScore(draftScore + 1)}
-      className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
-        currentHoleHasScore
-          ? "border-white/10 text-white/20"
-          : "border-[#ff9900] text-[#ff9900]"
-      }`}
-    >
-      +
-    </button>
-  </div>
-
-  <div
-    className={`mt-4 rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
-      currentHoleHasScore
-        ? "border-white/10 bg-white/5 text-white/35"
-        : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
-    }`}
-  >
-    {getScoreLabel(draftScore, hole.par)}
-  </div>
-
-  
-
-        <button
-          onClick={enterScore}
-          disabled={isSaving}
-          className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
-            scores[hole.number]
-              ? "bg-white/10 text-white"
-              : "bg-white text-black"
-          }`}
-        >
-          {isSaving
-            ? "SAVING..."
-            : scores[hole.number]
-            ? `EDIT HOLE ${hole.number} SCORE`
-            : `ENTER HOLE ${hole.number} SCORE`}
-        </button>
-      </div>
-    </div>
-
-    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
-      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
-        {latestTickerMessage}
-      </div>
-    </div>
-
-    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
-      <button
-        onClick={goPrev}
-        disabled={currentHoleIndex === 0}
-        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-      >
-        ←
-      </button>
-
-      <button
-        onClick={() => openView("leaderboard")}
-        className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
-      >
-        Leaderboard
-      </button>
-
-      <button
-        onClick={goNext}
-        disabled={currentHoleIndex === holes.length - 1}
-        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-      >
-        →
-      </button>
-    </div>
-  </>
-)}
-
-     {view === "leaderboard" && (
-  <div className="mt-8">
-    <div className="flex items-center justify-between">
-      <div>
-        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-          Live Standings
-        </div>
-        <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
-      </div>
-
-      <button
-        onClick={refreshLeaderboard}
-        className="rounded-full border border-white/10 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#ff9900] backdrop-blur-md"
-      >
-        Refresh
-      </button>
-    </div>
-
-    {leaderboardUpdatedMessage && (
-      <div className="mt-3 text-right text-xs font-bold text-[#ff9900]">
-        {leaderboardUpdatedMessage}
-      </div>
-    )}
-
-    <div className="mt-5 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
-      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
-        {latestTickerMessage}
-      </div>
-    </div>
-
-    <div className="mt-6 space-y-3">
-      {sortedLeaderboard.map((player, index) => (
-        <div
-          key={player.id}
-          className={`flex items-center justify-between rounded-[1.5rem] border p-4 shadow-xl backdrop-blur-md ${
-            index === 0
-              ? "border-[#ff9900] bg-[#ff9900]/90 text-black"
-              : "border-white/10 bg-black/55 text-white"
-          }`}
-        >
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
-              {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+      <div className="relative z-10">
+        {activeAdminAlert && (
+          <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
+            <div className="text-xs font-black uppercase tracking-[0.3em]">
+              🚨 Admin Alert
             </div>
-
-            <div className="mt-1 text-lg font-black">{player.name}</div>
-
-            <div className="mt-1 text-xs opacity-70">
-              Thru {player.thru} · Gross {player.gross || "--"}
-            </div>
-
-            <div className="text-xs opacity-70">
-              Last:{" "}
-              {player.lastHole
-                ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
-                : "--"}
+            <div className="mt-2 text-xl font-black">
+              {activeAdminAlert.message.replace("🚨 ADMIN ALERT:", "").trim()}
             </div>
           </div>
+        )}
 
-          <div className="text-4xl font-black">{formatScore(player.net)}</div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
-      {view === "courseInfo" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-            Course Info
+        {saveMessage && (
+          <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
+            <div className="text-xs font-black uppercase tracking-[0.3em]">
+              ✅ Score Saved
+            </div>
+            <div className="mt-2 text-xl font-black">{saveMessage}</div>
           </div>
+        )}
 
-          <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+        {view !== "join" && view !== "selectPlayer" && (
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => openView("scorecard")}
+              className="flex min-w-0 items-center gap-2"
+            >
+              <img src="/ch-logo.png" alt="Clubs & Holes" className="h-9 w-auto" />
 
-          <div className="mt-8 space-y-4 text-gray-300">
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Address</div>
-              <div className="mt-1 text-lg font-bold">
-                10256 Golf Course Rd, Taft, CA 93268
+              <div className="min-w-0 max-w-[90px] truncate text-left text-xs font-black uppercase tracking-[0.08em] text-white">
+                {playerName || "Player"}
+              </div>
+
+              <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
+                {formatScore(net)}
+              </div>
+
+              <div className="rounded-full border border-gray-700 px-3 py-1 text-xs font-black uppercase text-gray-300">
+                H{hole.number}
+              </div>
+            </button>
+
+            <button onClick={() => setMenuOpen(true)} className="text-3xl leading-none">
+              ☰
+            </button>
+          </div>
+        )}
+
+        {menuOpen && (
+          <div className="absolute inset-0 z-50 bg-black/95 p-6">
+            <div className="flex items-center justify-between">
+              <img src="/ch-logo.png" alt="Clubs & Holes" className="h-12 w-auto" />
+
+              <button onClick={() => setMenuOpen(false)} className="text-3xl">
+                ×
+              </button>
+            </div>
+
+            <div className="mt-10 flex flex-col gap-4">
+              {[
+                ["Scorecard", "scorecard"],
+                ["Leaderboard", "leaderboard"],
+                ["Course Info", "courseInfo"],
+                ["Tournament Rules", "rules"],
+              ].map(([label, target]) => (
+                <button
+                  key={label}
+                  onClick={() => openView(target as View)}
+                  className="rounded-xl border border-gray-700 p-4 text-left text-xl font-bold"
+                >
+                  {label}
+                </button>
+              ))}
+
+              <button
+                onClick={resetLocalPlayer}
+                className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
+              >
+                Change Player
+              </button>
+            </div>
+          </div>
+        )}
+
+        {view === "join" && (
+          <div className="flex h-screen flex-col items-center justify-center text-center">
+            <img src="/ch-logo.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
+
+            <h1 className="text-4xl font-black">Join Tournament</h1>
+
+            <input
+              value={tournamentCode}
+              onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
+              placeholder="ENTER CODE"
+              className="mt-8 w-full max-w-xs rounded-xl bg-gray-900 p-4 text-center text-2xl font-bold uppercase outline-none"
+            />
+
+            <button
+              onClick={joinTournament}
+              className="mt-6 w-full max-w-xs rounded-full bg-white px-6 py-4 font-black text-black"
+            >
+              ENTER
+            </button>
+          </div>
+        )}
+
+        {view === "selectPlayer" && (
+          <div className="mt-10">
+            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+              Code: {tournamentCode || "PLAY16"}
+            </div>
+
+            <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
+            <div className="mt-8 space-y-3">
+              {players.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => selectPlayer(p)}
+                  disabled={p.claimed}
+                  className={`w-full rounded-2xl border p-4 text-left text-xl font-bold ${
+                    p.claimed
+                      ? "border-gray-900 bg-gray-950 text-gray-600"
+                      : "border-gray-800 bg-gray-950 text-white"
+                  }`}
+                >
+                  {p.name}
+                  {p.claimed && (
+                    <span className="ml-2 text-sm text-red-400">
+                      Already Claimed
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => fetchPlayers()}
+              className="mt-6 text-sm text-[#ff9900]"
+            >
+              Refresh Players
+            </button>
+          </div>
+        )}
+
+        {view === "scorecard" && (
+          <>
+            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
+                  backgroundColor: accentColor,
+                }}
+              />
+            </div>
+
+            <div
+              onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+              onTouchEnd={(e) => handleHoleSwipe(e.changedTouches[0].clientX)}
+              className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl backdrop-blur-md"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+                    HOLE {hole.number}
+                  </div>
+
+                  <div className="mt-2 text-xl font-black text-white">
+                    Sundale Country Club
+                  </div>
+
+                  <div className="mt-3 text-2xl font-black text-white">
+                    PAR {hole.par}
+                  </div>
+
+                  <div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
+                    {hole.yards} Yards
+                  </div>
+                </div>
+
+                <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+                  <img
+                    src={currentHoleImage}
+                    alt={`Hole ${hole.number}`}
+                    className="h-full w-auto object-contain"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col items-center">
+                <div className="flex items-center justify-center gap-6">
+                  <button
+                    onClick={() => changeDraftScore(draftScore - 1)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
+                      currentHoleHasScore
+                        ? "border-white/10 text-white/20"
+                        : "border-[#ff9900] text-[#ff9900]"
+                    }`}
+                  >
+                    −
+                  </button>
+
+                  <div
+                    className={`select-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
+                      currentHoleHasScore ? "text-white/45" : "text-white"
+                    }`}
+                  >
+                    {draftScore}
+                  </div>
+
+                  <button
+                    onClick={() => changeDraftScore(draftScore + 1)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
+                      currentHoleHasScore
+                        ? "border-white/10 text-white/20"
+                        : "border-[#ff9900] text-[#ff9900]"
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <div
+                  className={`mt-4 rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
+                    currentHoleHasScore
+                      ? "border-white/10 bg-white/5 text-white/35"
+                      : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
+                  }`}
+                >
+                  {getScoreLabel(draftScore, hole.par)}
+                </div>
+
+                <button
+                  onClick={enterScore}
+                  disabled={isSaving}
+                  className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
+                    scores[hole.number]
+                      ? "bg-white/10 text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  {isSaving
+                    ? "SAVING..."
+                    : scores[hole.number]
+                    ? `EDIT HOLE ${hole.number} SCORE`
+                    : `ENTER HOLE ${hole.number} SCORE`}
+                </button>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Phone</div>
-              <a
-                href="tel:16617696226"
-                className="mt-1 block text-lg font-bold text-[#ff9900]"
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+              <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
+                {latestTickerMessage}
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
+              <button
+                onClick={goPrev}
+                disabled={currentHoleIndex === 0}
+                className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
               >
-                (661) 769-6226
+                ←
+              </button>
+
+              <button
+                onClick={() => openView("leaderboard")}
+                className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
+              >
+                Leaderboard
+              </button>
+
+              <button
+                onClick={goNext}
+                disabled={currentHoleIndex === holes.length - 1}
+                className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
+              >
+                →
+              </button>
+            </div>
+          </>
+        )}
+
+        {view === "leaderboard" && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+                  Live Standings
+                </div>
+                <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
+              </div>
+
+              <button
+                onClick={refreshLeaderboard}
+                className="rounded-full border border-white/10 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#ff9900] backdrop-blur-md"
+              >
+                Refresh
+              </button>
+            </div>
+
+            {leaderboardUpdatedMessage && (
+              <div className="mt-3 text-right text-xs font-bold text-[#ff9900]">
+                {leaderboardUpdatedMessage}
+              </div>
+            )}
+
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+              <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
+                {latestTickerMessage}
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {sortedLeaderboard.map((player, index) => (
+                <div
+                  key={player.id}
+                  className={`flex items-center justify-between rounded-[1.5rem] border p-4 shadow-xl backdrop-blur-md ${
+                    index === 0
+                      ? "border-[#ff9900] bg-[#ff9900]/90 text-black"
+                      : "border-white/10 bg-black/55 text-white"
+                  }`}
+                >
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
+                      {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+                    </div>
+
+                    <div className="mt-1 text-lg font-black">{player.name}</div>
+
+                    <div className="mt-1 text-xs opacity-70">
+                      Thru {player.thru} · Gross {player.gross || "--"}
+                    </div>
+
+                    <div className="text-xs opacity-70">
+                      Last:{" "}
+                      {player.lastHole
+                        ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
+                        : "--"}
+                    </div>
+                  </div>
+
+                  <div className="text-4xl font-black">{formatScore(player.net)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {view === "courseInfo" && (
+          <div className="mt-10">
+            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+              Course Info
+            </div>
+
+            <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+
+            <div className="mt-8 space-y-4 text-gray-300">
+              <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+                <div className="text-sm text-gray-500">Address</div>
+                <div className="mt-1 text-lg font-bold">
+                  10256 Golf Course Rd, Taft, CA 93268
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+                <div className="text-sm text-gray-500">Phone</div>
+                <a
+                  href="tel:16617696226"
+                  className="mt-1 block text-lg font-bold text-[#ff9900]"
+                >
+                  (661) 769-6226
+                </a>
+              </div>
+
+              <a
+                href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
+                target="_blank"
+                className="block rounded-full bg-white px-6 py-4 text-center font-black text-black"
+              >
+                OPEN MAP
               </a>
-            </div>
 
-            <a
-              href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
-              target="_blank"
-              className="block rounded-full bg-white px-6 py-4 text-center font-black text-black"
-            >
-              OPEN MAP
-            </a>
-
-            <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-              <div className="text-sm text-gray-500">Tournament Start</div>
-              <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+              <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
+                <div className="text-sm text-gray-500">Tournament Start</div>
+                <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {view === "rules" && (
-        <div className="mt-10">
-          <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-            Belt Rules
+        {view === "rules" && (
+          <div className="mt-10">
+            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+              Belt Rules
+            </div>
+
+            <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
+
+            <div className="mt-8 space-y-4 text-gray-300">
+              <p>• Each player enters their own score after every hole.</p>
+              <p>• Scores must be called out before moving to the next tee.</p>
+              <p>• Lowest net score wins the Belt.</p>
+              <p>• Tiebreaker 1: Final 6 holes.</p>
+              <p>• Tiebreaker 2: Final 3 holes.</p>
+              <p>• Tiebreaker 3: Hole 18.</p>
+              <p>• No fake scores. No boring golf. Swing Reckless.</p>
+            </div>
           </div>
-
-          <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
-
-          <div className="mt-8 space-y-4 text-gray-300">
-            <p>• Each player enters their own score after every hole.</p>
-            <p>• Scores must be called out before moving to the next tee.</p>
-            <p>• Lowest net score wins the Belt.</p>
-            <p>• Tiebreaker 1: Final 6 holes.</p>
-            <p>• Tiebreaker 2: Final 3 holes.</p>
-            <p>• Tiebreaker 3: Hole 18.</p>
-            <p>• No fake scores. No boring golf. Swing Reckless.</p>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </div>
   );
 }
