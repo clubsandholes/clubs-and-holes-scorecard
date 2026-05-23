@@ -56,7 +56,7 @@ export default function Home() {
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
 
-  const [courseName, setCourseName] = useState("Sundale Country Club");
+  const [courseName, setCourseName] = useState("Clubs & Holes Championship");
 const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
 
   const [scores, setScores] = useState<Record<number, number>>({});
@@ -90,10 +90,10 @@ const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
     }
 
     setCurrentTournamentId(data.id);
-    setCourseName(data.course_name || "Sundale Country Club");
+    setCourseName(data.course_name || "Clubs & Holes Championship");
 setBackgroundImageUrl(data.background_image_url || "/burn-cart.jpg");
 
-localStorage.setItem("courseName", data.course_name || "Sundale Country Club");
+localStorage.setItem("courseName", data.course_name || "Clubs & Holes Championship");
 localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-cart.jpg");
     localStorage.setItem("currentTournamentId", data.id);
     localStorage.setItem("tournamentCode", code);
@@ -196,6 +196,28 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
     setTickerEvents(data || []);
   };
 
+  const fetchTournamentSettings = async (tournamentId: string) => {
+  const { data, error } = await supabase
+    .from("tournaments")
+    .select("course_name, background_image_url")
+    .eq("id", tournamentId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching tournament settings:", error);
+    return;
+  }
+
+  const newCourseName = data.course_name || "Clubs & Holes Championship";
+  const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
+
+  setCourseName(newCourseName);
+  setBackgroundImageUrl(newBackgroundImageUrl);
+
+  localStorage.setItem("courseName", newCourseName);
+  localStorage.setItem("backgroundImageUrl", newBackgroundImageUrl);
+};
+
   useEffect(() => {
     const savedTournamentId = localStorage.getItem("currentTournamentId");
     const savedTournamentCode = localStorage.getItem("tournamentCode");
@@ -215,6 +237,7 @@ if (savedBackgroundImageUrl) setBackgroundImageUrl(savedBackgroundImageUrl);
       fetchPlayers(savedTournamentId);
       fetchAllScores(savedTournamentId);
       fetchTickerEvents(savedTournamentId);
+      fetchTournamentSettings(savedTournamentId);
     }
 
     if (savedPlayerId && savedPlayerName) {
@@ -957,7 +980,7 @@ if (savedBackgroundImageUrl) setBackgroundImageUrl(savedBackgroundImageUrl);
               Course Info
             </div>
 
-            <h1 className="mt-3 text-4xl font-black">Buena Vista Golf Course</h1>
+            <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
 
             <div className="mt-8 space-y-4 text-gray-300">
               <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
