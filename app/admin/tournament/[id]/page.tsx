@@ -18,6 +18,9 @@ export default function TournamentAdminPage() {
   const [loading, setLoading] = useState(true);
   const [adminMessage, setAdminMessage] = useState("");
 
+  const [players, setPlayers] = useState<any[]>([]);
+const [newPlayerName, setNewPlayerName] = useState("");
+
   const fetchTournament = async () => {
     const { data, error } = await supabase
       .from("tournaments")
@@ -36,9 +39,25 @@ export default function TournamentAdminPage() {
     setLoading(false);
   };
 
+  const fetchPlayers = async () => {
+  const { data, error } = await supabase
+    .from("tournament_players")
+    .select("*")
+    .eq("tournament_id", tournamentId)
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setPlayers(data || []);
+};
+
   useEffect(() => {
     if (tournamentId) {
       fetchTournament();
+      fetchPlayers();
     }
   }, [tournamentId]);
 
@@ -139,6 +158,64 @@ export default function TournamentAdminPage() {
     alert("Players unlocked.");
   };
 
+  const addPlayer = async () => {
+  if (!newPlayerName.trim()) {
+    alert("Enter player name.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("tournament_players")
+    .insert({
+      tournament_id: tournamentId,
+      name: newPlayerName.trim(),
+      claimed: false,
+    });
+
+  if (error) {
+    console.error(error);
+    alert("Player could not be added.");
+    return;
+  }
+
+  setNewPlayerName("");
+  fetchPlayers();
+};
+
+const unlockSinglePlayer = async (playerId: string) => {
+  const { error } = await supabase
+    .from("tournament_players")
+    .update({
+      claimed: false,
+      claimed_at: null,
+    })
+    .eq("id", playerId);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  fetchPlayers();
+};
+
+const deletePlayer = async (playerId: string) => {
+  const confirmed = confirm("Delete player?");
+  if (!confirmed) return;
+
+  const { error } = await supabase
+    .from("tournament_players")
+    .delete()
+    .eq("id", playerId);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  fetchPlayers();
+};
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black p-6 text-white">
@@ -212,6 +289,66 @@ export default function TournamentAdminPage() {
           </button>
         </div>
       </div>
+      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+    Players
+  </div>
+
+  <h2 className="mt-2 text-2xl font-black">
+    Tournament Players
+  </h2>
+
+  <div className="mt-5 flex gap-3">
+    <input
+      value={newPlayerName}
+      onChange={(e) => setNewPlayerName(e.target.value)}
+      placeholder="Add player..."
+      className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+    />
+
+    <button
+      onClick={addPlayer}
+      className="rounded-full bg-[#ff9900] px-6 font-black text-black"
+    >
+      ADD
+    </button>
+  </div>
+
+  <div className="mt-6 space-y-3">
+    {players.map((player) => (
+      <div
+        key={player.id}
+        className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
+      >
+        <div>
+          <div className="text-lg font-black">
+            {player.name}
+          </div>
+
+          <div className="text-xs uppercase tracking-[0.18em] text-white/50">
+            {player.claimed ? "Claimed" : "Available"}
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => unlockSinglePlayer(player.id)}
+            className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase"
+          >
+            Unlock
+          </button>
+
+          <button
+            onClick={() => deletePlayer(player.id)}
+            className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
     </div>
   );
 }
