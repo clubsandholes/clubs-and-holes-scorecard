@@ -224,11 +224,11 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
     const savedPlayerId = localStorage.getItem("selectedPlayerId");
     const savedPlayerName = localStorage.getItem("playerName");
 
-    const savedCourseName = localStorage.getItem("courseName");
-const savedBackgroundImageUrl = localStorage.getItem("backgroundImageUrl");
+    
 
-if (savedCourseName) setCourseName(savedCourseName);
-if (savedBackgroundImageUrl) setBackgroundImageUrl(savedBackgroundImageUrl);
+
+
+
 
     if (savedTournamentId) {
       setCurrentTournamentId(savedTournamentId);
@@ -348,6 +348,8 @@ if (savedBackgroundImageUrl) setBackgroundImageUrl(savedBackgroundImageUrl);
   const resetLocalPlayer = () => {
     localStorage.removeItem("selectedPlayerId");
     localStorage.removeItem("playerName");
+    localStorage.removeItem("courseName");
+    localStorage.removeItem("backgroundImageUrl");
 
     setSelectedPlayerId("");
     setPlayerName("");
