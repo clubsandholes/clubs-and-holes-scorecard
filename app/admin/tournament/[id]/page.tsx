@@ -10,6 +10,9 @@ type Tournament = {
   code: string;
   course_name?: string;
   background_image_url?: string;
+  course_address?: string;
+  course_phone?: string;
+  course_map_url?: string;
 };
 
 export default function TournamentAdminPage() {
@@ -19,16 +22,22 @@ export default function TournamentAdminPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminMessage, setAdminMessage] = useState("");
+
   const [courseName, setCourseName] = useState("");
-const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
+  const [courseAddress, setCourseAddress] = useState("");
+  const [coursePhone, setCoursePhone] = useState("");
+  const [courseMapUrl, setCourseMapUrl] = useState("");
 
   const [players, setPlayers] = useState<any[]>([]);
-const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerName, setNewPlayerName] = useState("");
 
   const fetchTournament = async () => {
     const { data, error } = await supabase
       .from("tournaments")
-      .select("id, name, code, course_name, background_image_url")
+      .select(
+        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url"
+      )
       .eq("id", tournamentId)
       .single();
 
@@ -42,23 +51,26 @@ const [newPlayerName, setNewPlayerName] = useState("");
     setTournament(data);
     setCourseName(data.course_name || "");
     setBackgroundImageUrl(data.background_image_url || "");
+    setCourseAddress(data.course_address || "");
+    setCoursePhone(data.course_phone || "");
+    setCourseMapUrl(data.course_map_url || "");
     setLoading(false);
   };
 
   const fetchPlayers = async () => {
-  const { data, error } = await supabase
-    .from("tournament_players")
-    .select("*")
-    .eq("tournament_id", tournamentId)
-    .order("name");
+    const { data, error } = await supabase
+      .from("tournament_players")
+      .select("*")
+      .eq("tournament_id", tournamentId)
+      .order("name");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-  setPlayers(data || []);
-};
+    setPlayers(data || []);
+  };
 
   useEffect(() => {
     if (tournamentId) {
@@ -66,6 +78,28 @@ const [newPlayerName, setNewPlayerName] = useState("");
       fetchPlayers();
     }
   }, [tournamentId]);
+
+  const saveTournamentSettings = async () => {
+    const { error } = await supabase
+      .from("tournaments")
+      .update({
+        course_name: courseName,
+        background_image_url: backgroundImageUrl,
+        course_address: courseAddress,
+        course_phone: coursePhone,
+        course_map_url: courseMapUrl,
+      })
+      .eq("id", tournamentId);
+
+    if (error) {
+      console.error(error);
+      alert("Tournament settings could not be saved.");
+      return;
+    }
+
+    await fetchTournament();
+    alert("Tournament settings saved.");
+  };
 
   const sendAdminAlert = async () => {
     if (!adminMessage.trim()) {
@@ -161,105 +195,72 @@ const [newPlayerName, setNewPlayerName] = useState("");
       return;
     }
 
+    await fetchPlayers();
     alert("Players unlocked.");
   };
 
-  const saveTournamentSettings = async () => {
-  console.log("Saving tournament:", tournamentId);
-  console.log("Course Name:", courseName);
-
-  const { data, error } = await supabase
-    .from("tournaments")
-    .update({
-      course_name: courseName,
-      background_image_url: backgroundImageUrl,
-    })
-    .eq("id", tournamentId)
-    .select();
-
-  console.log("Returned data:", data);
-
-  if (error) {
-    console.error(error);
-    alert("Tournament settings could not be saved.");
-    return;
-  }
-
-  alert("Tournament settings saved.");
-};
-
   const addPlayer = async () => {
-  if (!newPlayerName.trim()) {
-    alert("Enter player name.");
-    return;
-  }
+    if (!newPlayerName.trim()) {
+      alert("Enter player name.");
+      return;
+    }
 
-  const { error } = await supabase
-    .from("tournament_players")
-    .insert({
+    const { error } = await supabase.from("tournament_players").insert({
       tournament_id: tournamentId,
       name: newPlayerName.trim(),
       claimed: false,
     });
 
-  if (error) {
-    console.error(error);
-    alert("Player could not be added.");
-    return;
-  }
+    if (error) {
+      console.error(error);
+      alert("Player could not be added.");
+      return;
+    }
 
-  setNewPlayerName("");
-  fetchPlayers();
-};
+    setNewPlayerName("");
+    fetchPlayers();
+  };
 
-const unlockSinglePlayer = async (playerId: string) => {
-  const { error } = await supabase
-    .from("tournament_players")
-    .update({
-      claimed: false,
-      claimed_at: null,
-    })
-    .eq("id", playerId);
+  const unlockSinglePlayer = async (playerId: string) => {
+    const { error } = await supabase
+      .from("tournament_players")
+      .update({
+        claimed: false,
+        claimed_at: null,
+      })
+      .eq("id", playerId);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-  fetchPlayers();
-};
+    fetchPlayers();
+  };
 
-const deletePlayer = async (playerId: string) => {
-  const confirmed = confirm("Delete player?");
-  if (!confirmed) return;
+  const deletePlayer = async (playerId: string) => {
+    const confirmed = confirm("Delete player?");
+    if (!confirmed) return;
 
-  const { error } = await supabase
-    .from("tournament_players")
-    .delete()
-    .eq("id", playerId);
+    const { error } = await supabase
+      .from("tournament_players")
+      .delete()
+      .eq("id", playerId);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-  fetchPlayers();
-};
+    fetchPlayers();
+  };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black p-6 text-white">
-        Loading tournament...
-      </div>
-    );
+    return <div className="min-h-screen bg-black p-6 text-white">Loading tournament...</div>;
   }
 
   if (!tournament) {
-    return (
-      <div className="min-h-screen bg-black p-6 text-white">
-        Tournament not found.
-      </div>
-    );
+    return <div className="min-h-screen bg-black p-6 text-white">Tournament not found.</div>;
   }
 
   return (
@@ -271,41 +272,61 @@ const deletePlayer = async (playerId: string) => {
       <h1 className="mt-2 text-4xl font-black">{tournament.name}</h1>
 
       <p className="mt-2 text-gray-400">
-        Tournament Code:{" "}
-        <span className="font-black text-[#ff9900]">{tournament.code}</span>
+        Tournament Code: <span className="font-black text-[#ff9900]">{tournament.code}</span>
       </p>
-    <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-    Tournament Info
-  </div>
 
-  <h2 className="mt-2 text-2xl font-black">
-    Event Setup
-  </h2>
+      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Tournament Info
+        </div>
 
-  <div className="mt-6 space-y-4">
-    <input
-      value={courseName}
-      onChange={(e) => setCourseName(e.target.value)}
-      placeholder="Course Name"
-      className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-    />
+        <h2 className="mt-2 text-2xl font-black">Event Setup</h2>
 
-    <input
-      value={backgroundImageUrl}
-      onChange={(e) => setBackgroundImageUrl(e.target.value)}
-      placeholder="Background Image URL"
-      className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-    />
-    
-    <button
-      onClick={saveTournamentSettings}
-      className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
-    >
-      SAVE TOURNAMENT SETTINGS
-    </button>
-  </div>
-</div>
+        <div className="mt-6 space-y-4">
+          <input
+            value={courseName}
+            onChange={(e) => setCourseName(e.target.value)}
+            placeholder="Course Name"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <input
+            value={courseAddress}
+            onChange={(e) => setCourseAddress(e.target.value)}
+            placeholder="Course Address"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <input
+            value={coursePhone}
+            onChange={(e) => setCoursePhone(e.target.value)}
+            placeholder="Course Phone"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <input
+            value={courseMapUrl}
+            onChange={(e) => setCourseMapUrl(e.target.value)}
+            placeholder="Course Map URL"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <input
+            value={backgroundImageUrl}
+            onChange={(e) => setBackgroundImageUrl(e.target.value)}
+            placeholder="Background Image URL"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <button
+            onClick={saveTournamentSettings}
+            className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+          >
+            SAVE TOURNAMENT SETTINGS
+          </button>
+        </div>
+      </div>
+
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Live Controls
@@ -328,88 +349,70 @@ const deletePlayer = async (playerId: string) => {
         </button>
 
         <div className="mt-6 grid gap-3">
-          <button
-            onClick={clearTicker}
-            className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white"
-          >
+          <button onClick={clearTicker} className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white">
             Clear Ticker
           </button>
 
-          <button
-            onClick={clearScores}
-            className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white"
-          >
+          <button onClick={clearScores} className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white">
             Clear Scores
           </button>
 
-          <button
-            onClick={unlockPlayers}
-            className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white"
-          >
+          <button onClick={unlockPlayers} className="rounded-2xl border border-white/10 bg-black p-4 text-left font-black text-white">
             Unlock Players
           </button>
         </div>
       </div>
+
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-    Players
-  </div>
-
-  <h2 className="mt-2 text-2xl font-black">
-    Tournament Players
-  </h2>
-
-  <div className="mt-5 flex gap-3">
-    <input
-      value={newPlayerName}
-      onChange={(e) => setNewPlayerName(e.target.value)}
-      placeholder="Add player..."
-      className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
-    />
-
-    <button
-      onClick={addPlayer}
-      className="rounded-full bg-[#ff9900] px-6 font-black text-black"
-    >
-      ADD
-    </button>
-  </div>
-
-  <div className="mt-6 space-y-3">
-    {players.map((player) => (
-      <div
-        key={player.id}
-        className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
-      >
-        <div>
-          <div className="text-lg font-black">
-            {player.name}
-          </div>
-
-          <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-            {player.claimed ? "Claimed" : "Available"}
-          </div>
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Players
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => unlockSinglePlayer(player.id)}
-            className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase"
-          >
-            Unlock
-          </button>
+        <h2 className="mt-2 text-2xl font-black">Tournament Players</h2>
 
-          <button
-            onClick={() => deletePlayer(player.id)}
-            className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
-          >
-            Delete
+        <div className="mt-5 flex gap-3">
+          <input
+            value={newPlayerName}
+            onChange={(e) => setNewPlayerName(e.target.value)}
+            placeholder="Add player..."
+            className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <button onClick={addPlayer} className="rounded-full bg-[#ff9900] px-6 font-black text-black">
+            ADD
           </button>
+        </div>
+
+        <div className="mt-6 space-y-3">
+          {players.map((player) => (
+            <div key={player.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4">
+              <div>
+                <div className="text-lg font-black">{player.name}</div>
+
+                <div className="text-xs uppercase tracking-[0.18em] text-white/50">
+                  {player.claimed ? "Claimed" : "Available"}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => unlockSinglePlayer(player.id)}
+                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase"
+                >
+                  Unlock
+                </button>
+
+                <button
+                  onClick={() => deletePlayer(player.id)}
+                  className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    ))}
-  </div>
-</div>
     </div>
   );
 }
