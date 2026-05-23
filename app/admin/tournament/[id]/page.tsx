@@ -297,9 +297,7 @@ const deletePlayer = async (playerId: string) => {
       placeholder="Background Image URL"
       className="w-full rounded-2xl bg-black p-4 text-white outline-none"
     />
-    <div className="text-red-400">
-  Tournament ID: {tournamentId}
-</div>
+    
     <button
       onClick={saveTournamentSettings}
       className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"

@@ -981,9 +981,7 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
             <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
               Course Info
             </div>
-            <div className="text-xs text-red-400">
-  Course debug: {courseName}
-</div>
+            
             <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
 
             <div className="mt-8 space-y-4 text-gray-300">
