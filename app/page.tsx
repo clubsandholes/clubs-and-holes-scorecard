@@ -56,6 +56,9 @@ export default function Home() {
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
 
+  const [courseName, setCourseName] = useState("Sundale Country Club");
+const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
+
   const [scores, setScores] = useState<Record<number, number>>({});
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(holes[0].par);
@@ -77,7 +80,7 @@ export default function Home() {
 
     const { data, error } = await supabase
       .from("tournaments")
-      .select("id, name, code")
+      .select("id, name, code, course_name, background_image_url")
       .eq("code", code)
       .single();
 
@@ -87,6 +90,11 @@ export default function Home() {
     }
 
     setCurrentTournamentId(data.id);
+    setCourseName(data.course_name || "Sundale Country Club");
+setBackgroundImageUrl(data.background_image_url || "/burn-cart.jpg");
+
+localStorage.setItem("courseName", data.course_name || "Sundale Country Club");
+localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-cart.jpg");
     localStorage.setItem("currentTournamentId", data.id);
     localStorage.setItem("tournamentCode", code);
 
@@ -193,6 +201,12 @@ export default function Home() {
     const savedTournamentCode = localStorage.getItem("tournamentCode");
     const savedPlayerId = localStorage.getItem("selectedPlayerId");
     const savedPlayerName = localStorage.getItem("playerName");
+
+    const savedCourseName = localStorage.getItem("courseName");
+const savedBackgroundImageUrl = localStorage.getItem("backgroundImageUrl");
+
+if (savedCourseName) setCourseName(savedCourseName);
+if (savedBackgroundImageUrl) setBackgroundImageUrl(savedBackgroundImageUrl);
 
     if (savedTournamentId) {
       setCurrentTournamentId(savedTournamentId);
@@ -580,7 +594,7 @@ export default function Home() {
       <div
         className="fixed inset-0 bg-cover bg-center opacity-90 blur-[1px]"
         style={{
-          backgroundImage: "url('/burn-cart.jpg')",
+          backgroundImage: `url('${backgroundImageUrl}')`,
         }}
       />
 
@@ -756,7 +770,7 @@ export default function Home() {
                   </div>
 
                   <div className="mt-2 text-xl font-black text-white">
-                    Sundale Country Club
+                    {courseName}
                   </div>
 
                   <div className="mt-3 text-2xl font-black text-white">
