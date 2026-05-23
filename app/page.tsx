@@ -17,7 +17,13 @@ const holes = [
   { number: 9, par: 4, yards: 420 },
 ];
 
-type View = "join" | "selectPlayer" | "scorecard" | "leaderboard" | "courseInfo" | "rules";
+type View =
+  | "join"
+  | "selectPlayer"
+  | "scorecard"
+  | "leaderboard"
+  | "courseInfo"
+  | "rules";
 
 type Player = {
   id: string;
@@ -48,7 +54,8 @@ export default function Home() {
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
   const [tickerIndex, setTickerIndex] = useState(0);
 
-  const [activeAdminAlert, setActiveAdminAlert] = useState<TickerEvent | null>(null);
+  const [activeAdminAlert, setActiveAdminAlert] =
+    useState<TickerEvent | null>(null);
   const [lastAdminAlertId, setLastAdminAlertId] = useState("");
 
   const [currentTournamentId, setCurrentTournamentId] = useState("");
@@ -57,18 +64,36 @@ export default function Home() {
   const [tournamentCode, setTournamentCode] = useState("");
 
   const [courseName, setCourseName] = useState("Clubs & Holes Championship");
-const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
+  const [courseAddress, setCourseAddress] = useState("");
+  const [coursePhone, setCoursePhone] = useState("");
+  const [courseMapUrl, setCourseMapUrl] = useState("");
 
   const [scores, setScores] = useState<Record<number, number>>({});
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(holes[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
+  const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] =
+    useState("");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const hole = holes[currentHoleIndex];
   const currentHoleHasScore = scores[hole.number] !== undefined;
+
+  const applyTournamentSettings = (data: any) => {
+    const newCourseName = data.course_name || "Clubs & Holes Championship";
+    const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
+    const newCourseAddress = data.course_address || "";
+    const newCoursePhone = data.course_phone || "";
+    const newCourseMapUrl = data.course_map_url || "";
+
+    setCourseName(newCourseName);
+    setBackgroundImageUrl(newBackgroundImageUrl);
+    setCourseAddress(newCourseAddress);
+    setCoursePhone(newCoursePhone);
+    setCourseMapUrl(newCourseMapUrl);
+  };
 
   const joinTournament = async () => {
     const code = tournamentCode.trim().toUpperCase();
@@ -80,7 +105,9 @@ const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
 
     const { data, error } = await supabase
       .from("tournaments")
-      .select("id, name, code, course_name, background_image_url")
+      .select(
+        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url"
+      )
       .eq("code", code)
       .single();
 
@@ -90,11 +117,8 @@ const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
     }
 
     setCurrentTournamentId(data.id);
-    setCourseName(data.course_name || "Clubs & Holes Championship");
-setBackgroundImageUrl(data.background_image_url || "/burn-cart.jpg");
+    applyTournamentSettings(data);
 
-localStorage.setItem("courseName", data.course_name || "Clubs & Holes Championship");
-localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-cart.jpg");
     localStorage.setItem("currentTournamentId", data.id);
     localStorage.setItem("tournamentCode", code);
 
@@ -197,38 +221,27 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
   };
 
   const fetchTournamentSettings = async (tournamentId: string) => {
-  const { data, error } = await supabase
-    .from("tournaments")
-    .select("course_name, background_image_url")
-    .eq("id", tournamentId)
-    .single();
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select(
+        "course_name, background_image_url, course_address, course_phone, course_map_url"
+      )
+      .eq("id", tournamentId)
+      .single();
 
-  if (error) {
-    console.error("Error fetching tournament settings:", error);
-    return;
-  }
+    if (error) {
+      console.error("Error fetching tournament settings:", error);
+      return;
+    }
 
-  const newCourseName = data.course_name || "Clubs & Holes Championship";
-  const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
-
-  setCourseName(newCourseName);
-  setBackgroundImageUrl(newBackgroundImageUrl);
-
-  localStorage.setItem("courseName", newCourseName);
-  localStorage.setItem("backgroundImageUrl", newBackgroundImageUrl);
-};
+    applyTournamentSettings(data);
+  };
 
   useEffect(() => {
     const savedTournamentId = localStorage.getItem("currentTournamentId");
     const savedTournamentCode = localStorage.getItem("tournamentCode");
     const savedPlayerId = localStorage.getItem("selectedPlayerId");
     const savedPlayerName = localStorage.getItem("playerName");
-
-    
-
-
-
-
 
     if (savedTournamentId) {
       setCurrentTournamentId(savedTournamentId);
@@ -253,19 +266,31 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
 
     const channel = supabase
       .channel(`live-tournament-${currentTournamentId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "scores" }, async () => {
-        await fetchAllScores(currentTournamentId);
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "scores" },
+        async () => {
+          await fetchAllScores(currentTournamentId);
 
-        if (selectedPlayerId) {
-          await fetchScoresForPlayer(selectedPlayerId);
+          if (selectedPlayerId) {
+            await fetchScoresForPlayer(selectedPlayerId);
+          }
         }
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "ticker_events" }, async () => {
-        await fetchTickerEvents(currentTournamentId);
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "tournament_players" }, async () => {
-        await fetchPlayers(currentTournamentId);
-      })
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ticker_events" },
+        async () => {
+          await fetchTickerEvents(currentTournamentId);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tournament_players" },
+        async () => {
+          await fetchPlayers(currentTournamentId);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -273,7 +298,9 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
     };
   }, [currentTournamentId, selectedPlayerId]);
 
-  const scoreTickerEvents = tickerEvents.filter((event) => event.event_type !== "admin");
+  const scoreTickerEvents = tickerEvents.filter(
+    (event) => event.event_type !== "admin"
+  );
 
   useEffect(() => {
     if (scoreTickerEvents.length === 0) return;
@@ -293,7 +320,9 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
       : "Live ticker will appear here";
 
   useEffect(() => {
-    const latestAdminAlert = tickerEvents.find((event) => event.event_type === "admin");
+    const latestAdminAlert = tickerEvents.find(
+      (event) => event.event_type === "admin"
+    );
 
     if (!latestAdminAlert) return;
     if (latestAdminAlert.id === lastAdminAlertId) return;
@@ -348,8 +377,6 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
   const resetLocalPlayer = () => {
     localStorage.removeItem("selectedPlayerId");
     localStorage.removeItem("playerName");
-    localStorage.removeItem("courseName");
-    localStorage.removeItem("backgroundImageUrl");
 
     setSelectedPlayerId("");
     setPlayerName("");
@@ -542,7 +569,6 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
     return `${score}`;
   };
 
-  const holesPlayed = Object.keys(scores).length;
   const grossTotal = getGrossTotal(scores);
   const parPlayed = getParPlayed(scores);
   const net = grossTotal - parPlayed;
@@ -610,6 +636,7 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
 
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage = `/hole-${hole.number}.png`;
+  const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
 
   return (
     <div
@@ -969,7 +996,9 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
                     </div>
                   </div>
 
-                  <div className="text-4xl font-black">{formatScore(player.net)}</div>
+                  <div className="text-4xl font-black">
+                    {formatScore(player.net)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -981,29 +1010,29 @@ localStorage.setItem("backgroundImageUrl", data.background_image_url || "/burn-c
             <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
               Course Info
             </div>
-            
+
             <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
 
             <div className="mt-8 space-y-4 text-gray-300">
               <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
                 <div className="text-sm text-gray-500">Address</div>
                 <div className="mt-1 text-lg font-bold">
-                  10256 Golf Course Rd, Taft, CA 93268
+                  {courseAddress || "Course address not set"}
                 </div>
               </div>
 
               <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
                 <div className="text-sm text-gray-500">Phone</div>
                 <a
-                  href="tel:16617696226"
+                  href={phoneHref}
                   className="mt-1 block text-lg font-bold text-[#ff9900]"
                 >
-                  (661) 769-6226
+                  {coursePhone || "Course phone not set"}
                 </a>
               </div>
 
               <a
-                href="https://maps.google.com/?q=Buena+Vista+Golf+Course+Taft+CA"
+                href={courseMapUrl || "#"}
                 target="_blank"
                 className="block rounded-full bg-white px-6 py-4 text-center font-black text-black"
               >
