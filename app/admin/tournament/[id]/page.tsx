@@ -8,6 +8,8 @@ type Tournament = {
   id: string;
   name: string;
   code: string;
+  course_name?: string;
+  background_image_url?: string;
 };
 
 export default function TournamentAdminPage() {
@@ -17,6 +19,8 @@ export default function TournamentAdminPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminMessage, setAdminMessage] = useState("");
+  const [courseName, setCourseName] = useState("");
+const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
 
   const [players, setPlayers] = useState<any[]>([]);
 const [newPlayerName, setNewPlayerName] = useState("");
@@ -24,7 +28,7 @@ const [newPlayerName, setNewPlayerName] = useState("");
   const fetchTournament = async () => {
     const { data, error } = await supabase
       .from("tournaments")
-      .select("id, name, code")
+      .select("id, name, code, course_name, background_image_url")
       .eq("id", tournamentId)
       .single();
 
@@ -36,6 +40,8 @@ const [newPlayerName, setNewPlayerName] = useState("");
     }
 
     setTournament(data);
+    setCourseName(data.course_name || "");
+    setBackgroundImageUrl(data.background_image_url || "");
     setLoading(false);
   };
 
@@ -158,6 +164,24 @@ const [newPlayerName, setNewPlayerName] = useState("");
     alert("Players unlocked.");
   };
 
+  const saveTournamentSettings = async () => {
+  const { error } = await supabase
+    .from("tournaments")
+    .update({
+      course_name: courseName,
+      background_image_url: backgroundImageUrl,
+    })
+    .eq("id", tournamentId);
+
+  if (error) {
+    console.error(error);
+    alert("Tournament settings could not be saved.");
+    return;
+  }
+
+  alert("Tournament settings saved.");
+};
+
   const addPlayer = async () => {
   if (!newPlayerName.trim()) {
     alert("Enter player name.");
@@ -244,7 +268,38 @@ const deletePlayer = async (playerId: string) => {
         Tournament Code:{" "}
         <span className="font-black text-[#ff9900]">{tournament.code}</span>
       </p>
+    <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+    Tournament Info
+  </div>
 
+  <h2 className="mt-2 text-2xl font-black">
+    Event Setup
+  </h2>
+
+  <div className="mt-6 space-y-4">
+    <input
+      value={courseName}
+      onChange={(e) => setCourseName(e.target.value)}
+      placeholder="Course Name"
+      className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+    />
+
+    <input
+      value={backgroundImageUrl}
+      onChange={(e) => setBackgroundImageUrl(e.target.value)}
+      placeholder="Background Image URL"
+      className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+    />
+
+    <button
+      onClick={saveTournamentSettings}
+      className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+    >
+      SAVE TOURNAMENT SETTINGS
+    </button>
+  </div>
+</div>
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Live Controls
