@@ -5,17 +5,19 @@ import { supabase } from "@/lib/supabase";
 
 const accentColor = "#ff9900";
 
-const holes = [
-  { number: 1, par: 4, yards: 385 },
-  { number: 2, par: 3, yards: 165 },
-  { number: 3, par: 5, yards: 525 },
-  { number: 4, par: 4, yards: 410 },
-  { number: 5, par: 4, yards: 360 },
-  { number: 6, par: 3, yards: 145 },
-  { number: 7, par: 5, yards: 540 },
-  { number: 8, par: 4, yards: 395 },
-  { number: 9, par: 4, yards: 420 },
-];
+type Hole = {
+  number: number;
+  par: number;
+  yards: number;
+  image_url?: string;
+};
+
+const defaultHoles: Hole[] = Array.from({ length: 18 }, (_, index) => ({
+  number: index + 1,
+  par: 4,
+  yards: 0,
+  image_url: `/hole-${index + 1}.png`,
+}));
 
 type View =
   | "join"
@@ -59,6 +61,7 @@ export default function Home() {
   const [lastAdminAlertId, setLastAdminAlertId] = useState("");
 
   const [currentTournamentId, setCurrentTournamentId] = useState("");
+  const [currentCourseId, setCurrentCourseId] = useState("");
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
@@ -68,20 +71,48 @@ export default function Home() {
   const [courseAddress, setCourseAddress] = useState("");
   const [coursePhone, setCoursePhone] = useState("");
   const [courseMapUrl, setCourseMapUrl] = useState("");
-
+  const [holes, setHoles] = useState<Hole[]>(defaultHoles);
   const [scores, setScores] = useState<Record<number, number>>({});
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
-  const [draftScore, setDraftScore] = useState(holes[0].par);
+  const [draftScore, setDraftScore] = useState(defaultHoles[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] =
     useState("");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  const hole = holes[currentHoleIndex];
+  const hole = holes[currentHoleIndex] || defaultHoles[0];
   const currentHoleHasScore = scores[hole.number] !== undefined;
+  const fetchCourseHoles = async (courseId: string) => {
+  if (!courseId) {
+    setHoles(defaultHoles);
+    return;
+  }
 
-  const applyTournamentSettings = (data: any) => {
+  const { data, error } = await supabase
+    .from("course_holes")
+    .select("hole_number, par, yards, image_url")
+    .eq("course_id", courseId)
+    .order("hole_number");
+
+  if (error || !data || data.length === 0) {
+    console.error("Error fetching course holes:", error);
+    setHoles(defaultHoles);
+    return;
+  }
+
+  const mappedHoles: Hole[] = data.map((h) => ({
+    number: h.hole_number,
+    par: h.par,
+    yards: h.yards,
+    image_url: h.image_url || `/hole-${h.hole_number}.png`,
+  }));
+
+  setHoles(mappedHoles);
+  setCurrentHoleIndex(0);
+};
+    const applyTournamentSettings = async (data: any) => {
+    const newCourseId = data.course_id || "";  
     const newCourseName = data.course_name || "Clubs & Holes Championship";
     const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
     const newCourseAddress = data.course_address || "";
@@ -93,6 +124,13 @@ export default function Home() {
     setCourseAddress(newCourseAddress);
     setCoursePhone(newCoursePhone);
     setCourseMapUrl(newCourseMapUrl);
+    setCurrentCourseId(newCourseId);
+
+        if (newCourseId) {
+      await fetchCourseHoles(newCourseId);
+    } else {
+      setHoles(defaultHoles);
+    }
   };
 
   const joinTournament = async () => {
@@ -106,7 +144,7 @@ export default function Home() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url"
+        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url, course_id"
       )
       .eq("code", code)
       .single();
@@ -117,7 +155,7 @@ export default function Home() {
     }
 
     setCurrentTournamentId(data.id);
-    applyTournamentSettings(data);
+    await applyTournamentSettings(data);
 
     localStorage.setItem("currentTournamentId", data.id);
     localStorage.setItem("tournamentCode", code);
@@ -224,7 +262,7 @@ export default function Home() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "course_name, background_image_url, course_address, course_phone, course_map_url"
+        "course_name, background_image_url, course_address, course_phone, course_map_url, course_id"
       )
       .eq("id", tournamentId)
       .single();
@@ -234,7 +272,7 @@ export default function Home() {
       return;
     }
 
-    applyTournamentSettings(data);
+    await applyTournamentSettings(data);
   };
 
   useEffect(() => {
@@ -635,7 +673,7 @@ export default function Home() {
   );
 
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
-  const currentHoleImage = `/hole-${hole.number}.png`;
+  const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
 
   return (
