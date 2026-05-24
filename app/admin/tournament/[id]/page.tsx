@@ -8,6 +8,7 @@ type Tournament = {
   id: string;
   name: string;
   code: string;
+  course_id?: string;
   course_name?: string;
   background_image_url?: string;
   course_address?: string;
@@ -28,6 +29,8 @@ export default function TournamentAdminPage() {
   const [courseAddress, setCourseAddress] = useState("");
   const [coursePhone, setCoursePhone] = useState("");
   const [courseMapUrl, setCourseMapUrl] = useState("");
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
 
   const [players, setPlayers] = useState<any[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
@@ -36,8 +39,8 @@ export default function TournamentAdminPage() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url"
-      )
+  "id, name, code, course_id, course_name, background_image_url, course_address, course_phone, course_map_url"
+)
       .eq("id", tournamentId)
       .single();
 
@@ -54,6 +57,7 @@ export default function TournamentAdminPage() {
     setCourseAddress(data.course_address || "");
     setCoursePhone(data.course_phone || "");
     setCourseMapUrl(data.course_map_url || "");
+    setSelectedCourseId(data.course_id || "");
     setLoading(false);
   };
 
@@ -72,10 +76,25 @@ export default function TournamentAdminPage() {
     setPlayers(data || []);
   };
 
+  const fetchCourses = async () => {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("id, name")
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setCourses(data || []);
+};
+
   useEffect(() => {
     if (tournamentId) {
       fetchTournament();
       fetchPlayers();
+      fetchCourses();
     }
   }, [tournamentId]);
 
@@ -83,6 +102,7 @@ export default function TournamentAdminPage() {
     const { error } = await supabase
       .from("tournaments")
       .update({
+        course_id: selectedCourseId || null,
         course_name: courseName,
         background_image_url: backgroundImageUrl,
         course_address: courseAddress,
@@ -283,6 +303,19 @@ export default function TournamentAdminPage() {
         <h2 className="mt-2 text-2xl font-black">Event Setup</h2>
 
         <div className="mt-6 space-y-4">
+          <select
+              value={selectedCourseId}
+              onChange={(e) => setSelectedCourseId(e.target.value)}
+              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+            >
+              <option value="">Select Course</option>
+
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.name}
+                </option>
+              ))}
+          </select>
           <input
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
