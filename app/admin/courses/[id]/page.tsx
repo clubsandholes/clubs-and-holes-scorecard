@@ -13,6 +13,22 @@ type Course = {
   background_image_url?: string;
 };
 
+type CourseHole = {
+  id?: string;
+  course_id?: string;
+  hole_number: number;
+  par: number;
+  yards: number;
+  image_url?: string;
+};
+
+const defaultHoles: CourseHole[] = Array.from({ length: 18 }, (_, index) => ({
+  hole_number: index + 1,
+  par: 4,
+  yards: 0,
+  image_url: "",
+}));
+
 export default function CourseDetailPage() {
   const params = useParams();
   const courseId = params.id as string;
@@ -25,6 +41,8 @@ export default function CourseDetailPage() {
   const [phone, setPhone] = useState("");
   const [mapUrl, setMapUrl] = useState("");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
+
+  const [holes, setHoles] = useState<CourseHole[]>(defaultHoles);
 
   const fetchCourse = async () => {
     const { data, error } = await supabase
@@ -49,9 +67,34 @@ export default function CourseDetailPage() {
     setLoading(false);
   };
 
+  const fetchHoles = async () => {
+    const { data, error } = await supabase
+      .from("course_holes")
+      .select("id, course_id, hole_number, par, yards, image_url")
+      .eq("course_id", courseId)
+      .order("hole_number");
+
+    if (error) {
+      console.error(error);
+      alert("Could not load holes.");
+      return;
+    }
+
+    const mergedHoles = defaultHoles.map((defaultHole) => {
+      const existingHole = (data || []).find(
+        (hole) => hole.hole_number === defaultHole.hole_number
+      );
+
+      return existingHole || defaultHole;
+    });
+
+    setHoles(mergedHoles);
+  };
+
   useEffect(() => {
     if (courseId) {
       fetchCourse();
+      fetchHoles();
     }
   }, [courseId]);
 
@@ -77,12 +120,67 @@ export default function CourseDetailPage() {
     alert("Course saved.");
   };
 
+  const updateHoleField = (
+    holeNumber: number,
+    field: "par" | "yards" | "image_url",
+    value: string
+  ) => {
+    setHoles((currentHoles) =>
+      currentHoles.map((hole) => {
+        if (hole.hole_number !== holeNumber) return hole;
+
+        if (field === "par" || field === "yards") {
+          return {
+            ...hole,
+            [field]: Number(value),
+          };
+        }
+
+        return {
+          ...hole,
+          [field]: value,
+        };
+      })
+    );
+  };
+
+  const saveHoles = async () => {
+    const rowsToSave = holes.map((hole) => ({
+      course_id: courseId,
+      hole_number: hole.hole_number,
+      par: hole.par || 4,
+      yards: hole.yards || 0,
+      image_url: hole.image_url || "",
+    }));
+
+    const { error } = await supabase.from("course_holes").upsert(rowsToSave, {
+      onConflict: "course_id,hole_number",
+    });
+
+    if (error) {
+      console.error(error);
+      alert("Holes could not be saved.");
+      return;
+    }
+
+    await fetchHoles();
+    alert("Hole setup saved.");
+  };
+
   if (loading) {
-    return <div className="min-h-screen bg-black p-6 text-white">Loading course...</div>;
+    return (
+      <div className="min-h-screen bg-black p-6 text-white">
+        Loading course...
+      </div>
+    );
   }
 
   if (!course) {
-    return <div className="min-h-screen bg-black p-6 text-white">Course not found.</div>;
+    return (
+      <div className="min-h-screen bg-black p-6 text-white">
+        Course not found.
+      </div>
+    );
   }
 
   return (
@@ -93,9 +191,7 @@ export default function CourseDetailPage() {
 
       <h1 className="mt-2 text-4xl font-black">{course.name}</h1>
 
-      <p className="mt-2 text-gray-400">
-        Reusable course profile
-      </p>
+      <p className="mt-2 text-gray-400">Reusable course profile</p>
 
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
@@ -147,6 +243,65 @@ export default function CourseDetailPage() {
             SAVE COURSE
           </button>
         </div>
+      </div>
+
+      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Hole Setup
+        </div>
+
+        <h2 className="mt-2 text-2xl font-black">18 Hole Manager</h2>
+
+        <div className="mt-6 space-y-4">
+          {holes.map((hole) => (
+            <div
+              key={hole.hole_number}
+              className="rounded-2xl border border-white/10 bg-black p-4"
+            >
+              <div className="text-lg font-black text-[#ff9900]">
+                Hole {hole.hole_number}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <input
+                  type="number"
+                  value={hole.par}
+                  onChange={(e) =>
+                    updateHoleField(hole.hole_number, "par", e.target.value)
+                  }
+                  placeholder="Par"
+                  className="rounded-xl bg-gray-950 p-3 text-white outline-none"
+                />
+
+                <input
+                  type="number"
+                  value={hole.yards}
+                  onChange={(e) =>
+                    updateHoleField(hole.hole_number, "yards", e.target.value)
+                  }
+                  placeholder="Yards"
+                  className="rounded-xl bg-gray-950 p-3 text-white outline-none"
+                />
+              </div>
+
+              <input
+                value={hole.image_url || ""}
+                onChange={(e) =>
+                  updateHoleField(hole.hole_number, "image_url", e.target.value)
+                }
+                placeholder="Hole image URL"
+                className="mt-3 w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+              />
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={saveHoles}
+          className="mt-6 w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+        >
+          SAVE 18 HOLES
+        </button>
       </div>
     </div>
   );
