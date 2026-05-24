@@ -263,26 +263,38 @@ export default function CourseDetailPage() {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <input
-                  type="number"
-                  value={hole.par}
-                  onChange={(e) =>
-                    updateHoleField(hole.hole_number, "par", e.target.value)
-                  }
-                  placeholder="Par"
-                  className="rounded-xl bg-gray-950 p-3 text-white outline-none"
-                />
+  <label className="block">
+    <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+      Par
+    </div>
 
-                <input
-                  type="number"
-                  value={hole.yards}
-                  onChange={(e) =>
-                    updateHoleField(hole.hole_number, "yards", e.target.value)
-                  }
-                  placeholder="Yards"
-                  className="rounded-xl bg-gray-950 p-3 text-white outline-none"
-                />
-              </div>
+    <input
+      type="number"
+      value={hole.par || ""}
+      onChange={(e) =>
+        updateHoleField(hole.hole_number, "par", e.target.value)
+      }
+      placeholder="4"
+      className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+    />
+  </label>
+
+  <label className="block">
+    <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+      Yards
+    </div>
+
+    <input
+      type="number"
+      value={hole.yards || ""}
+      onChange={(e) =>
+        updateHoleField(hole.hole_number, "yards", e.target.value)
+      }
+      placeholder="382"
+      className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+    />
+  </label>
+</div>
 
               <input
                 value={hole.image_url || ""}
