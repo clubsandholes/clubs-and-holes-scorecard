@@ -275,6 +275,37 @@ export default function TournamentAdminPage() {
     fetchPlayers();
   };
 
+  const handleCourseSelect = async (courseId: string) => {
+  setSelectedCourseId(courseId);
+
+  if (!courseId) {
+    setCourseName("");
+    setCourseAddress("");
+    setCoursePhone("");
+    setCourseMapUrl("");
+    setBackgroundImageUrl("");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("courses")
+    .select("name, address, phone, map_url, background_image_url")
+    .eq("id", courseId)
+    .single();
+
+  if (error || !data) {
+    console.error(error);
+    alert("Could not load course details.");
+    return;
+  }
+
+  setCourseName(data.name || "");
+  setCourseAddress(data.address || "");
+  setCoursePhone(data.phone || "");
+  setCourseMapUrl(data.map_url || "");
+  setBackgroundImageUrl(data.background_image_url || "");
+};
+
   if (loading) {
     return <div className="min-h-screen bg-black p-6 text-white">Loading tournament...</div>;
   }
@@ -305,7 +336,7 @@ export default function TournamentAdminPage() {
         <div className="mt-6 space-y-4">
           <select
               value={selectedCourseId}
-              onChange={(e) => setSelectedCourseId(e.target.value)}
+              onChange={(e) => handleCourseSelect(e.target.value)}
               className="w-full rounded-2xl bg-black p-4 text-white outline-none"
             >
               <option value="">Select Course</option>
