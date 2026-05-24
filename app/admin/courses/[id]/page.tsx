@@ -290,7 +290,7 @@ export default function CourseDetailPage() {
       onChange={(e) =>
         updateHoleField(hole.hole_number, "yards", e.target.value)
       }
-      placeholder="382"
+      placeholder="0"
       className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
     />
   </label>
