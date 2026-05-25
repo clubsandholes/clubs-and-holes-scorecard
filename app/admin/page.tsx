@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -79,6 +78,7 @@ export default function AdminPage() {
     return (
 
       <div className="min-h-screen bg-black p-6 text-white">
+        
 
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center">
 

@@ -1,5 +1,5 @@
 "use client";
-
+import AdminNav from "../AdminNav";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -73,6 +73,7 @@ export default function CoursesAdminPage() {
 
   return (
     <div className="min-h-screen bg-black p-6 text-white">
+      <AdminNav />
       <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
         Clubs & Holes Admin
       </div>
