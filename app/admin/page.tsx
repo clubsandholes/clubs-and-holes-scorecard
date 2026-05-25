@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
+import AdminNav from "./AdminNav";
 
 import { supabase } from "@/lib/supabase";
 
@@ -124,9 +125,9 @@ export default function AdminPage() {
 
   }
 
-  return (
-
-    <div className="min-h-screen bg-black p-6 text-white">
+return (
+  <div className="min-h-screen bg-black p-6 text-white">
+    <AdminNav />
 
       <div className="flex items-center justify-between">
 
