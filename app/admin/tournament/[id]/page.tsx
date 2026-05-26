@@ -157,6 +157,12 @@ export default function TournamentAdminPage() {
     setTeamPlayers(data || []);
   };
 
+  const getMaxPlayersPerTeam = () => {
+  if (formatType === "2v2") return 2;
+  if (formatType === "4v4") return 4;
+  return 999;
+  };
+
   useEffect(() => {
     if (tournamentId) {
       fetchTournament();
@@ -297,28 +303,42 @@ export default function TournamentAdminPage() {
     fetchTeams();
   };
 
-  const assignPlayerToTeam = async (
-    teamId: string,
-    playerId: string
-  ) => {
-    if (!playerId) return;
+  cconst assignPlayerToTeam = async (teamId: string, playerId: string) => {
+  if (!playerId) return;
 
-    await supabase.from("team_players").insert({
-      team_id: teamId,
-      tournament_player_id: playerId,
-    });
+  const maxPlayers = getMaxPlayersPerTeam();
 
-    fetchTeamPlayers();
-  };
+  const currentTeamCount = teamPlayers.filter(
+    (tp) => tp.team_id === teamId
+  ).length;
 
-  const removePlayerFromTeam = async (teamPlayerId: string) => {
-    await supabase
-      .from("team_players")
-      .delete()
-      .eq("id", teamPlayerId);
+  if (currentTeamCount >= maxPlayers) {
+    alert(`This team is already full. Max players: ${maxPlayers}`);
+    return;
+  }
 
-    fetchTeamPlayers();
-  };
+  const playerAlreadyAssigned = teamPlayers.some(
+    (tp) => tp.tournament_player_id === playerId
+  );
+
+  if (playerAlreadyAssigned) {
+    alert("This player is already assigned to a team.");
+    return;
+  }
+
+  const { error } = await supabase.from("team_players").insert({
+    team_id: teamId,
+    tournament_player_id: playerId,
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Player could not be assigned.");
+    return;
+  }
+
+  fetchTeamPlayers();
+};
 
   if (loading) {
     return (
