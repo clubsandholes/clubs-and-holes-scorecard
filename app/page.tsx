@@ -144,7 +144,7 @@ export default function Home() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "id, name, code, course_name, background_image_url, course_address, course_phone, course_map_url, course_id"
+              "id, name, code, course_id, status, course_name, background_image_url, course_address, course_phone, course_map_url"
       )
       .eq("code", code)
       .single();
@@ -153,6 +153,26 @@ export default function Home() {
       alert("Tournament not found. Check the code.");
       return;
     }
+
+    if (data.status !== "active") {
+  if (data.status === "draft") {
+    alert("This tournament is not open yet.");
+    return;
+  }
+
+  if (data.status === "completed") {
+    alert("This tournament has been completed.");
+    return;
+  }
+
+  if (data.status === "archived") {
+    alert("This tournament is archived.");
+    return;
+  }
+
+  alert("This tournament is not currently active.");
+  return;
+}
 
     setCurrentTournamentId(data.id);
     await applyTournamentSettings(data);
