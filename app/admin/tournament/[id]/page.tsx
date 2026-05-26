@@ -733,167 +733,70 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
       >
         ADD
       </button>
+    </div>
 
-      <div className="mt-4">
-  <select
-    defaultValue=""
-    onChange={(e) => assignPlayerToTeam(team.id, e.target.value)}
-    className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
-  >
-    <option value="">Assign player...</option>
-
-    {players.map((player) => (
-      <option key={player.id} value={player.id}>
-        {player.name}
-      </option>
-    ))}
-  </select>
-
-  <div className="mt-3 space-y-2">
-    {teamPlayers
-      .filter((tp) => tp.team_id === team.id)
-      .map((tp) => {
-        const player = players.find((p) => p.id === tp.tournament_player_id);
-
-        return (
-          <div
-            key={tp.id}
-            className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
-          >
-            <div className="font-bold">{player?.name || "Unknown Player"}</div>
+    <div className="mt-6 space-y-3">
+      {teams.map((team) => (
+        <div
+          key={team.id}
+          className="rounded-2xl border border-white/10 bg-black p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-black">{team.name}</div>
 
             <button
-              onClick={() => removePlayerFromTeam(tp.id)}
-              className="text-xs font-black uppercase text-red-400"
+              onClick={() => deleteTeam(team.id)}
+              className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
             >
-              Remove
+              Delete
             </button>
           </div>
-        );
-      })}
-  </div>
-</div>
-    </div>
 
+          <div className="mt-4">
+            <select
+              defaultValue=""
+              onChange={(e) => assignPlayerToTeam(team.id, e.target.value)}
+              className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+            >
+              <option value="">Assign player...</option>
 
-    
+              {players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+            </select>
 
+            <div className="mt-3 space-y-2">
+              {teamPlayers
+                .filter((tp) => tp.team_id === team.id)
+                .map((tp) => {
+                  const player = players.find(
+                    (p) => p.id === tp.tournament_player_id
+                  );
 
+                  return (
+                    <div
+                      key={tp.id}
+                      className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
+                    >
+                      <div className="font-bold">
+                        {player?.name || "Unknown Player"}
+                      </div>
 
-  <div className="mt-6 space-y-3">
-  {teams.map((team) => (
-    <div
-      key={team.id}
-      className="rounded-2xl border border-white/10 bg-black p-4"
-    >
-      <div className="flex items-center justify-between">
-        <div className="text-lg font-black">{team.name}</div>
-
-        <button
-          onClick={() => deleteTeam(team.id)}
-          className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
-        >
-          Delete
-        </button>
-      </div>
-
-      <div className="mt-4">
-        <select
-          defaultValue=""
-          onChange={(e) => assignPlayerToTeam(team.id, e.target.value)}
-          className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
-        >
-          <option value="">Assign player...</option>
-
-          {players.map((player) => (
-            <option key={player.id} value={player.id}>
-              {player.name}
-            </option>
-          ))}
-        </select>
-
-        <div className="mt-3 space-y-2">
-          {teamPlayers
-            .filter((tp) => tp.team_id === team.id)
-            .map((tp) => {
-              const player = players.find(
-                (p) => p.id === tp.tournament_player_id
-              );
-
-              return (
-                <div
-                  key={tp.id}
-                  className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
-                >
-                  <div className="font-bold">
-                    {player?.name || "Unknown Player"}
-                  </div>
-
-                  <button
-                    onClick={() => removePlayerFromTeam(tp.id)}
-                    className="text-xs font-black uppercase text-red-400"
-                  >
-                    Remove
-                  </button>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-
-      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-          Players
-        </div>
-
-        <h2 className="mt-2 text-2xl font-black">Tournament Players</h2>
-
-        <div className="mt-5 flex gap-3">
-          <input
-            value={newPlayerName}
-            onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Add player..."
-            className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
-          />
-
-          <button onClick={addPlayer} className="rounded-full bg-[#ff9900] px-6 font-black text-black">
-            ADD
-          </button>
-        </div>
-
-        <div className="mt-6 space-y-3">
-          {players.map((player) => (
-            <div key={player.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4">
-              <div>
-                <div className="text-lg font-black">{player.name}</div>
-
-                <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                  {player.claimed ? "Claimed" : "Available"}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => unlockSinglePlayer(player.id)}
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase"
-                >
-                  Unlock
-                </button>
-
-                <button
-                  onClick={() => deletePlayer(player.id)}
-                  className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
-                >
-                  Delete
-                </button>
-              </div>
+                      <button
+                        onClick={() => removePlayerFromTeam(tp.id)}
+                        className="text-xs font-black uppercase text-red-400"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
-  );
-}
+  </div>
+)}
