@@ -15,6 +15,7 @@ type Tournament = {
   course_phone?: string;
   course_map_url?: string;
   tournament_date?: string;
+  status?: string;
 };
 
 export default function TournamentAdminPage() {
@@ -32,7 +33,7 @@ export default function TournamentAdminPage() {
   const [courseMapUrl, setCourseMapUrl] = useState("");
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState("");
-
+  const [tournamentStatus, setTournamentStatus] = useState("draft");
   const [players, setPlayers] = useState<any[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
 
@@ -40,8 +41,7 @@ export default function TournamentAdminPage() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-          "id, name, code, course_id, tournament_date, course_name, background_image_url, course_address, course_phone, course_map_url"
-)
+          "id, name, code, course_id, tournament_date, status, course_name, background_image_url, course_address, course_phone, course_map_url"
       .eq("id", tournamentId)
       .single();
 
@@ -61,6 +61,7 @@ export default function TournamentAdminPage() {
     setSelectedCourseId(data.course_id || "");
     setTournamentCodeValue(data.code || "");
     setTournamentDate(data.tournament_date || "");
+    setTournamentStatus(data.status || "draft");
     setLoading(false);
   };
 
@@ -136,6 +137,7 @@ export default function TournamentAdminPage() {
       course_address: courseAddress,
       course_phone: coursePhone,
       course_map_url: courseMapUrl,
+      status: tournamentStatus,
     })
     .eq("id", tournamentId);
 
@@ -409,6 +411,24 @@ export default function TournamentAdminPage() {
               className="w-full rounded-2xl bg-black p-4 text-white outline-none"
             />
           </label>
+
+              <label className="block">
+                <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+                  Tournament Status
+                </div>
+
+                <select
+                  value={tournamentStatus}
+                  onChange={(e) => setTournamentStatus(e.target.value)}
+                  className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+
           <input
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
