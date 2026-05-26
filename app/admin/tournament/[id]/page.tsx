@@ -14,6 +14,7 @@ type Tournament = {
   course_address?: string;
   course_phone?: string;
   course_map_url?: string;
+  tournament_date?: string;
 };
 
 export default function TournamentAdminPage() {
@@ -39,7 +40,7 @@ export default function TournamentAdminPage() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-  "id, name, code, course_id, course_name, background_image_url, course_address, course_phone, course_map_url"
+          "id, name, code, course_id, tournament_date, course_name, background_image_url, course_address, course_phone, course_map_url"
 )
       .eq("id", tournamentId)
       .single();
@@ -58,6 +59,7 @@ export default function TournamentAdminPage() {
     setCoursePhone(data.course_phone || "");
     setCourseMapUrl(data.course_map_url || "");
     setSelectedCourseId(data.course_id || "");
+    setTournamentDate(data.tournament_date || "");
     setLoading(false);
   };
 
@@ -108,6 +110,7 @@ export default function TournamentAdminPage() {
         course_address: courseAddress,
         course_phone: coursePhone,
         course_map_url: courseMapUrl,
+        tournament_date: tournamentDate || null,
       })
       .eq("id", tournamentId);
 
@@ -142,7 +145,7 @@ export default function TournamentAdminPage() {
     setAdminMessage("");
     alert("Admin alert sent.");
   };
-
+  const [tournamentDate, setTournamentDate] = useState("");
   const clearTicker = async () => {
     const confirmed = confirm("Clear ticker events for this tournament?");
     if (!confirmed) return;
@@ -349,6 +352,18 @@ export default function TournamentAdminPage() {
                 </option>
               ))}
           </select>
+          <label className="block">
+            <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+              Tournament Date
+            </div>
+
+            <input
+              type="date"
+              value={tournamentDate}
+              onChange={(e) => setTournamentDate(e.target.value)}
+              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+            />
+          </label>
           <input
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
