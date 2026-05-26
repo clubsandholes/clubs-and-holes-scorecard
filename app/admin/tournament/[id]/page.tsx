@@ -59,6 +59,7 @@ export default function TournamentAdminPage() {
     setCoursePhone(data.course_phone || "");
     setCourseMapUrl(data.course_map_url || "");
     setSelectedCourseId(data.course_id || "");
+    setTournamentCodeValue(data.code || "");
     setTournamentDate(data.tournament_date || "");
     setLoading(false);
   };
@@ -99,30 +100,55 @@ export default function TournamentAdminPage() {
       fetchCourses();
     }
   }, [tournamentId]);
-
+  const isValidTournamentCode = (code: string) => {
+  return /^[A-Z0-9]{4,12}$/.test(code);
+};
   const saveTournamentSettings = async () => {
-    const { error } = await supabase
-      .from("tournaments")
-      .update({
-        course_id: selectedCourseId || null,
-        course_name: courseName,
-        background_image_url: backgroundImageUrl,
-        course_address: courseAddress,
-        course_phone: coursePhone,
-        course_map_url: courseMapUrl,
-        tournament_date: tournamentDate || null,
-      })
-      .eq("id", tournamentId);
+  const cleanedCode = tournamentCodeValue.trim().toUpperCase();
 
-    if (error) {
-      console.error(error);
-      alert("Tournament settings could not be saved.");
-      return;
-    }
+  if (!isValidTournamentCode(cleanedCode)) {
+    alert(
+      "Tournament code must be 4-12 characters using only letters and numbers."
+    );
+    return;
+  }
 
-    await fetchTournament();
-    alert("Tournament settings saved.");
-  };
+  const { data: existingTournament } = await supabase
+    .from("tournaments")
+    .select("id")
+    .eq("code", cleanedCode)
+    .neq("id", tournamentId)
+    .maybeSingle();
+
+  if (existingTournament) {
+    alert("Tournament code already exists.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("tournaments")
+    .update({
+      code: cleanedCode,
+      course_id: selectedCourseId || null,
+      tournament_date: tournamentDate || null,
+      course_name: courseName,
+      background_image_url: backgroundImageUrl,
+      course_address: courseAddress,
+      course_phone: coursePhone,
+      course_map_url: courseMapUrl,
+    })
+    .eq("id", tournamentId);
+
+  if (error) {
+    console.error(error);
+    alert("Tournament settings could not be saved.");
+    return;
+  }
+
+  await fetchTournament();
+
+  alert("Tournament settings saved.");
+};
 
   const sendAdminAlert = async () => {
     if (!adminMessage.trim()) {
@@ -146,6 +172,7 @@ export default function TournamentAdminPage() {
     alert("Admin alert sent.");
   };
   const [tournamentDate, setTournamentDate] = useState("");
+  const [tournamentCodeValue, setTournamentCodeValue] = useState("");
   const clearTicker = async () => {
     const confirmed = confirm("Clear ticker events for this tournament?");
     if (!confirmed) return;
@@ -352,6 +379,24 @@ export default function TournamentAdminPage() {
                 </option>
               ))}
           </select>
+
+          <label className="block">
+          <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+            Tournament Code
+          </div>
+
+            <input
+              value={tournamentCodeValue}
+              onChange={(e) =>
+                setTournamentCodeValue(
+                  e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+                )
+              }
+              placeholder="PLAY16"
+              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+            />
+          </label>
+
           <label className="block">
             <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
               Tournament Date
