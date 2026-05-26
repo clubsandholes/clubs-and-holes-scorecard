@@ -374,6 +374,42 @@ const deleteTeam = async (teamId: string) => {
 
     fetchPlayers();
   };
+  const addTeam = async () => {
+  if (!newTeamName.trim()) {
+    alert("Enter team name.");
+    return;
+  }
+
+  const { error } = await supabase.from("teams").insert({
+    tournament_id: tournamentId,
+    name: newTeamName.trim(),
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Team could not be added.");
+    return;
+  }
+
+  setNewTeamName("");
+  fetchTeams();
+};
+
+const deleteTeam = async (teamId: string) => {
+  const confirmed = confirm("Delete team?");
+  if (!confirmed) return;
+
+  const { error } = await supabase.from("teams").delete().eq("id", teamId);
+
+  if (error) {
+    console.error(error);
+    alert("Team could not be deleted.");
+    return;
+  }
+
+  fetchTeams();
+};
+
 
   const handleCourseSelect = async (courseId: string) => {
   setSelectedCourseId(courseId);
