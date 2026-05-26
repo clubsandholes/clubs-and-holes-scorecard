@@ -37,6 +37,7 @@ export default function TournamentAdminPage() {
   const [players, setPlayers] = useState<any[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [tournamentName, setTournamentName] = useState("");
+  const [formatType, setFormatType] = useState("individual");
 
   const fetchTournament = async () => {
     const { data, error } = await supabase
@@ -66,6 +67,7 @@ export default function TournamentAdminPage() {
     setTournamentStatus(data.status || "draft");
     setTournament(data);
     setLoading(false);
+    setFormatType(data.format_type || "individual");
   };
 
   const fetchPlayers = async () => {
@@ -142,6 +144,7 @@ export default function TournamentAdminPage() {
       course_map_url: courseMapUrl,
       status: tournamentStatus,
       name: tournamentName,
+      format_type: formatType,
     })
     .eq("id", tournamentId);
 
@@ -374,6 +377,25 @@ export default function TournamentAdminPage() {
       <p className="mt-2 text-gray-400">
         Tournament Code: <span className="font-black text-[#ff9900]">{tournament.code}</span>
       </p>
+
+
+      <label className="block">
+  <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+    Tournament Format
+  </div>
+
+  <select
+    value={formatType}
+    onChange={(e) => setFormatType(e.target.value)}
+    className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+  >
+    <option value="individual">Individual</option>
+    <option value="2v2">2v2 Team</option>
+    <option value="4v4">4v4 Team</option>
+    <option value="custom">Custom</option>
+  </select>
+</label>
+
 
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
