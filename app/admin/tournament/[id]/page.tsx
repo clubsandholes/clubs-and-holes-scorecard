@@ -24,6 +24,12 @@ type Team = {
   image_url?: string;
 };
 
+type TeamPlayer = {
+  id: string;
+  team_id: string;
+  tournament_player_id: string;
+};
+
 export default function TournamentAdminPage() {
   const params = useParams();
   const tournamentId = params.id as string;
@@ -46,6 +52,7 @@ export default function TournamentAdminPage() {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [tournamentName, setTournamentName] = useState("");
   const [formatType, setFormatType] = useState("individual");
+  const [teamPlayers, setTeamPlayers] = useState<TeamPlayer[]>([]);
 
   const fetchTournament = async () => {
     const { data, error } = await supabase
@@ -77,6 +84,20 @@ export default function TournamentAdminPage() {
     setLoading(false);
     setFormatType(data.format_type || "individual");
   };
+
+  const fetchTeamPlayers = async () => {
+  const { data, error } = await supabase
+    .from("team_players")
+    .select("id, team_id, tournament_player_id");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setTeamPlayers(data || []);
+};
+
 
   const fetchTeams = async () => {
   const { data, error } = await supabase
@@ -128,6 +149,7 @@ export default function TournamentAdminPage() {
       fetchPlayers();
       fetchCourses();
       fetchTeams();
+      fetchTeamPlayers();
     }
   }, [tournamentId]);
   const isValidTournamentCode = (code: string) => {
@@ -142,6 +164,22 @@ export default function TournamentAdminPage() {
     );
     return;
   }
+
+const removePlayerFromTeam = async (teamPlayerId: string) => {
+  const { error } = await supabase
+    .from("team_players")
+    .delete()
+    .eq("id", teamPlayerId);
+
+  if (error) {
+    console.error(error);
+    alert("Player could not be removed.");
+    return;
+  }
+
+  fetchTeamPlayers();
+};
+
 
   const { data: existingTournament } = await supabase
     .from("tournaments")
@@ -665,7 +703,52 @@ const deleteTeam = async (teamId: string) => {
       >
         ADD
       </button>
+
+      <div className="mt-4">
+  <select
+    defaultValue=""
+    onChange={(e) => assignPlayerToTeam(team.id, e.target.value)}
+    className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+  >
+    <option value="">Assign player...</option>
+
+    {players.map((player) => (
+      <option key={player.id} value={player.id}>
+        {player.name}
+      </option>
+    ))}
+  </select>
+
+  <div className="mt-3 space-y-2">
+    {teamPlayers
+      .filter((tp) => tp.team_id === team.id)
+      .map((tp) => {
+        const player = players.find((p) => p.id === tp.tournament_player_id);
+
+        return (
+          <div
+            key={tp.id}
+            className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
+          >
+            <div className="font-bold">{player?.name || "Unknown Player"}</div>
+
+            <button
+              onClick={() => removePlayerFromTeam(tp.id)}
+              className="text-xs font-black uppercase text-red-400"
+            >
+              Remove
+            </button>
+          </div>
+        );
+      })}
+  </div>
+</div>
     </div>
+
+
+    
+
+
 
     <div className="mt-6 space-y-3">
       {teams.map((team) => (
