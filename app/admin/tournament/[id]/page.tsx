@@ -42,6 +42,7 @@ export default function TournamentAdminPage() {
       .from("tournaments")
       .select(
           "id, name, code, course_id, tournament_date, status, course_name, background_image_url, course_address, course_phone, course_map_url";
+      )
       .eq("id", tournamentId)
       .single();
 
