@@ -18,6 +18,12 @@ type Tournament = {
   status?: string;
 };
 
+type Team = {
+  id: string;
+  name: string;
+  image_url?: string;
+};
+
 export default function TournamentAdminPage() {
   const params = useParams();
   const tournamentId = params.id as string;
@@ -35,6 +41,8 @@ export default function TournamentAdminPage() {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [tournamentStatus, setTournamentStatus] = useState("draft");
   const [players, setPlayers] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [newTeamName, setNewTeamName] = useState(""); 
   const [newPlayerName, setNewPlayerName] = useState("");
   const [tournamentName, setTournamentName] = useState("");
   const [formatType, setFormatType] = useState("individual");
@@ -70,6 +78,21 @@ export default function TournamentAdminPage() {
     setFormatType(data.format_type || "individual");
   };
 
+  const fetchTeams = async () => {
+  const { data, error } = await supabase
+    .from("teams")
+    .select("id, name, image_url")
+    .eq("tournament_id", tournamentId)
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setTeams(data || []);
+};
+
   const fetchPlayers = async () => {
     const { data, error } = await supabase
       .from("tournament_players")
@@ -104,6 +127,7 @@ export default function TournamentAdminPage() {
       fetchTournament();
       fetchPlayers();
       fetchCourses();
+      fetchTeams();
     }
   }, [tournamentId]);
   const isValidTournamentCode = (code: string) => {
@@ -130,6 +154,43 @@ export default function TournamentAdminPage() {
     alert("Tournament code already exists.");
     return;
   }
+
+const addTeam = async () => {
+  if (!newTeamName.trim()) {
+    alert("Enter team name.");
+    return;
+  }
+
+  const { error } = await supabase.from("teams").insert({
+    tournament_id: tournamentId,
+    name: newTeamName.trim(),
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Team could not be added.");
+    return;
+  }
+
+  setNewTeamName("");
+  fetchTeams();
+};
+
+const deleteTeam = async (teamId: string) => {
+  const confirmed = confirm("Delete team?");
+  if (!confirmed) return;
+
+  const { error } = await supabase.from("teams").delete().eq("id", teamId);
+
+  if (error) {
+    console.error(error);
+    alert("Team could not be deleted.");
+    return;
+  }
+
+  fetchTeams();
+};
+
 
   const { error } = await supabase
     .from("tournaments")
@@ -545,6 +606,50 @@ export default function TournamentAdminPage() {
           </button>
         </div>
       </div>
+
+{formatType !== "individual" && (
+  <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+      Teams
+    </div>
+
+    <h2 className="mt-2 text-2xl font-black">Team Manager</h2>
+
+    <div className="mt-5 flex gap-3">
+      <input
+        value={newTeamName}
+        onChange={(e) => setNewTeamName(e.target.value)}
+        placeholder="Add team..."
+        className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <button
+        onClick={addTeam}
+        className="rounded-full bg-[#ff9900] px-6 font-black text-black"
+      >
+        ADD
+      </button>
+    </div>
+
+    <div className="mt-6 space-y-3">
+      {teams.map((team) => (
+        <div
+          key={team.id}
+          className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
+        >
+          <div className="text-lg font-black">{team.name}</div>
+
+          <button
+            onClick={() => deleteTeam(team.id)}
+            className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
+          >
+            Delete
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
