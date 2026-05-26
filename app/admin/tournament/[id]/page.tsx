@@ -36,6 +36,7 @@ export default function TournamentAdminPage() {
   const [tournamentStatus, setTournamentStatus] = useState("draft");
   const [players, setPlayers] = useState<any[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
+  const [tournamentName, setTournamentName] = useState("");
 
   const fetchTournament = async () => {
     const { data, error } = await supabase
@@ -63,6 +64,7 @@ export default function TournamentAdminPage() {
     setTournamentCodeValue(data.code || "");
     setTournamentDate(data.tournament_date || "");
     setTournamentStatus(data.status || "draft");
+    setTournament(data);
     setLoading(false);
   };
 
@@ -139,6 +141,7 @@ export default function TournamentAdminPage() {
       course_phone: coursePhone,
       course_map_url: courseMapUrl,
       status: tournamentStatus,
+      name: tournamentName,
     })
     .eq("id", tournamentId);
 
@@ -355,7 +358,18 @@ export default function TournamentAdminPage() {
         Clubs & Holes Admin
       </div>
 
-      <h1 className="mt-2 text-4xl font-black">{tournament.name}</h1>
+      <label className="block">
+          <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+            Tournament Name
+          </div>
+
+          <input
+            value={tournamentName}
+            onChange={(e) => setTournamentName(e.target.value)}
+            placeholder="Belt Invitational"
+            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+        </label>
 
       <p className="mt-2 text-gray-400">
         Tournament Code: <span className="font-black text-[#ff9900]">{tournament.code}</span>
