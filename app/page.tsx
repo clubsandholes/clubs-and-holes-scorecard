@@ -719,7 +719,7 @@ export default function Home() {
       <div className="relative z-10">
         {activeAdminAlert && (
   <div className="fixed bottom-6 left-4 right-4 z-[100]">
-    <div className="rounded-[2rem] border border-red-400/40 bg-red-600/95 p-5 text-center text-white shadow-2xl backdrop-blur-md">
+    <div className="animate-admin-alert rounded-[2rem] border border-red-400/40 bg-red-600/95 p-5 text-center text-white shadow-2xl backdrop-blur-md">
       <div className="text-xs font-black uppercase tracking-[0.3em]">
         🚨 Admin Alert
       </div>
