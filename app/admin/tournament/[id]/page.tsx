@@ -696,7 +696,11 @@ const handleTeamImageUpload = async (
                 className="rounded-2xl border border-white/10 bg-black p-4"
               >
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-black">{team.name}</div>
+                  <div className="text-lg font-black leading-none whitespace-nowrap overflow-hidden text-ellipsis">
+
+                    {team.name}
+
+                  </div>
                   <input
                       type="file"
                       accept="image/*"
@@ -711,13 +715,28 @@ const handleTeamImageUpload = async (
                   </button>
                 </div>
 
-                {team.image_url && (
-                  <img
-                    src={team.image_url}
-                    alt={team.name}
-                    className="mt-4 h-32 w-full rounded-xl object-cover"
-                  />
-                )}
+                <div className="mt-4 rounded-2xl border border-white/10 bg-gray-950 p-4">
+                    <label className="flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
+                      Upload Team Photo
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleTeamImageUpload(team.id, e)}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {team.image_url && (
+                      <div className="mt-4 flex h-40 items-center justify-center overflow-hidden rounded-xl bg-black p-4">
+                        <img
+                          src={team.image_url}
+                          alt={team.name}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
 
                 <div className="mt-4">
                   <select
