@@ -701,12 +701,7 @@ const handleTeamImageUpload = async (
                     {team.name}
 
                   </div>
-                  <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleTeamImageUpload(team.id, e)}
-                      className="mt-4 w-full text-sm text-white/70"
-                    />
+                  
                   <button
                     onClick={() => deleteTeam(team.id)}
                     className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
