@@ -43,6 +43,36 @@ export default function TournamentAdminPage() {
   const params = useParams();
   const tournamentId = params.id as string;
 
+
+
+// =========================
+// LIVE CONTROL FUNCTIONS
+// =========================
+
+const sendAdminAlert = async () => {
+  if (!adminMessage.trim()) {
+    alert("Enter an admin alert message.");
+    return;
+  }
+
+  const { error } = await supabase.from("ticker_events").insert({
+    tournament_id: tournamentId,
+    message: `🚨 ADMIN ALERT: ${adminMessage.trim()}`,
+    event_type: "admin",
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Admin alert failed.");
+    return;
+  }
+
+  setAdminMessage("");
+  showAdminNotice("Admin alert sent.");
+};
+
+
+
   // =========================
   // LOADING / UI
   // =========================
@@ -713,6 +743,31 @@ const handleTeamImageUpload = async (
           </button>
         </div>
       </div>
+      
+
+      {/* LIVE CONTROLS */}
+        <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            Live Controls
+          </div>
+
+          <h2 className="mt-2 text-2xl font-black">Event Control Room</h2>
+
+          <textarea
+            value={adminMessage}
+            onChange={(e) => setAdminMessage(e.target.value)}
+            placeholder="Type admin alert..."
+            className="mt-5 min-h-28 w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <button
+            onClick={sendAdminAlert}
+            className="mt-4 w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+          >
+            SEND ADMIN ALERT
+          </button>
+        </div>
+
 
       {/* TEAM MANAGER */}
       {formatType !== "individual" && (
