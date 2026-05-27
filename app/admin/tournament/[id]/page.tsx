@@ -569,18 +569,29 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                             className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
                           >
                             <div className="font-bold">
-                              {player?.name || "Unknown Player"}
+                              {player?.name || "Unknown Player"} 
                               {team.official_scorer_player_id === player?.id ? (
-                                  <div className="mt-1 text-xs font-black uppercase tracking-[0.15em] text-[#ff9900]">
+
+                                  <div className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+
                                     ⭐ Official Scorer
+
                                   </div>
+
                                 ) : (
+
                                   <button
+
                                     onClick={() => setOfficialScorer(team.id, player!.id)}
-                                    className="mt-1 text-xs font-black uppercase tracking-[0.15em] text-[#ff9900]"
+
+                                    className="mt-3 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+
                                   >
+
                                     Make Official Scorer
+
                                   </button>
+
                                 )}
 
                             </div>
