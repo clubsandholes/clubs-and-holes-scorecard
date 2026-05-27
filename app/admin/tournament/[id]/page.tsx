@@ -879,52 +879,54 @@ const handleTeamImageUpload = async (
         <div className="mt-6 space-y-3">
           {players.map((player) => (
             <div
-              key={player.id}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
-            >
-              <div>
-                {player.profile_image_url && (
-                  <img
-                    src={player.profile_image_url}
-                    alt={player.name}
-                    className="mb-3 h-16 w-16 rounded-full object-cover"
-                  />
-                )}
+  key={player.id}
+  className="rounded-2xl border border-white/10 bg-black p-4"
+>
+  <div className="flex items-start gap-4">
+    {player.profile_image_url && (
+      <img
+        src={player.profile_image_url}
+        alt={player.name}
+        className="h-16 w-16 shrink-0 rounded-full object-cover"
+      />
+    )}
 
-                <div className="text-lg font-black">{player.name}</div>
-                <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                  {player.claimed ? "Claimed" : "Available"}
-                </div>  
-                <label className="mt-4 flex w-fit items-center justify-center whitespace-nowrap rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-                    Upload Player Photo
+    <div className="min-w-0 flex-1">
+      <div className="text-lg font-black">{player.name}</div>
 
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handlePlayerImageUpload(player.id, e)}
-                      className="hidden"
-                    />
-                  </label>
+      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
+        {player.claimed ? "Claimed" : "Available"}
+      </div>
 
-                
-              </div>
+      <label className="mt-4 flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+        Upload Player Photo
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => unlockSinglePlayer(player.id)}
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase"
-                >
-                  Unlock
-                </button>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handlePlayerImageUpload(player.id, e)}
+          className="hidden"
+        />
+      </label>
+    </div>
+  </div>
 
-                <button
-                  onClick={() => deletePlayer(player.id)}
-                  className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+  <div className="mt-4 grid grid-cols-2 gap-3">
+    <button
+      onClick={() => unlockSinglePlayer(player.id)}
+      className="rounded-full border border-white/10 px-4 py-3 text-xs font-black uppercase"
+    >
+      Unlock
+    </button>
+
+    <button
+      onClick={() => deletePlayer(player.id)}
+      className="rounded-full border border-red-500/30 px-4 py-3 text-xs font-black uppercase text-red-400"
+    >
+      Delete
+    </button>
+  </div>
+</div>
           ))}
         </div>
       </div>
