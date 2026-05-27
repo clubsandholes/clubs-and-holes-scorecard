@@ -717,22 +717,26 @@ export default function Home() {
       <div className="fixed inset-0 bg-gradient-to-b from-black/80 via-black/10 to-black/60" />
 
       <div className="relative z-10">
-        {activeAdminAlert && (
-          <div className="animate-admin-alert fixed left-0 right-0 top-0 z-[100] bg-red-600 text-center text-white shadow-lg">
-            <div
-              className="px-6 py-5"
-              style={{ paddingTop: "env(safe-area-inset-top)" }}
-            >
-              <div className="text-xs font-black uppercase tracking-[0.3em]">
-                🚨 Admin Alert
-              </div>
+        {activeAdminAlert ? (
+  <div className="fixed top-0 left-0 right-0 z-[100]">
+    <div
+      className="bg-red-600 px-6 pb-5 pt-5 text-center text-white shadow-lg"
+      style={{
+        paddingTop: "calc(env(safe-area-inset-top) + 20px)",
+      }}
+    >
+      <div className="text-xs font-black uppercase tracking-[0.3em]">
+        🚨 Admin Alert
+      </div>
 
-              <div className="mt-2 text-xl font-black">
-                {activeAdminAlert.message.replace("🚨 ADMIN ALERT:", "").trim()}
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="mt-2 text-xl font-black">
+        {activeAdminAlert.message
+          .replace("🚨 ADMIN ALERT:", "")
+          .trim()}
+      </div>
+    </div>
+  </div>
+) : null}
 
         {saveMessage && (
           <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
