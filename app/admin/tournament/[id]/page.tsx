@@ -506,6 +506,58 @@ export default function TournamentAdminPage() {
   }
 
   // =========================
+// TEAM IMAGE UPLOAD
+// =========================
+
+const handleTeamImageUpload = async (
+  teamId: string,
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  const fileExtension = file.name.split(".").pop() || "jpg";
+
+  const filePath = `teams/${teamId}/logo.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("scorecard-media")
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Team image upload failed.");
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("scorecard-media")
+    .getPublicUrl(filePath);
+
+  const publicUrl = data.publicUrl;
+
+  const { error: updateError } = await supabase
+    .from("teams")
+    .update({
+      image_url: publicUrl,
+    })
+    .eq("id", teamId);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Team image could not be saved.");
+    return;
+  }
+
+  fetchTeams();
+
+  showAdminNotice("Team image uploaded.");
+};
+
+  // =========================
   // UI
   // =========================
 
@@ -645,7 +697,12 @@ export default function TournamentAdminPage() {
               >
                 <div className="flex items-center justify-between">
                   <div className="text-lg font-black">{team.name}</div>
-
+                  <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleTeamImageUpload(team.id, e)}
+                      className="mt-4 w-full text-sm text-white/70"
+                    />
                   <button
                     onClick={() => deleteTeam(team.id)}
                     className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
