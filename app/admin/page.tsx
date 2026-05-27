@@ -93,10 +93,10 @@ export default function AdminPage() {
     .single();
 
   if (error || !data) {
-    console.error(error);
-    alert("Tournament could not be created.");
-    return;
-  }
+  console.error("Create tournament error:", error);
+  alert(error?.message || "Tournament could not be created.");
+  return;
+}
 
   router.push(`/admin/tournament/${data.id}`);
 };
