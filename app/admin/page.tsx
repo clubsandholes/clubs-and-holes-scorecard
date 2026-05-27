@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import AdminNav from "./AdminNav";
+import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
@@ -25,6 +26,8 @@ export default function AdminPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
 
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   const unlockAdmin = () => {
 
@@ -73,6 +76,30 @@ export default function AdminPage() {
     }
 
   }, [isUnlocked]);
+
+  const createTournament = async () => {
+  const defaultName = "New Tournament";
+  const randomCode = `CH${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const { data, error } = await supabase
+    .from("tournaments")
+    .insert({
+      name: defaultName,
+      code: randomCode,
+      status: "draft",
+      format_type: "individual",
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    console.error(error);
+    alert("Tournament could not be created.");
+    return;
+  }
+
+  router.push(`/admin/tournament/${data.id}`);
+};
 
   if (!isUnlocked) {
 
@@ -147,11 +174,12 @@ return (
 
         </div>
 
-        <button className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
-
-          + New Tournament
-
-        </button>
+        <button
+            onClick={createTournament}
+            className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
+          >
+            + New Tournament
+          </button>
 
       </div>
 
