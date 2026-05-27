@@ -340,6 +340,21 @@ export default function TournamentAdminPage() {
   fetchTeamPlayers();
 };
 
+const removePlayerFromTeam = async (teamPlayerId: string) => {
+  const { error } = await supabase
+    .from("team_players")
+    .delete()
+    .eq("id", teamPlayerId);
+
+  if (error) {
+    console.error(error);
+    alert("Player could not be removed.");
+    return;
+  }
+
+  fetchTeamPlayers();
+};
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black p-6 text-white">
