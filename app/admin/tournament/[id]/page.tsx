@@ -24,6 +24,7 @@ type Team = {
   id: string;
   name: string;
   image_url?: string;
+  official_scorer_player_id?: string;
 };
 
 type TeamPlayer = {
@@ -134,7 +135,7 @@ export default function TournamentAdminPage() {
   const fetchTeams = async () => {
     const { data, error } = await supabase
       .from("teams")
-      .select("id, name, image_url")
+      .select("id, name, image_url, official_scorer_player_id")
       .eq("tournament_id", tournamentId)
       .order("name");
 
@@ -145,6 +146,24 @@ export default function TournamentAdminPage() {
 
     setTeams(data || []);
   };
+
+
+    const setOfficialScorer = async (teamId: string, playerId: string) => {
+  const { error } = await supabase
+    .from("teams")
+    .update({
+      official_scorer_player_id: playerId,
+    })
+    .eq("id", teamId);
+
+  if (error) {
+    console.error(error);
+    alert("Official scorer could not be set.");
+    return;
+  }
+
+  fetchTeams();
+};
 
   const fetchTeamPlayers = async () => {
     const { data, error } = await supabase
@@ -551,6 +570,19 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                           >
                             <div className="font-bold">
                               {player?.name || "Unknown Player"}
+                              {team.official_scorer_player_id === player?.id ? (
+                                  <div className="mt-1 text-xs font-black uppercase tracking-[0.15em] text-[#ff9900]">
+                                    ⭐ Official Scorer
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => setOfficialScorer(team.id, player!.id)}
+                                    className="mt-1 text-xs font-black uppercase tracking-[0.15em] text-[#ff9900]"
+                                  >
+                                    Make Official Scorer
+                                  </button>
+                                )}
+
                             </div>
 
                             <button
