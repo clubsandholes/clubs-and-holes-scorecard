@@ -65,6 +65,8 @@ export default function TournamentAdminPage() {
 
   const [adminMessage, setAdminMessage] = useState("");
 
+  const [adminNotice, setAdminNotice] = useState("");
+
   const fetchTournament = async () => {
     const { data, error } = await supabase
       .from("tournaments")
@@ -162,6 +164,14 @@ export default function TournamentAdminPage() {
   if (formatType === "4v4") return 4;
   return 999;
   };
+
+  const showAdminNotice = (message: string) => {
+  setAdminNotice(message);
+
+  setTimeout(() => {
+    setAdminNotice("");
+  }, 2500);
+};
 
   useEffect(() => {
     if (tournamentId) {
@@ -283,6 +293,7 @@ export default function TournamentAdminPage() {
       .eq("id", playerId);
 
     fetchPlayers();
+    showAdminNotice("Player unlocked.");
   };
 
   const addTeam = async () => {
@@ -374,6 +385,12 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
   return (
     <div className="min-h-screen bg-black p-6 text-white">
       <AdminNav />
+
+      {adminNotice && (
+  <div className="mb-4 rounded-2xl border border-[#ff9900] bg-[#ff9900]/10 p-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff9900]">
+    {adminNotice}
+  </div>
+)}
 
       <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
         Clubs & Holes Admin
