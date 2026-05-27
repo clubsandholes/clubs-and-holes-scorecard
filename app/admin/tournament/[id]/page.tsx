@@ -33,11 +33,26 @@ type TeamPlayer = {
   tournament_player_id: string;
 };
 
+
 export default function TournamentAdminPage() {
+
+  // =========================
+  // ROUTER / PARAMS
+  // =========================
+
   const params = useParams();
   const tournamentId = params.id as string;
 
+  // =========================
+  // LOADING / UI
+  // =========================
+
   const [loading, setLoading] = useState(true);
+  const [adminNotice, setAdminNotice] = useState("");
+
+  // =========================
+  // TOURNAMENT STATE
+  // =========================
 
   const [tournament, setTournament] = useState<Tournament | null>(null);
 
@@ -46,6 +61,11 @@ export default function TournamentAdminPage() {
   const [tournamentDate, setTournamentDate] = useState("");
   const [tournamentStatus, setTournamentStatus] = useState("draft");
   const [formatType, setFormatType] = useState("individual");
+  const [tournamentRules, setTournamentRules] = useState("");
+
+  // =========================
+  // COURSE STATE
+  // =========================
 
   const [courseName, setCourseName] = useState("");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
@@ -56,24 +76,73 @@ export default function TournamentAdminPage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState("");
 
+  // =========================
+  // PLAYER STATE
+  // =========================
+
   const [players, setPlayers] = useState<any[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
+
+  // =========================
+  // TEAM STATE
+  // =========================
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [newTeamName, setNewTeamName] = useState("");
 
   const [teamPlayers, setTeamPlayers] = useState<TeamPlayer[]>([]);
 
+  // =========================
+  // LIVE CONTROL STATE
+  // =========================
+
   const [adminMessage, setAdminMessage] = useState("");
 
-  const [adminNotice, setAdminNotice] = useState("");
+  // =========================
+  // HELPERS
+  // =========================
+
+  const showAdminNotice = (message: string) => {
+    setAdminNotice(message);
+
+    setTimeout(() => {
+      setAdminNotice("");
+    }, 2500);
+  };
+
+  const isValidTournamentCode = (code: string) => {
+    return /^[A-Z0-9]{4,12}$/.test(code);
+  };
+
+  const getMaxPlayersPerTeam = () => {
+    if (formatType === "2v2") return 2;
+    if (formatType === "4v4") return 4;
+
+    return 999;
+  };
+
+  // =========================
+  // FETCH FUNCTIONS
+  // =========================
 
   const fetchTournament = async () => {
     const { data, error } = await supabase
       .from("tournaments")
-      .select(
-        "id, name, code, course_id, tournament_date, status, format_type, course_name, background_image_url, course_address, course_phone, course_map_url"
-      )
+      .select(`
+        id,
+        name,
+        code,
+        rules,
+        course_id,
+        tournament_date,
+        status,
+        format_type,
+        course_name,
+        background_image_url,
+        course_address,
+        course_phone,
+        course_map_url
+      `)
       .eq("id", tournamentId)
       .single();
 
@@ -91,6 +160,7 @@ export default function TournamentAdminPage() {
     setTournamentDate(data.tournament_date || "");
     setTournamentStatus(data.status || "draft");
     setFormatType(data.format_type || "individual");
+    setTournamentRules(data.rules || "");
 
     setSelectedCourseId(data.course_id || "");
 
@@ -104,93 +174,45 @@ export default function TournamentAdminPage() {
   };
 
   const fetchCourses = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("courses")
       .select("id, name")
       .order("name");
-
-    if (error) {
-      console.error(error);
-      return;
-    }
 
     setCourses(data || []);
   };
 
   const fetchPlayers = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("tournament_players")
       .select("*")
       .eq("tournament_id", tournamentId)
       .order("name");
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
     setPlayers(data || []);
   };
 
   const fetchTeams = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("teams")
       .select("id, name, image_url, official_scorer_player_id")
       .eq("tournament_id", tournamentId)
       .order("name");
 
-    if (error) {
-      console.error(error);
-      return;
-    }
-
     setTeams(data || []);
   };
 
-
-    const setOfficialScorer = async (teamId: string, playerId: string) => {
-  const { error } = await supabase
-    .from("teams")
-    .update({
-      official_scorer_player_id: playerId,
-    })
-    .eq("id", teamId);
-
-  if (error) {
-    console.error(error);
-    alert("Official scorer could not be set.");
-    return;
-  }
-
-  fetchTeams();
-};
-
   const fetchTeamPlayers = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("team_players")
-      .select("id, team_id, tournament_player_id");
-
-    if (error) {
-      console.error(error);
-      return;
-    }
+      .select("*");
 
     setTeamPlayers(data || []);
   };
 
-  const getMaxPlayersPerTeam = () => {
-  if (formatType === "2v2") return 2;
-  if (formatType === "4v4") return 4;
-  return 999;
-  };
-
-  const showAdminNotice = (message: string) => {
-  setAdminNotice(message);
-
-  setTimeout(() => {
-    setAdminNotice("");
-  }, 2500);
-};
+  // =========================
+  // EFFECTS
+  // =========================
 
   useEffect(() => {
     if (tournamentId) {
@@ -202,12 +224,14 @@ export default function TournamentAdminPage() {
     }
   }, [tournamentId]);
 
-  const isValidTournamentCode = (code: string) => {
-    return /^[A-Z0-9]{4,12}$/.test(code);
-  };
+  // =========================
+  // TOURNAMENT SAVE
+  // =========================
 
   const saveTournamentSettings = async () => {
-    const cleanedCode = tournamentCodeValue.trim().toUpperCase();
+
+    const cleanedCode =
+      tournamentCodeValue.trim().toUpperCase();
 
     if (!isValidTournamentCode(cleanedCode)) {
       alert(
@@ -233,6 +257,7 @@ export default function TournamentAdminPage() {
       .update({
         name: tournamentName,
         code: cleanedCode,
+        rules: tournamentRules,
         tournament_date: tournamentDate || null,
         status: tournamentStatus,
         format_type: formatType,
@@ -254,8 +279,13 @@ export default function TournamentAdminPage() {
 
     await fetchTournament();
 
-    alert("Tournament settings saved.");
+    showAdminNotice("Tournament settings saved.");
   };
+
+
+  // =========================
+  // COURSE FUNCTIONS
+  // =========================
 
   const handleCourseSelect = async (courseId: string) => {
     setSelectedCourseId(courseId);
@@ -270,6 +300,7 @@ export default function TournamentAdminPage() {
 
     if (error || !data) {
       console.error(error);
+      alert("Course details could not be loaded.");
       return;
     }
 
@@ -280,30 +311,51 @@ export default function TournamentAdminPage() {
     setBackgroundImageUrl(data.background_image_url || "");
   };
 
+  // =========================
+  // PLAYER FUNCTIONS
+  // =========================
+
   const addPlayer = async () => {
     if (!newPlayerName.trim()) return;
 
-    await supabase.from("tournament_players").insert({
+    const { error } = await supabase.from("tournament_players").insert({
       tournament_id: tournamentId,
       name: newPlayerName.trim(),
       claimed: false,
     });
 
+    if (error) {
+      console.error(error);
+      alert("Player could not be added.");
+      return;
+    }
+
     setNewPlayerName("");
     fetchPlayers();
+    showAdminNotice("Player added.");
   };
 
   const deletePlayer = async (playerId: string) => {
-    await supabase
+    const confirmed = confirm("Delete player?");
+    if (!confirmed) return;
+
+    const { error } = await supabase
       .from("tournament_players")
       .delete()
       .eq("id", playerId);
 
+    if (error) {
+      console.error(error);
+      alert("Player could not be deleted.");
+      return;
+    }
+
     fetchPlayers();
+    showAdminNotice("Player deleted.");
   };
 
   const unlockSinglePlayer = async (playerId: string) => {
-    await supabase
+    const { error } = await supabase
       .from("tournament_players")
       .update({
         claimed: false,
@@ -311,79 +363,131 @@ export default function TournamentAdminPage() {
       })
       .eq("id", playerId);
 
+    if (error) {
+      console.error(error);
+      alert("Player could not be unlocked.");
+      return;
+    }
+
     fetchPlayers();
     showAdminNotice("Player unlocked.");
   };
 
+  // =========================
+  // TEAM FUNCTIONS
+  // =========================
+
   const addTeam = async () => {
     if (!newTeamName.trim()) return;
 
-    await supabase.from("teams").insert({
+    const { error } = await supabase.from("teams").insert({
       tournament_id: tournamentId,
       name: newTeamName.trim(),
     });
 
+    if (error) {
+      console.error(error);
+      alert("Team could not be added.");
+      return;
+    }
+
     setNewTeamName("");
     fetchTeams();
+    showAdminNotice("Team added.");
   };
 
   const deleteTeam = async (teamId: string) => {
-    await supabase.from("teams").delete().eq("id", teamId);
+    const confirmed = confirm("Delete team?");
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("teams").delete().eq("id", teamId);
+
+    if (error) {
+      console.error(error);
+      alert("Team could not be deleted.");
+      return;
+    }
 
     fetchTeams();
+    fetchTeamPlayers();
+    showAdminNotice("Team deleted.");
   };
 
   const assignPlayerToTeam = async (teamId: string, playerId: string) => {
-  if (!playerId) return;
+    if (!playerId) return;
 
-  const maxPlayers = getMaxPlayersPerTeam();
+    const maxPlayers = getMaxPlayersPerTeam();
 
-  const currentTeamCount = teamPlayers.filter(
-    (tp) => tp.team_id === teamId
-  ).length;
+    const currentTeamCount = teamPlayers.filter(
+      (tp) => tp.team_id === teamId
+    ).length;
 
-  if (currentTeamCount >= maxPlayers) {
-    alert(`This team is already full. Max players: ${maxPlayers}`);
-    return;
-  }
+    if (currentTeamCount >= maxPlayers) {
+      alert(`This team is already full. Max players: ${maxPlayers}`);
+      return;
+    }
 
-  const playerAlreadyAssigned = teamPlayers.some(
-    (tp) => tp.tournament_player_id === playerId
-  );
+    const playerAlreadyAssigned = teamPlayers.some(
+      (tp) => tp.tournament_player_id === playerId
+    );
 
-  if (playerAlreadyAssigned) {
-    alert("This player is already assigned to a team.");
-    return;
-  }
+    if (playerAlreadyAssigned) {
+      alert("This player is already assigned to a team.");
+      return;
+    }
 
-  const { error } = await supabase.from("team_players").insert({
-    team_id: teamId,
-    tournament_player_id: playerId,
-  });
+    const { error } = await supabase.from("team_players").insert({
+      team_id: teamId,
+      tournament_player_id: playerId,
+    });
 
-  if (error) {
-    console.error(error);
-    alert("Player could not be assigned.");
-    return;
-  }
+    if (error) {
+      console.error(error);
+      alert("Player could not be assigned.");
+      return;
+    }
 
-  fetchTeamPlayers();
-};
+    fetchTeamPlayers();
+    showAdminNotice("Player assigned to team.");
+  };
 
-const removePlayerFromTeam = async (teamPlayerId: string) => {
-  const { error } = await supabase
-    .from("team_players")
-    .delete()
-    .eq("id", teamPlayerId);
+  const removePlayerFromTeam = async (teamPlayerId: string) => {
+    const { error } = await supabase
+      .from("team_players")
+      .delete()
+      .eq("id", teamPlayerId);
 
-  if (error) {
-    console.error(error);
-    alert("Player could not be removed.");
-    return;
-  }
+    if (error) {
+      console.error(error);
+      alert("Player could not be removed.");
+      return;
+    }
 
-  fetchTeamPlayers();
-};
+    fetchTeamPlayers();
+    showAdminNotice("Player removed from team.");
+  };
+
+  const setOfficialScorer = async (teamId: string, playerId: string) => {
+    const { error } = await supabase
+      .from("teams")
+      .update({
+        official_scorer_player_id: playerId,
+      })
+      .eq("id", teamId);
+
+    if (error) {
+      console.error(error);
+      alert("Official scorer could not be set.");
+      return;
+    }
+
+    fetchTeams();
+    showAdminNotice("Official scorer updated.");
+  };
+
+    // =========================
+  // LOADING / NOT FOUND STATES
+  // =========================
 
   if (loading) {
     return (
@@ -401,31 +505,36 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
     );
   }
 
+  // =========================
+  // UI
+  // =========================
+
   return (
     <div className="min-h-screen bg-black p-6 text-white">
       <AdminNav />
 
       {adminNotice && (
-  <div className="mb-4 rounded-2xl border border-[#ff9900] bg-[#ff9900]/10 p-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff9900]">
-    {adminNotice}
-  </div>
-)}
+        <div className="mb-4 rounded-2xl border border-[#ff9900] bg-[#ff9900]/10 p-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff9900]">
+          {adminNotice}
+        </div>
+      )}
 
+      {/* PAGE HEADER */}
       <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
         Clubs & Holes Admin
       </div>
 
-      <h1 className="mt-2 text-4xl font-black">
-        {tournament.name}
-      </h1>
+      <h1 className="mt-2 text-4xl font-black">{tournament.name}</h1>
 
+      {/* TOURNAMENT SETTINGS */}
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Tournament Info
         </div>
 
-        <div className="mt-6 space-y-4">
+        <h2 className="mt-2 text-2xl font-black">Event Setup</h2>
 
+        <div className="mt-6 space-y-4">
           <input
             value={tournamentName}
             onChange={(e) => setTournamentName(e.target.value)}
@@ -487,6 +596,13 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
             ))}
           </select>
 
+          <textarea
+            value={tournamentRules}
+            onChange={(e) => setTournamentRules(e.target.value)}
+            placeholder="Tournament Rules"
+            className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
           <button
             onClick={saveTournamentSettings}
             className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
@@ -496,11 +612,14 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
         </div>
       </div>
 
+      {/* TEAM MANAGER */}
       {formatType !== "individual" && (
         <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
           <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
             Teams
           </div>
+
+          <h2 className="mt-2 text-2xl font-black">Team Manager</h2>
 
           <div className="mt-5 flex gap-3">
             <input
@@ -525,9 +644,7 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                 className="rounded-2xl border border-white/10 bg-black p-4"
               >
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-black">
-                    {team.name}
-                  </div>
+                  <div className="text-lg font-black">{team.name}</div>
 
                   <button
                     onClick={() => deleteTeam(team.id)}
@@ -536,6 +653,14 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                     Delete
                   </button>
                 </div>
+
+                {team.image_url && (
+                  <img
+                    src={team.image_url}
+                    alt={team.name}
+                    className="mt-4 h-32 w-full rounded-xl object-cover"
+                  />
+                )}
 
                 <div className="mt-4">
                   <select
@@ -559,8 +684,7 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                       .filter((tp) => tp.team_id === team.id)
                       .map((tp) => {
                         const player = players.find(
-                          (p) =>
-                            p.id === tp.tournament_player_id
+                          (p) => p.id === tp.tournament_player_id
                         );
 
                         return (
@@ -568,38 +692,30 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
                             key={tp.id}
                             className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
                           >
-                            <div className="font-bold">
-                              {player?.name || "Unknown Player"} 
+                            <div>
+                              <div className="font-bold">
+                                {player?.name || "Unknown Player"}
+                              </div>
+
                               {team.official_scorer_player_id === player?.id ? (
-
-                                  <div className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-
-                                    ⭐ Official Scorer
-
-                                  </div>
-
-                                ) : (
-
-                                  <button
-
-                                    onClick={() => setOfficialScorer(team.id, player!.id)}
-
-                                    className="mt-3 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
-
-                                  >
-
-                                    Make Official Scorer
-
-                                  </button>
-
-                                )}
-
+                                <div className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                                  ⭐ Official Scorer
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    player &&
+                                    setOfficialScorer(team.id, player.id)
+                                  }
+                                  className="mt-2 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+                                >
+                                  Make Official Scorer
+                                </button>
+                              )}
                             </div>
 
                             <button
-                              onClick={() =>
-                                removePlayerFromTeam(tp.id)
-                              }
+                              onClick={() => removePlayerFromTeam(tp.id)}
                               className="text-xs font-black uppercase text-red-400"
                             >
                               Remove
@@ -615,10 +731,13 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
         </div>
       )}
 
+      {/* PLAYER MANAGER */}
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Players
         </div>
+
+        <h2 className="mt-2 text-2xl font-black">Tournament Players</h2>
 
         <div className="mt-5 flex gap-3">
           <input
@@ -643,9 +762,15 @@ const removePlayerFromTeam = async (teamPlayerId: string) => {
               className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
             >
               <div>
-                <div className="text-lg font-black">
-                  {player.name}
-                </div>
+                {player.profile_image_url && (
+                  <img
+                    src={player.profile_image_url}
+                    alt={player.name}
+                    className="mb-3 h-16 w-16 rounded-full object-cover"
+                  />
+                )}
+
+                <div className="text-lg font-black">{player.name}</div>
 
                 <div className="text-xs uppercase tracking-[0.18em] text-white/50">
                   {player.claimed ? "Claimed" : "Available"}
