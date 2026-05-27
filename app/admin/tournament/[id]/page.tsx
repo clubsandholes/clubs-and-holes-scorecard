@@ -485,6 +485,56 @@ export default function TournamentAdminPage() {
     showAdminNotice("Official scorer updated.");
   };
 
+
+  // =========================
+// PLAYER IMAGE UPLOAD
+// =========================
+
+const handlePlayerImageUpload = async (
+  playerId: string,
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const fileExtension = file.name.split(".").pop() || "jpg";
+  const filePath = `players/${playerId}/profile.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("scorecard-media")
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Player image upload failed.");
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("scorecard-media")
+    .getPublicUrl(filePath);
+
+  const publicUrl = data.publicUrl;
+
+  const { error: updateError } = await supabase
+    .from("tournament_players")
+    .update({
+      profile_image_url: publicUrl,
+    })
+    .eq("id", playerId);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Player image could not be saved.");
+    return;
+  }
+
+  fetchPlayers();
+  showAdminNotice("Player image uploaded.");
+};
+
     // =========================
   // LOADING / NOT FOUND STATES
   // =========================
@@ -842,6 +892,17 @@ const handleTeamImageUpload = async (
                 )}
 
                 <div className="text-lg font-black">{player.name}</div>
+
+                <label className="mt-4 inline-flex cursor-pointer items-center justify-center rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                    Upload Player Photo
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handlePlayerImageUpload(player.id, e)}
+                      className="hidden"
+                    />
+                  </label>
 
                 <div className="text-xs uppercase tracking-[0.18em] text-white/50">
                   {player.claimed ? "Claimed" : "Available"}
