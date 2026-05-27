@@ -303,7 +303,7 @@ export default function TournamentAdminPage() {
     fetchTeams();
   };
 
-  cconst assignPlayerToTeam = async (teamId: string, playerId: string) => {
+  const assignPlayerToTeam = async (teamId: string, playerId: string) => {
   if (!playerId) return;
 
   const maxPlayers = getMaxPlayersPerTeam();
