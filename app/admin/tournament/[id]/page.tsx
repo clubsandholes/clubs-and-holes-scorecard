@@ -892,8 +892,10 @@ const handleTeamImageUpload = async (
                 )}
 
                 <div className="text-lg font-black">{player.name}</div>
-
-                <label className="mt-4 inline-flex cursor-pointer items-center justify-center rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                <div className="text-xs uppercase tracking-[0.18em] text-white/50">
+                  {player.claimed ? "Claimed" : "Available"}
+                </div>  
+                <label className="mt-4 flex w-fit items-center justify-center whitespace-nowrap rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
                     Upload Player Photo
 
                     <input
@@ -904,9 +906,7 @@ const handleTeamImageUpload = async (
                     />
                   </label>
 
-                <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                  {player.claimed ? "Claimed" : "Available"}
-                </div>
+                
               </div>
 
               <div className="flex gap-2">
