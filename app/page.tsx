@@ -336,8 +336,13 @@ export default function Home() {
         }
       )
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "ticker_events" },
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "ticker_events",
+              filter: `tournament_id=eq.${currentTournamentId}`,
+            },
         async () => {
           await fetchTickerEvents(currentTournamentId);
         }
@@ -713,7 +718,13 @@ export default function Home() {
 
       <div className="relative z-10">
         {activeAdminAlert && (
-          <div className="animate-admin-alert fixed inset-x-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg">
+          <div
+
+                className="animate-admin-alert fixed left-0 right-0 top-0 z-[100] bg-red-600 px-6 py-5 text-center text-white shadow-lg"
+
+                style={{ paddingTop: "env(safe-area-inset-top)" }}
+
+              >
             <div className="text-xs font-black uppercase tracking-[0.3em]">
               🚨 Admin Alert
             </div>
