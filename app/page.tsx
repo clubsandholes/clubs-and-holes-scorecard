@@ -718,15 +718,17 @@ export default function Home() {
 
       <div className="relative z-10">
         {activeAdminAlert && (
-  <div className="relative z-[100] mb-4 rounded-2xl bg-red-600 px-6 py-5 text-center text-white shadow-lg">
-    <div className="text-xs font-black uppercase tracking-[0.3em]">
-      🚨 Admin Alert
-    </div>
+  <div className="fixed bottom-6 left-4 right-4 z-[100]">
+    <div className="rounded-[2rem] border border-red-400/40 bg-red-600/95 p-5 text-center text-white shadow-2xl backdrop-blur-md">
+      <div className="text-xs font-black uppercase tracking-[0.3em]">
+        🚨 Admin Alert
+      </div>
 
-    <div className="mt-2 text-xl font-black">
-      {activeAdminAlert.message
-        .replace("🚨 ADMIN ALERT:", "")
-        .trim()}
+      <div className="mt-2 text-xl font-black leading-tight">
+        {activeAdminAlert.message
+          .replace("🚨 ADMIN ALERT:", "")
+          .trim()}
+      </div>
     </div>
   </div>
 )}
