@@ -734,13 +734,18 @@ export default function Home() {
 )}
 
         {saveMessage && (
-          <div className="animate-success-alert fixed inset-x-0 top-0 z-[90] bg-green-600 px-6 py-5 text-center text-white shadow-lg">
-            <div className="text-xs font-black uppercase tracking-[0.3em]">
-              ✅ Score Saved
-            </div>
-            <div className="mt-2 text-xl font-black">{saveMessage}</div>
-          </div>
-        )}
+  <div className="fixed bottom-6 left-4 right-4 z-[90]">
+    <div className="animate-admin-alert rounded-[2rem] border border-green-400/40 bg-green-600/95 p-5 text-center text-white shadow-2xl backdrop-blur-md">
+      <div className="text-xs font-black uppercase tracking-[0.3em]">
+        ✅ Score Saved
+      </div>
+
+      <div className="mt-2 text-xl font-black leading-tight">
+        {saveMessage}
+      </div>
+    </div>
+  </div>
+)}
 
         {view !== "join" && view !== "selectPlayer" && (
           <div className="flex items-center justify-between gap-3">
