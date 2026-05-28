@@ -435,7 +435,7 @@ const playersForSelectedTeam =
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "course_name, background_image_url, course_address, course_phone, course_map_url, course_id"
+  "course_name, background_image_url, course_address, course_phone, course_map_url, course_id, format_type"
       )
       .eq("id", tournamentId)
       .single();
@@ -446,6 +446,8 @@ const playersForSelectedTeam =
     }
 
     await applyTournamentSettings(data);
+    await fetchTeams(tournamentId);
+await fetchTeamPlayers();
   };
 
   useEffect(() => {
