@@ -102,6 +102,7 @@ export default function Home() {
   const [currentCourseId, setCurrentCourseId] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
   const [formatType, setFormatType] = useState("individual");
+  const [tournamentRules, setTournamentRules] = useState("");
 
   // =========================
   // COURSE DISPLAY STATE
@@ -210,6 +211,7 @@ export default function Home() {
     setCoursePhone(newCoursePhone);
     setCourseMapUrl(newCourseMapUrl);
     setCurrentCourseId(newCourseId);
+    setTournamentRules(data.rules || "");
 
         if (newCourseId) {
       await fetchCourseHoles(newCourseId);
@@ -229,7 +231,7 @@ export default function Home() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-        "id, name, code, course_id, status, format_type, course_name, background_image_url, course_address, course_phone, course_map_url"
+        "id, name, code, course_id, status, format_type, rules, course_name, background_image_url, course_address, course_phone, course_map_url"
         )
       .eq("code", code)
       .single();
@@ -462,7 +464,7 @@ const playersForSelectedTeam =
 
     await applyTournamentSettings(data);
     await fetchTeams(tournamentId);
-await fetchTeamPlayers();
+    await fetchTeamPlayers();
   };
 
   useEffect(() => {
@@ -1491,25 +1493,15 @@ const leaderboard =
         )}
 
         {view === "rules" && (
-          <div className="mt-10">
-            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-              Belt Rules
-            </div>
-
-            <h1 className="mt-3 text-4xl font-black">Tournament Rules</h1>
-
-            <div className="mt-8 space-y-4 text-gray-300">
-              <p>• Each player enters their own score after every hole.</p>
-              <p>• Scores must be called out before moving to the next tee.</p>
-              <p>• Lowest net score wins the Belt.</p>
-              <p>• Tiebreaker 1: Final 6 holes.</p>
-              <p>• Tiebreaker 2: Final 3 holes.</p>
-              <p>• Tiebreaker 3: Hole 18.</p>
-              <p>• No fake scores. No boring golf. Swing Reckless.</p>
-            </div>
-          </div>
-        )}
-      </div>
+  <div className="mt-10">
+    <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+      Tournament Rules
     </div>
-  );
-}
+
+    <h1 className="mt-3 text-4xl font-black">Rules</h1>
+
+    <div className="mt-8 whitespace-pre-line rounded-[2rem] border border-white/10 bg-black/55 p-5 text-lg leading-relaxed text-gray-300 backdrop-blur-md">
+      {tournamentRules || "Tournament rules have not been added yet."}
+    </div>
+  </div>
+)}
