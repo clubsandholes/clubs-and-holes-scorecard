@@ -906,13 +906,7 @@ const teamLeaderboard = teams.map((team) => {
 const leaderboard =
   formatType === "individual" ? playerLeaderboard : teamLeaderboard;
 
-const sortedLeaderboard = [...leaderboard].sort((a, b) => {
-  if (a.net !== b.net) return a.net - b.net;
-  if (a.last6 !== b.last6) return a.last6 - b.last6;
-  if (a.last3 !== b.last3) return a.last3 - b.last3;
-  if (a.last1 !== b.last1) return a.last1 - b.last1;
-  return a.name.localeCompare(b.name);
-});
+
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => {
     if (a.net !== b.net) return a.net - b.net;
