@@ -3,7 +3,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+// =========================
+// BRAND CONSTANTS
+// =========================
+
 const accentColor = "#ff9900";
+
+// =========================
+// HOLE TYPES / DEFAULTS
+// =========================
 
 type Hole = {
   number: number;
@@ -19,22 +27,46 @@ const defaultHoles: Hole[] = Array.from({ length: 18 }, (_, index) => ({
   image_url: `/hole-${index + 1}.png`,
 }));
 
+// =========================
+// VIEW TYPES
+// =========================
+
 type View =
   | "join"
+  | "selectTeam"
   | "selectPlayer"
   | "scorecard"
   | "leaderboard"
   | "courseInfo"
   | "rules";
 
+// =========================
+// DATA TYPES
+// =========================
+
 type Player = {
   id: string;
   name: string;
   claimed: boolean;
+  profile_image_url?: string;
+};
+
+type Team = {
+  id: string;
+  name: string;
+  image_url?: string;
+  official_scorer_player_id?: string;
+};
+
+type TeamPlayer = {
+  id: string;
+  team_id: string;
+  tournament_player_id: string;
 };
 
 type ScoreRow = {
-  tournament_player_id: string;
+  tournament_player_id?: string | null;
+  team_id?: string | null;
   hole_number: number;
   strokes: number;
 };
@@ -46,25 +78,34 @@ type TickerEvent = {
   created_at: string;
 };
 
+
+
+
+
+
+
+
+
 export default function Home() {
+  // =========================
+  // VIEW / MENU STATE
+  // =========================
+
   const [view, setView] = useState<View>("join");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [previousLeaderboard, setPreviousLeaderboard] = useState<string[]>([]);
-  const [allScores, setAllScores] = useState<ScoreRow[]>([]);
-  const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
-  const [tickerIndex, setTickerIndex] = useState(0);
-
-  const [activeAdminAlert, setActiveAdminAlert] =
-    useState<TickerEvent | null>(null);
-  const [lastAdminAlertId, setLastAdminAlertId] = useState("");
+  // =========================
+  // TOURNAMENT STATE
+  // =========================
 
   const [currentTournamentId, setCurrentTournamentId] = useState("");
   const [currentCourseId, setCurrentCourseId] = useState("");
-  const [selectedPlayerId, setSelectedPlayerId] = useState("");
-  const [playerName, setPlayerName] = useState("");
   const [tournamentCode, setTournamentCode] = useState("");
+  const [formatType, setFormatType] = useState("individual");
+
+  // =========================
+  // COURSE DISPLAY STATE
+  // =========================
 
   const [courseName, setCourseName] = useState("Clubs & Holes Championship");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
@@ -72,14 +113,56 @@ export default function Home() {
   const [coursePhone, setCoursePhone] = useState("");
   const [courseMapUrl, setCourseMapUrl] = useState("");
   const [holes, setHoles] = useState<Hole[]>(defaultHoles);
+
+  // =========================
+  // PLAYER / TEAM STATE
+  // =========================
+
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<TeamPlayer[]>([]);
+
+  const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [playerName, setPlayerName] = useState("");
+
+  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedTeamName, setSelectedTeamName] = useState("");
+  const [canScore, setCanScore] = useState(true);
+
+  // =========================
+  // SCORING STATE
+  // =========================
+
   const [scores, setScores] = useState<Record<number, number>>({});
+  const [allScores, setAllScores] = useState<ScoreRow[]>([]);
+  const [previousLeaderboard, setPreviousLeaderboard] = useState<string[]>([]);
+
   const [currentHoleIndex, setCurrentHoleIndex] = useState(0);
   const [draftScore, setDraftScore] = useState(defaultHoles[0].par);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] =
-    useState("");
+  const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  // =========================
+  // TICKER / ALERT STATE
+  // =========================
+
+  const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([]);
+  const [tickerIndex, setTickerIndex] = useState(0);
+
+  const [activeAdminAlert, setActiveAdminAlert] =
+    useState<TickerEvent | null>(null);
+  const [lastAdminAlertId, setLastAdminAlertId] = useState("");
+
+
+
+
+
+
+
+
+
 
   const hole = holes[currentHoleIndex] || defaultHoles[0];
   const currentHoleHasScore = scores[hole.number] !== undefined;
@@ -112,6 +195,8 @@ export default function Home() {
   setCurrentHoleIndex(0);
 };
     const applyTournamentSettings = async (data: any) => {
+      const newFormatType = data.format_type || "individual";
+      setFormatType(newFormatType);
     const newCourseId = data.course_id || "";  
     const newCourseName = data.course_name || "Clubs & Holes Championship";
     const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
@@ -144,8 +229,8 @@ export default function Home() {
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-              "id, name, code, course_id, status, course_name, background_image_url, course_address, course_phone, course_map_url"
-      )
+        "id, name, code, course_id, status, format_type, course_name, background_image_url, course_address, course_phone, course_map_url"
+        )
       .eq("code", code)
       .single();
 
@@ -183,9 +268,65 @@ export default function Home() {
     await fetchPlayers(data.id);
     await fetchAllScores(data.id);
     await fetchTickerEvents(data.id);
+    await fetchTeams(data.id);
+    await fetchTeamPlayers();
 
-    setView("selectPlayer");
+    setView((data.format_type || "individual") === "individual" ? "selectPlayer" : "selectTeam");
   };
+
+
+// =========================
+// TEAM FETCH FUNCTIONS
+// =========================
+
+const fetchTeams = async (tournamentId?: string) => {
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
+
+  const { data, error } = await supabase
+    .from("teams")
+    .select("id, name, image_url, official_scorer_player_id")
+    .eq("tournament_id", idToUse)
+    .order("name");
+
+  if (error) {
+    console.error("Error fetching teams:", error);
+    return;
+  }
+
+  setTeams(data || []);
+};
+
+// =========================
+// TEAM SELECTION FLOW
+// =========================
+
+const selectTeam = (team: Team) => {
+  setSelectedTeamId(team.id);
+  setSelectedTeamName(team.name);
+
+  localStorage.setItem("selectedTeamId", team.id);
+  localStorage.setItem("selectedTeamName", team.name);
+
+  setView("selectPlayer");
+};
+
+
+
+const fetchTeamPlayers = async () => {
+  const { data, error } = await supabase
+    .from("team_players")
+    .select("id, team_id, tournament_player_id");
+
+  if (error) {
+    console.error("Error fetching team players:", error);
+    return;
+  }
+
+  setTeamPlayers(data || []);
+};
+
+
 
   const fetchPlayers = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
@@ -228,7 +369,7 @@ export default function Home() {
 
     const { data, error } = await supabase
       .from("scores")
-      .select("tournament_player_id, hole_number, strokes")
+      .select("tournament_player_id, team_id, hole_number, strokes")
       .in("tournament_player_id", playerIds);
 
     if (error) {
@@ -238,6 +379,18 @@ export default function Home() {
 
     setAllScores(data || []);
   };
+
+const playersForSelectedTeam =
+  selectedTeamId && formatType !== "individual"
+    ? players.filter((player) =>
+        teamPlayers.some(
+          (tp) =>
+            tp.team_id === selectedTeamId &&
+            tp.tournament_player_id === player.id
+        )
+      )
+    : players;
+
 
   const fetchScoresForPlayer = async (playerId: string) => {
     const { data, error } = await supabase
@@ -300,6 +453,19 @@ export default function Home() {
     const savedTournamentCode = localStorage.getItem("tournamentCode");
     const savedPlayerId = localStorage.getItem("selectedPlayerId");
     const savedPlayerName = localStorage.getItem("playerName");
+
+    const savedTeamId = localStorage.getItem("selectedTeamId");
+    const savedTeamName = localStorage.getItem("selectedTeamName");
+    const savedCanScore = localStorage.getItem("canScore");
+
+    if (savedTeamId && savedTeamName) {
+        setSelectedTeamId(savedTeamId);
+        setSelectedTeamName(savedTeamName);
+      }
+
+      if (savedCanScore !== null) {
+        setCanScore(savedCanScore === "true");
+      }
 
     if (savedTournamentId) {
       setCurrentTournamentId(savedTournamentId);
@@ -431,6 +597,21 @@ export default function Home() {
 
     setSelectedPlayerId(data.id);
     setPlayerName(data.name);
+
+    if (formatType !== "individual") {
+  const team = getSelectedTeam();
+  const isOfficialScorer =
+    team?.official_scorer_player_id === data.id;
+
+  setCanScore(isOfficialScorer);
+  localStorage.setItem("canScore", String(isOfficialScorer));
+} else {
+  setCanScore(true);
+  localStorage.setItem("canScore", "true");
+}
+
+
+
     setView("scorecard");
 
     fetchScoresForPlayer(data.id);
@@ -440,7 +621,13 @@ export default function Home() {
   const resetLocalPlayer = () => {
     localStorage.removeItem("selectedPlayerId");
     localStorage.removeItem("playerName");
-
+    localStorage.removeItem("selectedTeamId");
+    localStorage.removeItem("selectedTeamName");
+    localStorage.removeItem("canScore");
+    
+    setSelectedTeamId("");
+    setSelectedTeamName("");
+    setCanScore(true);
     setSelectedPlayerId("");
     setPlayerName("");
     setScores({});
@@ -490,17 +677,33 @@ export default function Home() {
 
     setIsSaving(true);
 
-    const { error } = await supabase.from("scores").upsert(
-      {
+    const scorePayload =
+  formatType === "individual"
+    ? {
         tournament_player_id: selectedPlayerId,
+        team_id: null,
         hole_number: hole.number,
         strokes: draftScore,
         updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "tournament_player_id,hole_number",
       }
-    );
+    : {
+        tournament_player_id: null,
+        team_id: selectedTeamId,
+        hole_number: hole.number,
+        strokes: draftScore,
+        updated_at: new Date().toISOString(),
+      };
+
+const conflictTarget =
+  formatType === "individual"
+    ? "tournament_player_id,hole_number"
+    : "team_id,hole_number";
+
+const { error } = await supabase.from("scores").upsert(scorePayload, {
+  onConflict: conflictTarget,
+});
+
+
 
     if (error) {
       console.error("Error saving score:", error);
@@ -596,6 +799,11 @@ export default function Home() {
     return holes.reduce((total, h) => total + (scoreMap[h.number] ?? 0), 0);
   };
 
+
+  const getSelectedTeam = () => {
+  return teams.find((team) => team.id === selectedTeamId);
+};
+
   const getParPlayed = (scoreMap: Record<number, number>) => {
     return holes.reduce(
       (total, h) => (scoreMap[h.number] ? total + h.par : total),
@@ -636,26 +844,75 @@ export default function Home() {
   const parPlayed = getParPlayed(scores);
   const net = grossTotal - parPlayed;
 
-  const leaderboard = players.map((player) => {
-    const playerScores = getPlayerScoreMap(player.id);
-    const gross = getGrossTotal(playerScores);
-    const par = getParPlayed(playerScores);
-    const thru = Object.keys(playerScores).length;
-    const lastHole = getLastHole(playerScores);
+// =========================
+// LEADERBOARD CALCULATIONS
+// =========================
 
-    return {
-      id: player.id,
-      name: player.name,
-      thru,
-      gross,
-      net: gross - par,
-      lastHole,
-      lastHoleScore: lastHole ? playerScores[lastHole] : null,
-      last6: getLastNToPar(playerScores, 6),
-      last3: getLastNToPar(playerScores, 3),
-      last1: getLastNToPar(playerScores, 1),
-    };
-  });
+const getTeamScoreMap = (teamId: string) => {
+  const map: Record<number, number> = {};
+
+  allScores
+    .filter((score) => score.team_id === teamId)
+    .forEach((score) => {
+      map[score.hole_number] = score.strokes;
+    });
+
+  return map;
+};
+
+const playerLeaderboard = players.map((player) => {
+  const playerScores = getPlayerScoreMap(player.id);
+  const gross = getGrossTotal(playerScores);
+  const par = getParPlayed(playerScores);
+  const thru = Object.keys(playerScores).length;
+  const lastHole = getLastHole(playerScores);
+
+  return {
+    id: player.id,
+    name: player.name,
+    thru,
+    gross,
+    net: gross - par,
+    lastHole,
+    lastHoleScore: lastHole ? playerScores[lastHole] : null,
+    last6: getLastNToPar(playerScores, 6),
+    last3: getLastNToPar(playerScores, 3),
+    last1: getLastNToPar(playerScores, 1),
+  };
+});
+
+const teamLeaderboard = teams.map((team) => {
+  const teamScores = getTeamScoreMap(team.id);
+  const gross = getGrossTotal(teamScores);
+  const par = getParPlayed(teamScores);
+  const thru = Object.keys(teamScores).length;
+  const lastHole = getLastHole(teamScores);
+
+  return {
+    id: team.id,
+    name: team.name,
+    image_url: team.image_url,
+    thru,
+    gross,
+    net: gross - par,
+    lastHole,
+    lastHoleScore: lastHole ? teamScores[lastHole] : null,
+    last6: getLastNToPar(teamScores, 6),
+    last3: getLastNToPar(teamScores, 3),
+    last1: getLastNToPar(teamScores, 1),
+  };
+});
+
+const leaderboard =
+  formatType === "individual" ? playerLeaderboard : teamLeaderboard;
+
+const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+  if (a.net !== b.net) return a.net - b.net;
+  if (a.last6 !== b.last6) return a.last6 - b.last6;
+  if (a.last3 !== b.last3) return a.last3 - b.last3;
+  if (a.last1 !== b.last1) return a.last1 - b.last1;
+  return a.name.localeCompare(b.name);
+});
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => {
     if (a.net !== b.net) return a.net - b.net;
@@ -747,7 +1004,7 @@ export default function Home() {
   </div>
 )}
 
-        {view !== "join" && view !== "selectPlayer" && (
+        {view !== "join" && view !== "selectTeam" && view !== "selectPlayer" && (
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => openView("scorecard")}
@@ -832,6 +1089,49 @@ export default function Home() {
           </div>
         )}
 
+
+        {view === "selectTeam" && (
+  <div className="mt-10">
+    <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+      Code: {tournamentCode}
+    </div>
+
+    <h1 className="mt-3 text-4xl font-black">Select Your Team</h1>
+
+    <div className="mt-8 space-y-3">
+      {teams.map((team) => (
+        <button
+          key={team.id}
+          onClick={() => selectTeam(team)}
+          className="w-full rounded-2xl border border-white/10 bg-black/60 p-4 text-left backdrop-blur-md"
+        >
+          <div className="flex items-center gap-4">
+            {team.image_url && (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-950 p-2">
+                <img
+                  src={team.image_url}
+                  alt={team.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            )}
+
+            <div className="min-w-0">
+              <div className="truncate text-xl font-black">{team.name}</div>
+
+              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
+                Select Team
+              </div>
+            </div>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+)}  
+
+
+
         {view === "selectPlayer" && (
           <div className="mt-10">
             <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
@@ -841,7 +1141,7 @@ export default function Home() {
             <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
 
             <div className="mt-8 space-y-3">
-              {players.map((p) => (
+              {playersForSelectedTeam.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => selectPlayer(p)}
@@ -872,143 +1172,171 @@ export default function Home() {
         )}
 
         {view === "scorecard" && (
-          <>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
-                  backgroundColor: accentColor,
-                }}
-              />
+  <>
+    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
+      <div
+        className="h-full rounded-full transition-all duration-500"
+        style={{
+          width: `${((currentHoleIndex + 1) / holes.length) * 100}%`,
+          backgroundColor: accentColor,
+        }}
+      />
+    </div>
+
+    <div
+      onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
+      onTouchEnd={(e) => handleHoleSwipe(e.changedTouches[0].clientX)}
+      className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl backdrop-blur-md"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            HOLE {hole.number}
+          </div>
+
+          <div className="mt-2 text-xl font-black text-white">
+            {courseName}
+          </div>
+
+          {formatType !== "individual" && selectedTeamName && (
+            <div className="mt-2 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-[#ff9900]">
+              {selectedTeamName}
             </div>
+          )}
+
+          {formatType !== "individual" && !canScore && (
+            <div className="mt-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-white/60">
+              View Only
+            </div>
+          )}
+
+          <div className="mt-3 text-2xl font-black text-white">
+            PAR {hole.par}
+          </div>
+
+          <div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
+            {hole.yards} Yards
+          </div>
+        </div>
+
+        <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+          <img
+            src={currentHoleImage}
+            alt={`Hole ${hole.number}`}
+            className="h-full w-auto object-contain"
+          />
+        </div>
+      </div>
+
+      {canScore ? (
+        <div className="mt-6 flex flex-col items-center">
+          <div className="flex items-center justify-center gap-6">
+            <button
+              onClick={() => changeDraftScore(draftScore - 1)}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
+                currentHoleHasScore
+                  ? "border-white/10 text-white/20"
+                  : "border-[#ff9900] text-[#ff9900]"
+              }`}
+            >
+              −
+            </button>
 
             <div
-              onTouchStart={(e) => setTouchStartX(e.touches[0].clientX)}
-              onTouchEnd={(e) => handleHoleSwipe(e.changedTouches[0].clientX)}
-              className="mt-5 rounded-[2rem] border border-white/10 bg-black/55 p-5 shadow-2xl backdrop-blur-md"
+              className={`select-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
+                currentHoleHasScore ? "text-white/45" : "text-white"
+              }`}
             >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-                    HOLE {hole.number}
-                  </div>
-
-                  <div className="mt-2 text-xl font-black text-white">
-                    {courseName}
-                  </div>
-
-                  <div className="mt-3 text-2xl font-black text-white">
-                    PAR {hole.par}
-                  </div>
-
-                  <div className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-white/70">
-                    {hole.yards} Yards
-                  </div>
-                </div>
-
-                <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-                  <img
-                    src={currentHoleImage}
-                    alt={`Hole ${hole.number}`}
-                    className="h-full w-auto object-contain"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col items-center">
-                <div className="flex items-center justify-center gap-6">
-                  <button
-                    onClick={() => changeDraftScore(draftScore - 1)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
-                      currentHoleHasScore
-                        ? "border-white/10 text-white/20"
-                        : "border-[#ff9900] text-[#ff9900]"
-                    }`}
-                  >
-                    −
-                  </button>
-
-                  <div
-                    className={`select-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
-                      currentHoleHasScore ? "text-white/45" : "text-white"
-                    }`}
-                  >
-                    {draftScore}
-                  </div>
-
-                  <button
-                    onClick={() => changeDraftScore(draftScore + 1)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
-                      currentHoleHasScore
-                        ? "border-white/10 text-white/20"
-                        : "border-[#ff9900] text-[#ff9900]"
-                    }`}
-                  >
-                    +
-                  </button>
-                </div>
-
-                <div
-                  className={`mt-4 rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
-                    currentHoleHasScore
-                      ? "border-white/10 bg-white/5 text-white/35"
-                      : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
-                  }`}
-                >
-                  {getScoreLabel(draftScore, hole.par)}
-                </div>
-
-                <button
-                  onClick={enterScore}
-                  disabled={isSaving}
-                  className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
-                    scores[hole.number]
-                      ? "bg-white/10 text-white"
-                      : "bg-white text-black"
-                  }`}
-                >
-                  {isSaving
-                    ? "SAVING..."
-                    : scores[hole.number]
-                    ? `EDIT HOLE ${hole.number} SCORE`
-                    : `ENTER HOLE ${hole.number} SCORE`}
-                </button>
-              </div>
+              {draftScore}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
-              <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
-                {latestTickerMessage}
-              </div>
-            </div>
+            <button
+              onClick={() => changeDraftScore(draftScore + 1)}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border text-2xl font-black transition-all ${
+                currentHoleHasScore
+                  ? "border-white/10 text-white/20"
+                  : "border-[#ff9900] text-[#ff9900]"
+              }`}
+            >
+              +
+            </button>
+          </div>
 
-            <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
-              <button
-                onClick={goPrev}
-                disabled={currentHoleIndex === 0}
-                className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-              >
-                ←
-              </button>
+          <div
+            className={`mt-4 rounded-full border px-5 py-2 text-sm font-black uppercase tracking-[0.2em] ${
+              currentHoleHasScore
+                ? "border-white/10 bg-white/5 text-white/35"
+                : "border-[#ff9900] bg-[#ff9900]/10 text-[#ff9900]"
+            }`}
+          >
+            {getScoreLabel(draftScore, hole.par)}
+          </div>
 
-              <button
-                onClick={() => openView("leaderboard")}
-                className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
-              >
-                Leaderboard
-              </button>
+          <button
+            onClick={enterScore}
+            disabled={isSaving}
+            className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
+              scores[hole.number]
+                ? "bg-white/10 text-white"
+                : "bg-white text-black"
+            }`}
+          >
+            {isSaving
+              ? "SAVING..."
+              : scores[hole.number]
+              ? `EDIT HOLE ${hole.number} SCORE`
+              : `ENTER HOLE ${hole.number} SCORE`}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            View Only
+          </div>
 
-              <button
-                onClick={goNext}
-                disabled={currentHoleIndex === holes.length - 1}
-                className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-              >
-                →
-              </button>
-            </div>
-          </>
-        )}
+          <div className="mt-2 text-lg font-black">
+            Official scorer controls are locked.
+          </div>
+
+          <div className="mt-2 text-sm text-white/60">
+            You can follow the round, leaderboard, and live ticker.
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
+        {latestTickerMessage}
+      </div>
+    </div>
+
+    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
+      <button
+        onClick={goPrev}
+        disabled={currentHoleIndex === 0}
+        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
+      >
+        ←
+      </button>
+
+      <button
+        onClick={() => openView("leaderboard")}
+        className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
+      >
+        Leaderboard
+      </button>
+
+      <button
+        onClick={goNext}
+        disabled={currentHoleIndex === holes.length - 1}
+        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
+      >
+        →
+      </button>
+    </div>
+  </>
+)}
 
         {view === "leaderboard" && (
           <div className="mt-8">
