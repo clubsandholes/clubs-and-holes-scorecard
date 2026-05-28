@@ -642,23 +642,34 @@ console.log("Can Score:", isOfficialScorer);
     fetchPlayers();
   };
 
-  const resetLocalPlayer = () => {
-    localStorage.removeItem("selectedPlayerId");
-    localStorage.removeItem("playerName");
-    localStorage.removeItem("selectedTeamId");
-    localStorage.removeItem("selectedTeamName");
-    localStorage.removeItem("canScore");
-    
-    setSelectedTeamId("");
-    setSelectedTeamName("");
-    setCanScore(true);
-    setSelectedPlayerId("");
-    setPlayerName("");
-    setScores({});
-    setCurrentHoleIndex(0);
-    setMenuOpen(false);
-    setView("join");
-  };
+  const resetLocalPlayer = async () => {
+  if (selectedPlayerId) {
+    await supabase
+      .from("tournament_players")
+      .update({
+        claimed: false,
+        claimed_at: null,
+      })
+      .eq("id", selectedPlayerId);
+  }
+
+  localStorage.removeItem("selectedPlayerId");
+  localStorage.removeItem("playerName");
+  localStorage.removeItem("selectedTeamId");
+  localStorage.removeItem("selectedTeamName");
+  localStorage.removeItem("canScore");
+
+  setSelectedPlayerId("");
+  setPlayerName("");
+  setSelectedTeamId("");
+  setSelectedTeamName("");
+  setCanScore(true);
+  setScores({});
+  setCurrentHoleIndex(0);
+  setMenuOpen(false);
+
+  setView(formatType === "individual" ? "join" : "selectTeam");
+};
 
   useEffect(() => {
     setDraftScore(scores[hole.number] ?? hole.par);
