@@ -1168,7 +1168,20 @@ const leaderboard =
             </div>
 
             <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
-
+            {formatType !== "individual" && (
+              <button
+                onClick={() => {
+                  setSelectedTeamId("");
+                  setSelectedTeamName("");
+                  localStorage.removeItem("selectedTeamId");
+                  localStorage.removeItem("selectedTeamName");
+                  setView("selectTeam");
+                }}
+                className="mt-5 rounded-full border border-white/10 bg-black/50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+              >
+                ← Back to Teams
+              </button>
+)}
             <div className="mt-8 space-y-3">
               {playersForSelectedTeam.map((p) => (
                 <button
