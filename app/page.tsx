@@ -204,6 +204,7 @@ export default function Home() {
     const newCourseAddress = data.course_address || "";
     const newCoursePhone = data.course_phone || "";
     const newCourseMapUrl = data.course_map_url || "";
+    const [tournamentRules, setTournamentRules] = useState("");
 
     setCourseName(newCourseName);
     setBackgroundImageUrl(newBackgroundImageUrl);
@@ -452,7 +453,7 @@ const playersForSelectedTeam =
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-  "course_name, background_image_url, course_address, course_phone, course_map_url, course_id, format_type"
+  "course_name, background_image_url, course_address, course_phone, course_map_url, course_id, format_type, rules"
       )
       .eq("id", tournamentId)
       .single();
