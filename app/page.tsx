@@ -1492,7 +1492,8 @@ const leaderboard =
           </div>
         )}
 
-        {view === "rules" && (
+        
+{view === "rules" && (
   <div className="mt-10">
     <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
       Tournament Rules
