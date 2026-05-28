@@ -347,38 +347,53 @@ const fetchTeamPlayers = async () => {
   };
 
   const fetchAllScores = async (tournamentId?: string) => {
-    const idToUse = tournamentId || currentTournamentId;
-    if (!idToUse) return;
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
 
-    const { data: tournamentPlayers, error: playersError } = await supabase
-      .from("tournament_players")
-      .select("id")
-      .eq("tournament_id", idToUse);
-
-    if (playersError) {
-      console.error("Error fetching tournament player ids:", playersError);
-      return;
-    }
-
-    const playerIds = (tournamentPlayers || []).map((p) => p.id);
-
-    if (playerIds.length === 0) {
-      setAllScores([]);
-      return;
-    }
-
+  if (formatType !== "individual") {
     const { data, error } = await supabase
       .from("scores")
       .select("tournament_player_id, team_id, hole_number, strokes")
-      .in("tournament_player_id", playerIds);
+      .not("team_id", "is", null);
 
     if (error) {
-      console.error("Error fetching all scores:", error);
+      console.error("Error fetching team scores:", error);
       return;
     }
 
     setAllScores(data || []);
-  };
+    return;
+  }
+
+  const { data: tournamentPlayers, error: playersError } = await supabase
+    .from("tournament_players")
+    .select("id")
+    .eq("tournament_id", idToUse);
+
+  if (playersError) {
+    console.error("Error fetching tournament player ids:", playersError);
+    return;
+  }
+
+  const playerIds = (tournamentPlayers || []).map((p) => p.id);
+
+  if (playerIds.length === 0) {
+    setAllScores([]);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("scores")
+    .select("tournament_player_id, team_id, hole_number, strokes")
+    .in("tournament_player_id", playerIds);
+
+  if (error) {
+    console.error("Error fetching all scores:", error);
+    return;
+  }
+
+  setAllScores(data || []);
+};
 
 const playersForSelectedTeam =
   selectedTeamId && formatType !== "individual"
