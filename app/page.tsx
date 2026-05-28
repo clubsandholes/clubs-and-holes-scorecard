@@ -599,9 +599,16 @@ const playersForSelectedTeam =
     setPlayerName(data.name);
 
     if (formatType !== "individual") {
-  const team = getSelectedTeam();
-  const isOfficialScorer =
-    team?.official_scorer_player_id === data.id;
+  const selectedTeam = teams.find(
+  (team) => team.id === selectedTeamId
+);
+
+const isOfficialScorer =
+  selectedTeam?.official_scorer_player_id === data.id;
+  console.log("Selected Team:", selectedTeam);
+console.log("Official Scorer:", selectedTeam?.official_scorer_player_id);
+console.log("Current Player:", data.id);
+console.log("Can Score:", isOfficialScorer);
 
   setCanScore(isOfficialScorer);
   localStorage.setItem("canScore", String(isOfficialScorer));
