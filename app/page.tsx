@@ -1004,6 +1004,24 @@ const leaderboard =
     .toUpperCase();
 };
 
+
+  const selectedPlayer = players.find((p) => p.id === selectedPlayerId);
+const selectedTeam = teams.find((t) => t.id === selectedTeamId);
+
+const headerImage =
+  formatType !== "individual"
+    ? selectedTeam?.image_url || ""
+    : selectedPlayer?.profile_image_url || "";
+
+const headerName =
+  formatType !== "individual"
+    ? selectedTeamName || selectedTeam?.name || "Team"
+    : playerName || "Player";
+
+const headerSubName =
+  formatType !== "individual" ? playerName || "Player" : "";
+
+
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
@@ -1062,9 +1080,31 @@ const leaderboard =
             >
               <img src="/ch-logo.png" alt="Clubs & Holes" className="h-9 w-auto" />
 
-              <div className="min-w-0 max-w-[90px] truncate text-left text-xs font-black uppercase tracking-[0.08em] text-white">
-                {playerName || "Player"}
-              </div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
+  {headerImage ? (
+    <img
+      src={headerImage}
+      alt={headerName}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div className="text-xs font-black text-[#ff9900]">
+      {getInitials(headerName)}
+    </div>
+  )}
+</div>
+
+<div className="min-w-0 max-w-[110px] text-left">
+  <div className="truncate text-xs font-black uppercase tracking-[0.08em] text-white">
+    {headerName}
+  </div>
+
+  {headerSubName && (
+    <div className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
+      {headerSubName}
+    </div>
+  )}
+</div>
 
               <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
                 {formatScore(net)}
