@@ -1485,17 +1485,22 @@ const leaderboard =
 
                     <div className="mt-1 flex items-center gap-3">
   <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
-    {player.image_url || player.profile_image_url ? (
-      <img
-        src={player.image_url || player.profile_image_url}
-        alt={player.name}
-        className="h-full w-full object-cover"
-      />
-    ) : (
-      <div className="text-sm font-black text-[#ff9900]">
-        {getInitials(player.name)}
-      </div>
-    )}
+    {(() => {
+  const leaderboardImage =
+    player.image_url || player.profile_image_url || "";
+
+  return leaderboardImage ? (
+    <img
+      src={leaderboardImage}
+      alt={player.name}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div className="text-sm font-black text-[#ff9900]">
+      {getInitials(player.name)}
+    </div>
+  );
+})()}
   </div>
 
   <div className="min-w-0">
