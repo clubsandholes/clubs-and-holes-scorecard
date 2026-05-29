@@ -196,30 +196,30 @@ export default function Home() {
   setCurrentHoleIndex(0);
 };
     const applyTournamentSettings = async (data: any) => {
-      const newFormatType = data.format_type || "individual";
-      setFormatType(newFormatType);
-    const newCourseId = data.course_id || "";  
-    const newCourseName = data.course_name || "Clubs & Holes Championship";
-    const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
-    const newCourseAddress = data.course_address || "";
-    const newCoursePhone = data.course_phone || "";
-    const newCourseMapUrl = data.course_map_url || "";
-    const [tournamentRules, setTournamentRules] = useState("");
+  const newFormatType = data.format_type || "individual";
+  setFormatType(newFormatType);
 
-    setCourseName(newCourseName);
-    setBackgroundImageUrl(newBackgroundImageUrl);
-    setCourseAddress(newCourseAddress);
-    setCoursePhone(newCoursePhone);
-    setCourseMapUrl(newCourseMapUrl);
-    setCurrentCourseId(newCourseId);
-    setTournamentRules(data.rules || "");
+  const newCourseId = data.course_id || "";
+  const newCourseName = data.course_name || "Golf Course";
+  const newBackgroundImageUrl = data.background_image_url || "/burn-cart.jpg";
+  const newCourseAddress = data.course_address || "";
+  const newCoursePhone = data.course_phone || "";
+  const newCourseMapUrl = data.course_map_url || "";
 
-        if (newCourseId) {
-      await fetchCourseHoles(newCourseId);
-    } else {
-      setHoles(defaultHoles);
-    }
-  };
+  setCourseName(newCourseName);
+  setBackgroundImageUrl(newBackgroundImageUrl);
+  setCourseAddress(newCourseAddress);
+  setCoursePhone(newCoursePhone);
+  setCourseMapUrl(newCourseMapUrl);
+  setCurrentCourseId(newCourseId);
+  setTournamentRules(data.rules || "");
+
+  if (newCourseId) {
+    await fetchCourseHoles(newCourseId);
+  } else {
+    setHoles(defaultHoles);
+  }
+};
 
   const joinTournament = async () => {
     const code = tournamentCode.trim().toUpperCase();
@@ -269,10 +269,9 @@ export default function Home() {
     localStorage.setItem("tournamentCode", code);
 
     await fetchPlayers(data.id);
-    await fetchAllScores(data.id);
-    await fetchTickerEvents(data.id);
-    await fetchTeams(data.id);
-    await fetchTeamPlayers();
+await fetchTeams(data.id);
+await fetchTeamPlayers();
+await fetchTickerEvents(data.id);
 
     setView((data.format_type || "individual") === "individual" ? "selectPlayer" : "selectTeam");
   };
