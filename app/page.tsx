@@ -1184,56 +1184,75 @@ const leaderboard =
 
 
         {view === "selectPlayer" && (
-          <div className="mt-10">
-            <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
-              Code: {tournamentCode || "PLAY16"}
+  <div className="mt-10">
+    <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
+      Code: {tournamentCode || "PLAY16"}
+    </div>
+
+    <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+
+    {formatType !== "individual" && (
+      <button
+        onClick={() => {
+          setSelectedTeamId("");
+          setSelectedTeamName("");
+          localStorage.removeItem("selectedTeamId");
+          localStorage.removeItem("selectedTeamName");
+          setView("selectTeam");
+        }}
+        className="mt-5 rounded-full border border-white/10 bg-black/50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+      >
+        ← Back to Teams
+      </button>
+    )}
+
+    <div className="mt-8 space-y-3">
+      {playersForSelectedTeam.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => selectPlayer(p)}
+          disabled={p.claimed}
+          className={`w-full rounded-2xl border p-4 text-left ${
+            p.claimed
+              ? "border-gray-900 bg-gray-950 text-gray-600"
+              : "border-gray-800 bg-gray-950 text-white"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900">
+              {p.profile_image_url ? (
+                <img
+                  src={p.profile_image_url}
+                  alt={p.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="text-lg font-black text-[#ff9900]">
+                  {getInitials(p.name)}
+                </div>
+              )}
             </div>
 
-            <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
-            {formatType !== "individual" && (
-              <button
-                onClick={() => {
-                  setSelectedTeamId("");
-                  setSelectedTeamName("");
-                  localStorage.removeItem("selectedTeamId");
-                  localStorage.removeItem("selectedTeamName");
-                  setView("selectTeam");
-                }}
-                className="mt-5 rounded-full border border-white/10 bg-black/50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
-              >
-                ← Back to Teams
-              </button>
-)}
-            <div className="mt-8 space-y-3">
-              {playersForSelectedTeam.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => selectPlayer(p)}
-                  disabled={p.claimed}
-                  className={`w-full rounded-2xl border p-4 text-left text-xl font-bold ${
-                    p.claimed
-                      ? "border-gray-900 bg-gray-950 text-gray-600"
-                      : "border-gray-800 bg-gray-950 text-white"
-                  }`}
-                >
-                  {p.name}
-                  {p.claimed && (
-                    <span className="ml-2 text-sm text-red-400">
-                      Already Claimed
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-xl font-black">{p.name}</div>
 
-            <button
-              onClick={() => fetchPlayers()}
-              className="mt-6 text-sm text-[#ff9900]"
-            >
-              Refresh Players
-            </button>
+              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
+                {p.claimed ? "Already Claimed" : "Available"}
+              </div>
+            </div>
           </div>
-        )}
+        </button>
+      ))}
+    </div>
+
+    <button
+      onClick={() => fetchPlayers()}
+      className="mt-6 text-sm text-[#ff9900]"
+    >
+      Refresh Players
+    </button>
+  </div>
+)}
 
         {view === "scorecard" && (
   <>
