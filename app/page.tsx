@@ -903,15 +903,18 @@ const getTeamScoreMap = (teamId: string) => {
 };
 
 const playerLeaderboard = players.map((player) => {
+
   const playerScores = getPlayerScoreMap(player.id);
   const gross = getGrossTotal(playerScores);
   const par = getParPlayed(playerScores);
   const thru = Object.keys(playerScores).length;
   const lastHole = getLastHole(playerScores);
+  
 
   return {
     id: player.id,
     name: player.name,
+    profile_image_url: player.profile_image_url,
     thru,
     gross,
     net: gross - par,
@@ -1478,7 +1481,25 @@ const leaderboard =
                       {index === 0 ? "🏆 Current Leader" : `#${index + 1}`}
                     </div>
 
-                    <div className="mt-1 text-lg font-black">{player.name}</div>
+                    <div className="mt-1 flex items-center gap-3">
+  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
+    {player.image_url || player.profile_image_url ? (
+      <img
+        src={player.image_url || player.profile_image_url}
+        alt={player.name}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <div className="text-sm font-black text-[#ff9900]">
+        {getInitials(player.name)}
+      </div>
+    )}
+  </div>
+
+  <div className="min-w-0">
+    <div className="truncate text-lg font-black">{player.name}</div>
+  </div>
+</div>
 
                     <div className="mt-1 text-xs opacity-70">
                       Thru {player.thru} · Gross {player.gross || "--"}
