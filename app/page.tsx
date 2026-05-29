@@ -912,18 +912,19 @@ const playerLeaderboard = players.map((player) => {
   
 
   return {
-    id: player.id,
-    name: player.name,
-    profile_image_url: player.profile_image_url,
-    thru,
-    gross,
-    net: gross - par,
-    lastHole,
-    lastHoleScore: lastHole ? playerScores[lastHole] : null,
-    last6: getLastNToPar(playerScores, 6),
-    last3: getLastNToPar(playerScores, 3),
-    last1: getLastNToPar(playerScores, 1),
-  };
+  id: player.id,
+  name: player.name,
+  image_url: null,
+  profile_image_url: player.profile_image_url,
+  thru,
+  gross,
+  net: gross - par,
+  lastHole,
+  lastHoleScore: lastHole ? playerScores[lastHole] : null,
+  last6: getLastNToPar(playerScores, 6),
+  last3: getLastNToPar(playerScores, 3),
+  last1: getLastNToPar(playerScores, 1),
+};
 });
 
 const teamLeaderboard = teams.map((team) => {
@@ -934,18 +935,19 @@ const teamLeaderboard = teams.map((team) => {
   const lastHole = getLastHole(teamScores);
 
   return {
-    id: team.id,
-    name: team.name,
-    image_url: team.image_url,
-    thru,
-    gross,
-    net: gross - par,
-    lastHole,
-    lastHoleScore: lastHole ? teamScores[lastHole] : null,
-    last6: getLastNToPar(teamScores, 6),
-    last3: getLastNToPar(teamScores, 3),
-    last1: getLastNToPar(teamScores, 1),
-  };
+  id: team.id,
+  name: team.name,
+  image_url: team.image_url,
+  profile_image_url: null,
+  thru,
+  gross,
+  net: gross - par,
+  lastHole,
+  lastHoleScore: lastHole ? teamScores[lastHole] : null,
+  last6: getLastNToPar(teamScores, 6),
+  last3: getLastNToPar(teamScores, 3),
+  last1: getLastNToPar(teamScores, 1),
+};
 });
 
 const leaderboard =
