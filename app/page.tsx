@@ -1040,9 +1040,9 @@ const headerSubName =
       <div className="relative z-10">
         {activeAdminAlert && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
-    <div className="animate-admin-alert w-full max-w-md rounded-[2rem] border border-red-400/40 bg-red-600 p-6 text-center text-white shadow-2xl">
+    <div className="w-full max-w-md rounded-[2rem] border border-red-400/40 bg-red-600 p-6 text-center text-white shadow-2xl">
       <div className="text-xs font-black uppercase tracking-[0.3em]">
-        🚨 Admin Alert
+        🚨 TOURNAMENT ALERT
       </div>
 
       <div className="mt-4 text-2xl font-black leading-tight">
@@ -1055,7 +1055,7 @@ const headerSubName =
         onClick={() => setActiveAdminAlert(null)}
         className="mt-6 w-full rounded-full bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black"
       >
-        Acknowledge
+        CLOSE
       </button>
     </div>
   </div>
