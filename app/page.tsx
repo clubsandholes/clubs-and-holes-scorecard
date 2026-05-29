@@ -583,11 +583,7 @@ const playersForSelectedTeam =
     setLastAdminAlertId(latestAdminAlert.id);
     setActiveAdminAlert(latestAdminAlert);
 
-    const timeout = setTimeout(() => {
-      setActiveAdminAlert(null);
-    }, 5000);
-
-    return () => clearTimeout(timeout);
+    
   }, [tickerEvents]);
 
   const selectPlayer = async (player: Player) => {
@@ -1043,17 +1039,24 @@ const headerSubName =
 
       <div className="relative z-10">
         {activeAdminAlert && (
-  <div className="fixed bottom-6 left-4 right-4 z-[100]">
-    <div className="animate-admin-alert rounded-[2rem] border border-red-400/40 bg-red-600/95 p-5 text-center text-white shadow-2xl backdrop-blur-md">
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="animate-admin-alert w-full max-w-md rounded-[2rem] border border-red-400/40 bg-red-600 p-6 text-center text-white shadow-2xl">
       <div className="text-xs font-black uppercase tracking-[0.3em]">
         🚨 Admin Alert
       </div>
 
-      <div className="mt-2 text-xl font-black leading-tight">
+      <div className="mt-4 text-2xl font-black leading-tight">
         {activeAdminAlert.message
           .replace("🚨 ADMIN ALERT:", "")
           .trim()}
       </div>
+
+      <button
+        onClick={() => setActiveAdminAlert(null)}
+        className="mt-6 w-full rounded-full bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black"
+      >
+        Acknowledge
+      </button>
     </div>
   </div>
 )}
