@@ -175,14 +175,7 @@ export default function Home() {
   }
 
 
-  const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-};
+ 
 
   const { data, error } = await supabase
     .from("course_holes")
@@ -996,6 +989,15 @@ const leaderboard =
   const backgroundShade = Math.round(
     36 - (currentHoleIndex / (holes.length - 1)) * 36
   );
+
+   const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
 
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
