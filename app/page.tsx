@@ -1216,8 +1216,28 @@ const headerSubName =
               </div>
 
               <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
-                Select Team
-              </div>
+
+  {teamPlayers
+
+    .filter((tp) => tp.team_id === team.id)
+
+    .map((tp) => {
+
+      const player = players.find(
+
+        (p) => p.id === tp.tournament_player_id
+
+      );
+
+      return player?.name;
+
+    })
+
+    .filter(Boolean)
+
+    .join(" • ") || "No players assigned"}
+
+</div>
             </div>
           </div>
         </button>
