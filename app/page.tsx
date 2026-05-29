@@ -103,6 +103,7 @@ export default function Home() {
   const [tournamentCode, setTournamentCode] = useState("");
   const [formatType, setFormatType] = useState("individual");
   const [tournamentRules, setTournamentRules] = useState("");
+  const [tournamentName, setTournamentName] = useState("");
 
   // =========================
   // COURSE DISPLAY STATE
@@ -213,6 +214,7 @@ export default function Home() {
   setCourseMapUrl(newCourseMapUrl);
   setCurrentCourseId(newCourseId);
   setTournamentRules(data.rules || "");
+  setTournamentName(data.name || "Tournament");
 
   if (newCourseId) {
     await fetchCourseHoles(newCourseId);
@@ -336,7 +338,7 @@ const fetchTeamPlayers = async () => {
 
     const { data, error } = await supabase
       .from("tournament_players")
-      .select("id, name, claimed")
+      .select("id, name, claimed, profile_image_url")
       .eq("tournament_id", idToUse)
       .order("name");
 
@@ -452,8 +454,8 @@ const playersForSelectedTeam =
     const { data, error } = await supabase
       .from("tournaments")
       .select(
-  "course_name, background_image_url, course_address, course_phone, course_map_url, course_id, format_type, rules"
-      )
+  "name, course_name, background_image_url, course_address, course_phone, course_map_url, course_id, format_type, rules"
+)
       .eq("id", tournamentId)
       .single();
 
@@ -1238,8 +1240,12 @@ const leaderboard =
             HOLE {hole.number}
           </div>
 
-          <div className="mt-2 text-xl font-black text-white">
-            {courseName}
+         <div className="mt-2 text-xl font-black text-white">
+            {tournamentName}
+          </div>
+
+          <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-white/60">
+            {courseName || "Golf Course"}
           </div>
 
           {formatType !== "individual" && selectedTeamName && (
