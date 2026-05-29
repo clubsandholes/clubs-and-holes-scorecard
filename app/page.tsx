@@ -572,19 +572,24 @@ const playersForSelectedTeam =
       ? scoreTickerEvents[tickerIndex]?.message || "Live ticker will appear here"
       : "Live ticker will appear here";
 
-  useEffect(() => {
-    const latestAdminAlert = tickerEvents.find(
-      (event) => event.event_type === "admin"
-    );
+ useEffect(() => {
+  const latestAdminAlert = tickerEvents.find(
+    (event) => event.event_type === "admin"
+  );
 
-    if (!latestAdminAlert) return;
-    if (latestAdminAlert.id === lastAdminAlertId) return;
+  if (!latestAdminAlert) return;
+  if (latestAdminAlert.id === lastAdminAlertId) return;
 
+  const acknowledgedAlertId = localStorage.getItem("lastAcknowledgedAlertId");
+
+  if (latestAdminAlert.id === acknowledgedAlertId) {
     setLastAdminAlertId(latestAdminAlert.id);
-    setActiveAdminAlert(latestAdminAlert);
+    return;
+  }
 
-    
-  }, [tickerEvents]);
+  setLastAdminAlertId(latestAdminAlert.id);
+  setActiveAdminAlert(latestAdminAlert);
+}, [tickerEvents]);
 
   const selectPlayer = async (player: Player) => {
     if (player.claimed) {
@@ -1052,7 +1057,17 @@ const headerSubName =
       </div>
 
       <button
-        onClick={() => setActiveAdminAlert(null)}
+        onClick={() => {
+
+  if (activeAdminAlert) {
+
+    localStorage.setItem("lastAcknowledgedAlertId", activeAdminAlert.id);
+
+  }
+
+  setActiveAdminAlert(null);
+
+}}
         className="mt-6 w-full rounded-full bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black"
       >
         CLOSE
