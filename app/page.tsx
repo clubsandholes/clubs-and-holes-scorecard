@@ -1396,6 +1396,14 @@ const leaderboard =
                   Live Standings
                 </div>
                 <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
+
+                <div className="mt-2 text-lg font-black text-white">
+                  {tournamentName || "Tournament"}
+                </div>
+
+                <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+                  {courseName || "Golf Course"}
+                </div>
               </div>
 
               <button
