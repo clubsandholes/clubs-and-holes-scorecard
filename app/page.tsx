@@ -174,6 +174,16 @@ export default function Home() {
     return;
   }
 
+
+  const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
+
   const { data, error } = await supabase
     .from("course_holes")
     .select("hole_number, par, yards, image_url")
@@ -1139,18 +1149,24 @@ const leaderboard =
           className="w-full rounded-2xl border border-white/10 bg-black/60 p-4 text-left backdrop-blur-md"
         >
           <div className="flex items-center gap-4">
-            {team.image_url && (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-950 p-2">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-950 p-2">
+              {team.image_url ? (
                 <img
                   src={team.image_url}
                   alt={team.name}
                   className="h-full w-full object-contain"
                 />
-              </div>
-            )}
+              ) : (
+                <div className="text-xl font-black text-[#ff9900]">
+                  {getInitials(team.name)}
+                </div>
+              )}
+            </div>
 
             <div className="min-w-0">
-              <div className="truncate text-xl font-black">{team.name}</div>
+              <div className="truncate text-xl font-black">
+                {team.name}
+              </div>
 
               <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
                 Select Team
@@ -1161,7 +1177,7 @@ const leaderboard =
       ))}
     </div>
   </div>
-)}  
+)}
 
 
 
@@ -1438,7 +1454,7 @@ const leaderboard =
                 >
                   <div>
                     <div className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
-                      {index === 0 ? "🏆 Belt Leader" : `#${index + 1}`}
+                      {index === 0 ? "🏆 Current Leader" : `#${index + 1}`}
                     </div>
 
                     <div className="mt-1 text-lg font-black">{player.name}</div>
