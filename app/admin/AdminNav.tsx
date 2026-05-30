@@ -15,6 +15,10 @@ export default function AdminNav() {
         <Link href="/admin/courses" className="rounded-full bg-black px-4 py-3 text-center text-xs font-black uppercase">
           Courses
         </Link>
+
+        <Link href="/admin/sponsors" className="rounded-full bg-black px-4 py-3 text-center text-xs font-black uppercase">
+        Sponsors
+        </Link>
       </div>
     </div>
   );
