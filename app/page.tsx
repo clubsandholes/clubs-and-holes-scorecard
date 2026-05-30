@@ -1456,18 +1456,22 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
           </div>
         </div>
 
-        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/70 p-2">
+        <div className="flex h-32 w-32 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/70 p-2">
   {activeSponsor?.image_url ? (
     <a
       href={activeSponsor.website_url || "#"}
       target="_blank"
       rel="noreferrer"
-      className="flex h-full w-full items-center justify-center"
+      className="flex h-full w-full flex-col items-center justify-center"
     >
+      <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/50">
+        {activeScorecardSponsor?.placement_label || "Presented By"}
+      </div>
+
       <img
         src={activeSponsor.image_url}
         alt={activeSponsor.name}
-        className="h-full w-full object-contain"
+        className="max-h-[88px] w-full object-contain"
       />
     </a>
   ) : (
