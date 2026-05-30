@@ -78,7 +78,16 @@ type TickerEvent = {
   created_at: string;
 };
 
-
+type ScorecardSponsor = {
+  sponsor_id: string;
+  placement_label?: string | null;
+  priority?: number | null;
+  sponsors: {
+    name: string;
+    image_url?: string | null;
+    website_url?: string | null;
+  };
+};
 
 
 
@@ -104,7 +113,7 @@ export default function Home() {
   const [formatType, setFormatType] = useState("individual");
   const [tournamentRules, setTournamentRules] = useState("");
   const [tournamentName, setTournamentName] = useState("");
-
+  const [scorecardSponsors, setScorecardSponsors] = useState<ScorecardSponsor[]>([]);
   // =========================
   // COURSE DISPLAY STATE
   // =========================
@@ -277,6 +286,7 @@ export default function Home() {
 await fetchTeams(data.id);
 await fetchTeamPlayers();
 await fetchTickerEvents(data.id);
+await fetchScorecardSponsors(data.id);
 
     setView((data.format_type || "individual") === "individual" ? "selectPlayer" : "selectTeam");
   };
@@ -302,6 +312,39 @@ const fetchTeams = async (tournamentId?: string) => {
   }
 
   setTeams(data || []);
+};
+
+const fetchScorecardSponsors = async (tournamentId?: string) => {
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("sponsor_placements")
+    .select(`
+      sponsor_id,
+      placement_label,
+      priority,
+      sponsors (
+        name,
+        image_url,
+        website_url
+      )
+    `)
+    .eq("placement_type", "scorecard")
+    .eq("is_active", true)
+    .or(`scope_type.eq.global,tournament_id.eq.${idToUse}`)
+    .or(`starts_at.is.null,starts_at.lte.${today}`)
+    .or(`ends_at.is.null,ends_at.gte.${today}`)
+    .order("priority", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching scorecard sponsors:", error);
+    return;
+  }
+
+  setScorecardSponsors(data || []);
 };
 
 // =========================
@@ -1026,7 +1069,7 @@ const headerSubName =
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
-
+  const activeScorecardSponsor = scorecardSponsors[0];
   return (
     <div
       className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
