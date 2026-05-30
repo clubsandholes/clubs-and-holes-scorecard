@@ -86,7 +86,7 @@ type ScorecardSponsor = {
     name: string;
     image_url?: string | null;
     website_url?: string | null;
-  };
+  }[];
 };
 
 
@@ -1070,6 +1070,7 @@ const headerSubName =
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
   const activeScorecardSponsor = scorecardSponsors[0];
+  const activeSponsor = activeScorecardSponsor?.sponsors?.[0];
   return (
     <div
       className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
