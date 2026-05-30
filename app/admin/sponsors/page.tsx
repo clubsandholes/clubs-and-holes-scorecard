@@ -428,7 +428,17 @@ alert(
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Sponsor Profile
         </div>
+        <div className="mt-6 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+    Sponsor Workflow
+  </div>
 
+  <div className="mt-4 grid gap-3 text-sm text-white/70">
+    <div><span className="font-black text-white">1.</span> Add the sponsor to your Sponsor Library.</div>
+    <div><span className="font-black text-white">2.</span> Upload a 380 × 380 sponsor card or paste an image URL.</div>
+    <div><span className="font-black text-white">3.</span> Place the sponsor globally or inside a specific tournament.</div>
+  </div>
+</div>
         <h2 className="mt-2 text-2xl font-black">Add Sponsor</h2>
 
         <div className="mt-6 space-y-4">
