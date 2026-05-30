@@ -326,17 +326,19 @@ const fetchScorecardSponsors = async (tournamentId?: string) => {
       sponsor_id,
       placement_label,
       priority,
+      scope_type,
+      tournament_id,
+      starts_at,
+      ends_at,
       sponsors (
         name,
         image_url,
-        website_url
+        website_url,
+        is_active
       )
     `)
     .eq("placement_type", "scorecard")
     .eq("is_active", true)
-    .or(`scope_type.eq.global,tournament_id.eq.${idToUse}`)
-    .or(`starts_at.is.null,starts_at.lte.${today}`)
-    .or(`ends_at.is.null,ends_at.gte.${today}`)
     .order("priority", { ascending: false });
 
   if (error) {
@@ -344,7 +346,25 @@ const fetchScorecardSponsors = async (tournamentId?: string) => {
     return;
   }
 
-  setScorecardSponsors(data || []);
+  const eligibleSponsors = (data || []).filter((placement: any) => {
+    const sponsor = Array.isArray(placement.sponsors)
+      ? placement.sponsors[0]
+      : placement.sponsors;
+
+    const scopeMatches =
+      placement.scope_type === "global" ||
+      placement.tournament_id === idToUse;
+
+    const dateMatches =
+      (!placement.starts_at || placement.starts_at <= today) &&
+      (!placement.ends_at || placement.ends_at >= today);
+
+    return scopeMatches && dateMatches && sponsor?.is_active;
+  });
+
+  console.log("ELIGIBLE SCORECARD SPONSORS:", eligibleSponsors);
+
+  setScorecardSponsors(eligibleSponsors);
 };
 
 // =========================
@@ -1069,8 +1089,11 @@ const headerSubName =
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
-  const activeScorecardSponsor = scorecardSponsors[0];
-  const activeSponsor = activeScorecardSponsor?.sponsors?.[0];
+ const activeScorecardSponsor = scorecardSponsors[0];
+
+const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
+  ? activeScorecardSponsor?.sponsors[0]
+  : activeScorecardSponsor?.sponsors;
   return (
     <div
       className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
