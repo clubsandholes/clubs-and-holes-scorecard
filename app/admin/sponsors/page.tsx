@@ -554,20 +554,32 @@ alert(
           />
 
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="date"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-            />
+  <div>
+    <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+      Start Date
+    </div>
 
-            <input
-              type="date"
-              value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-            />
-          </div>
+    <input
+      type="date"
+      value={startsAt}
+      onChange={(e) => setStartsAt(e.target.value)}
+      className="w-full rounded-2xl border border-white/10 bg-black p-4 text-white outline-none"
+    />
+  </div>
+
+  <div>
+    <div className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/50">
+      End Date
+    </div>
+
+    <input
+      type="date"
+      value={endsAt}
+      onChange={(e) => setEndsAt(e.target.value)}
+      className="w-full rounded-2xl border border-white/10 bg-black p-4 text-white outline-none"
+    />
+  </div>
+</div>
 
           <input
             type="number"
