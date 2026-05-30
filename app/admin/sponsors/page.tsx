@@ -164,9 +164,13 @@ export default function SponsorsAdminPage() {
       });
 
     if (uploadError) {
-      console.error(uploadError);
-      alert("Sponsor image upload failed.");
-      return null;
+      console.error("UPLOAD ERROR:", uploadError);
+
+alert(
+  `Sponsor image upload failed: ${
+    uploadError?.message || "Unknown error"
+  }`
+);
     }
 
     const { data } = supabase.storage
