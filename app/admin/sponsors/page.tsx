@@ -202,10 +202,16 @@ alert(
       .single();
 
     if (error || !data) {
-      console.error(error);
-      alert("Sponsor could not be created.");
-      return;
-    }
+  console.error("SPONSOR CREATE ERROR:", error);
+
+  alert(
+    `Sponsor could not be created: ${
+      error?.message || "No sponsor data returned"
+    }`
+  );
+
+  return;
+}
 
     if (sponsorImageFile) {
       const uploadedUrl = await uploadSponsorImage(data.id, sponsorImageFile);
