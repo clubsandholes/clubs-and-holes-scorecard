@@ -1433,13 +1433,28 @@ const headerSubName =
           </div>
         </div>
 
-        <div className="flex h-32 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-          <img
-            src={currentHoleImage}
-            alt={`Hole ${hole.number}`}
-            className="h-full w-auto object-contain"
-          />
-        </div>
+        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/70 p-2">
+  {activeSponsor?.image_url ? (
+    <a
+      href={activeSponsor.website_url || "#"}
+      target="_blank"
+      rel="noreferrer"
+      className="flex h-full w-full items-center justify-center"
+    >
+      <img
+        src={activeSponsor.image_url}
+        alt={activeSponsor.name}
+        className="h-full w-full object-contain"
+      />
+    </a>
+  ) : (
+    <img
+      src="/ch-logo.png"
+      alt="Clubs & Holes"
+      className="h-full w-full object-contain p-2 opacity-80"
+    />
+  )}
+</div>
       </div>
 
       {canScore ? (
