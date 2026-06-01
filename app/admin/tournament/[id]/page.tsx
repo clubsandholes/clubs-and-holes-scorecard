@@ -93,6 +93,9 @@ const sendAdminAlert = async () => {
   const [formatType, setFormatType] = useState("individual");
   const [tournamentRules, setTournamentRules] = useState("");
 
+
+
+
   // =========================
   // COURSE STATE
   // =========================
@@ -934,9 +937,10 @@ const handleTeamImageUpload = async (
         <div className="mt-6 space-y-3">
           {players.map((player) => (
             <div
-  key={player.id}
-  className="rounded-2xl border border-white/10 bg-black p-4"
->
+            key={player.id}
+  
+            className="rounded-2xl border border-white/10 bg-black p-4"
+          >
   <div className="flex items-start gap-4">
     {player.profile_image_url && (
       <img

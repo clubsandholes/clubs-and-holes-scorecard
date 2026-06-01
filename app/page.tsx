@@ -167,7 +167,12 @@ export default function Home() {
   const [lastAdminAlertId, setLastAdminAlertId] = useState("");
 
 
+  // =========================
+// LEADERBOARD DETAIL STATE
+// =========================
 
+const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
+  useState<any | null>(null);
 
 
 
@@ -1594,6 +1599,87 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   </>
 )}
 
+        {selectedLeaderboardPlayer && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+    <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-black p-5 text-white">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            Hole By Hole
+          </div>
+
+          <div className="mt-1 text-2xl font-black">
+            {selectedLeaderboardPlayer.name}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setSelectedLeaderboardPlayer(null)}
+          className="text-3xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="mt-6 overflow-x-auto">
+  <div className="flex min-w-max items-end gap-1">
+    {holes.map((holeInfo) => {
+      const playerScores =
+        formatType === "individual"
+          ? getPlayerScoreMap(selectedLeaderboardPlayer.id)
+          : getTeamScoreMap(selectedLeaderboardPlayer.id);
+
+      const score = playerScores[holeInfo.number];
+      const diff = score ? score - holeInfo.par : null;
+
+      const scoreShape =
+        diff === null
+          ? ""
+          : diff <= -2
+          ? "border-double border-4 rounded-full"
+          : diff === -1
+          ? "border rounded-full"
+          : diff === 1
+          ? "border rounded-none"
+          : diff >= 2
+          ? "border-double border-4 rounded-none"
+          : "";
+
+      return (
+        <div key={holeInfo.number} className="w-10 shrink-0 text-center">
+          <div className="mb-1 bg-black text-[10px] font-black text-white">
+            {holeInfo.number}
+          </div>
+
+          <div
+            className={`mx-auto flex h-8 w-8 items-center justify-center text-sm font-black ${
+              scoreShape
+                ? `${scoreShape} border-[#ff9900] text-white`
+                : "text-white"
+            }`}
+          >
+            {score ?? "-"}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+        <div className="text-xs uppercase tracking-[0.18em] text-white/50">
+          Total
+        </div>
+
+        <div className="mt-1 text-3xl font-black">
+          {formatScore(selectedLeaderboardPlayer.net)}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
         {view === "leaderboard" && (
           <div className="mt-8">
             <div className="flex items-center justify-between">
@@ -1635,8 +1721,9 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
             <div className="mt-6 space-y-3">
               {sortedLeaderboard.map((player, index) => (
                 <div
-                  key={player.id}
-                  className={`flex items-center justify-between rounded-[1.5rem] border p-4 shadow-xl backdrop-blur-md ${
+  key={player.id}
+  onClick={() => setSelectedLeaderboardPlayer(player)}
+  className={`flex cursor-pointer items-center justify-between rounded-[1.5rem] border p-4 shadow-xl backdrop-blur-md ${
                     index === 0
                       ? "border-[#ff9900] bg-[#ff9900]/90 text-black"
                       : "border-white/10 bg-black/55 text-white"
