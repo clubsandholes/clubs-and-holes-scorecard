@@ -1763,11 +1763,8 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
                       Thru {player.thru} · Gross {player.gross || "--"}
                     </div>
 
-                    <div className="text-xs opacity-70">
-                      Last:{" "}
-                      {player.lastHole
-                        ? `Hole ${player.lastHole} - ${player.lastHoleScore}`
-                        : "--"}
+                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] opacity-60">
+                        Tap to view scorecard
                     </div>
                   </div>
 
