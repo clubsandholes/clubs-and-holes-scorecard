@@ -956,8 +956,13 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
     return `${score}`;
   };
 
-  const grossTotal = getGrossTotal(scores);
-  const parPlayed = getParPlayed(scores);
+const headerScoreMap =
+  formatType === "individual"
+    ? scores
+    : getTeamScoreMap(selectedTeamId);
+
+  const grossTotal = getGrossTotal(headerScoreMap);
+const parPlayed = getParPlayed(headerScoreMap);
   const net = grossTotal - parPlayed;
 
 // =========================
