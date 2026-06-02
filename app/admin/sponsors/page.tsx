@@ -29,6 +29,7 @@ type SponsorPlacement = {
   placement_type: string;
   placement_label?: string | null;
   scope_type?: string | null;
+  hole_number?: number | null;
   starts_at?: string | null;
   ends_at?: string | null;
   priority?: number | null;
@@ -44,6 +45,7 @@ export default function SponsorsAdminPage() {
   // STATE
   // =========================
 
+  const [holeNumber, setHoleNumber] = useState("");
   const [loading, setLoading] = useState(true);
   const [adminNotice, setAdminNotice] = useState("");
 
@@ -112,7 +114,7 @@ export default function SponsorsAdminPage() {
     const { data, error } = await supabase
       .from("sponsor_placements")
       .select(
-        "id, sponsor_id, tournament_id, placement_type, placement_label, scope_type, starts_at, ends_at, priority, is_active"
+        "id, sponsor_id, tournament_id, placement_type, placement_label, scope_type, hole_number, starts_at, ends_at, priority, is_active"
       )
       .order("priority", { ascending: false });
 
@@ -268,17 +270,18 @@ alert(
     }
 
     const { error } = await supabase.from("sponsor_placements").insert({
-      sponsor_id: placementSponsorId,
-      scope_type: scopeType,
-      tournament_id: tournamentId,
-      placement_type: placementType,
-      placement_label: placementLabel.trim() || "Presented By",
-      starts_at: startsAt || null,
-      ends_at: endsAt || null,
-      priority: Number(priority) || 0,
-      display_order: Number(priority) || 0,
-      is_active: true,
-    });
+  sponsor_id: placementSponsorId,
+  scope_type: scopeType,
+  tournament_id: tournamentId,
+  placement_type: placementType,
+  placement_label: placementLabel.trim() || "Presented By",
+  hole_number: holeNumber ? Number(holeNumber) : null,
+  starts_at: startsAt || null,
+  ends_at: endsAt || null,
+  priority: Number(priority) || 0,
+  display_order: Number(priority) || 0,
+  is_active: true,
+});
 
     if (error) {
       console.error(error);
@@ -294,6 +297,7 @@ alert(
     setStartsAt("");
     setEndsAt("");
     setPriority("0");
+    setHoleNumber("");
 
     await fetchPlacements();
     showAdminNotice("Sponsor placement created.");
@@ -545,7 +549,17 @@ alert(
             <option value="bunker">The Bunker Future</option>
             <option value="livefeed">Live Feed Future</option>
           </select>
-
+          {placementType === "scorecard" && scopeType === "tournament" && (
+  <input
+    type="number"
+    min="1"
+    max="18"
+    value={holeNumber}
+    onChange={(e) => setHoleNumber(e.target.value)}
+    placeholder="Hole Number Optional: 1-18"
+    className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+  />
+)}
           <input
             value={placementLabel}
             onChange={(e) => setPlacementLabel(e.target.value)}
@@ -685,8 +699,13 @@ alert(
 
               <div className="mt-1 text-xs text-white/40">
                 {getTournamentLabel(placement.tournament_id)}
+                
               </div>
-
+              {placement.hole_number && (
+                <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                  Hole {placement.hole_number} Sponsor
+                </div>
+              )}
               <div className="mt-1 text-xs text-white/40">
                 {placement.starts_at || "No start"} →{" "}
                 {placement.ends_at || "No end"} · Priority{" "}
