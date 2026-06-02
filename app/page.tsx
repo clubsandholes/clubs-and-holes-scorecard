@@ -421,11 +421,16 @@ const fetchTeamPlayers = async () => {
     setPlayers(data || []);
   };
 
-  const fetchAllScores = async (tournamentId?: string) => {
+  cconst fetchAllScores = async (
+  tournamentId?: string,
+  overrideFormatType?: string
+) => {
   const idToUse = tournamentId || currentTournamentId;
   if (!idToUse) return;
 
-  if (formatType !== "individual") {
+  const formatToUse = overrideFormatType || formatType;
+
+  if (formatToUse !== "individual") {
     const { data, error } = await supabase
       .from("scores")
       .select("tournament_player_id, team_id, hole_number, strokes")
@@ -536,6 +541,7 @@ const playersForSelectedTeam =
     }
 
     await applyTournamentSettings(data);
+    await fetchAllScores(data.id, data.format_type || "individual");
     await fetchTeams(tournamentId);
     await fetchTeamPlayers();
   };
@@ -560,14 +566,13 @@ const playersForSelectedTeam =
       }
 
     if (savedTournamentId) {
-      setCurrentTournamentId(savedTournamentId);
-      setTournamentCode(savedTournamentCode || "");
+  setCurrentTournamentId(savedTournamentId);
+  setTournamentCode(savedTournamentCode || "");
 
-      fetchPlayers(savedTournamentId);
-      fetchAllScores(savedTournamentId);
-      fetchTickerEvents(savedTournamentId);
-      fetchTournamentSettings(savedTournamentId);
-    }
+  fetchPlayers(savedTournamentId);
+  fetchTickerEvents(savedTournamentId);
+  fetchTournamentSettings(savedTournamentId);
+}
 
     if (savedPlayerId && savedPlayerName) {
       setSelectedPlayerId(savedPlayerId);
