@@ -115,6 +115,7 @@ export default function Home() {
   const [tournamentName, setTournamentName] = useState("");
   const [scorecardSponsors, setScorecardSponsors] = useState<ScorecardSponsor[]>([]);
   const [leaderboardSponsors, setLeaderboardSponsors] = useState<ScorecardSponsor[]>([]);
+  const [joinSponsors, setJoinSponsors] = useState<ScorecardSponsor[]>([]);
   // =========================
   // COURSE DISPLAY STATE
   // =========================
@@ -436,6 +437,80 @@ const fetchLeaderboardSponsors = async (tournamentId?: string) => {
 
 `)
     .eq("placement_type", "leaderboard")
+    .eq("is_active", true)
+    .order("priority", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching leaderboard sponsors:", error);
+    return;
+  }
+
+  console.log("ALL SCORECARD PLACEMENTS:", data);
+
+  const eligibleSponsors = (data || []).filter((placement: any) => {
+    const sponsor = Array.isArray(placement.sponsors)
+      ? placement.sponsors[0]
+      : placement.sponsors;
+
+    const scopeMatches =
+      placement.scope_type === "global" ||
+      placement.tournament_id === idToUse;
+
+    const dateMatches =
+      (!placement.starts_at || placement.starts_at <= today) &&
+      (!placement.ends_at || placement.ends_at >= today);
+
+    return scopeMatches && dateMatches && sponsor?.is_active;
+  });
+
+  console.log("ELIGIBLE LEADERBOARD SPONSORS:", eligibleSponsors);
+
+  setLeaderboardSponsors(eligibleSponsors);
+};
+
+
+
+
+const fetchJoinSponsors = async (tournamentId?: string) => {
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("sponsor_placements")
+    .select(`
+
+  sponsor_id,
+
+  placement_label,
+
+  priority,
+
+  scope_type,
+
+  tournament_id,
+
+  hole_number,
+
+  starts_at,
+
+  ends_at,
+
+  sponsors (
+
+    name,
+
+    image_url,
+
+    website_url,
+
+    is_active
+
+  )
+
+`)
+    .eq("placement_type", "join")
     .eq("is_active", true)
     .order("priority", { ascending: false });
 
@@ -1257,7 +1332,18 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
 console.log("Hole Sponsor:", holeSponsor);
 console.log("Tournament Sponsors:", tournamentSponsors);
 console.log("Global Sponsors:", globalSponsors);
+const activeTournamentSponsor = scorecardSponsors.find(
+  (placement: any) =>
+    placement.scope_type === "tournament" &&
+    placement.tournament_id === currentTournamentId &&
+    !placement.hole_number
+);
 
+const activeTournamentSponsorData = Array.isArray(
+  activeTournamentSponsor?.sponsors
+)
+  ? activeTournamentSponsor?.sponsors[0]
+  : activeTournamentSponsor?.sponsors;
 
   return (
     <div
@@ -1409,10 +1495,33 @@ console.log("Global Sponsors:", globalSponsors);
 
         {view === "join" && (
           <div className="flex h-screen flex-col items-center justify-center text-center">
-            <img src="/ch-logo.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
+            <img src="/clubs-n-holes.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
 
             <h1 className="text-4xl font-black">Join Tournament</h1>
+            {activeTournamentSponsorData && (
+  <a
+    href={activeTournamentSponsorData.website_url || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="mt-6 flex flex-col items-center"
+  >
+    <div className="mb-2 text-xs font-black uppercase tracking-[0.22em] text-white/50">
+      {activeTournamentSponsor?.placement_label || "Presented By"}
+    </div>
 
+    {activeTournamentSponsorData.image_url ? (
+      <img
+        src={activeTournamentSponsorData.image_url}
+        alt={activeTournamentSponsorData.name}
+        className="h-28 w-28 rounded-2xl object-contain"
+      />
+    ) : (
+      <div className="text-xl font-black text-[#ff9900]">
+        {activeTournamentSponsorData.name}
+      </div>
+    )}
+  </a>
+)}
             <input
               value={tournamentCode}
               onChange={(e) => setTournamentCode(e.target.value.toUpperCase())}
