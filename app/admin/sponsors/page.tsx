@@ -518,17 +518,17 @@ alert(
             ))}
           </select>
 
-          <select
-            value={scopeType}
-            onChange={(e) => setScopeType(e.target.value)}
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          >
-            <option value="global">Global</option>
-            <option value="tournament">Tournament</option>
-            <option value="league" disabled>
-              League Future
-            </option>
-          </select>
+        <select
+  value={scopeType}
+  onChange={(e) => setScopeType(e.target.value)}
+  className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+>
+  <option value="global">Global Sponsor</option>
+  <option value="tournament">Tournament Sponsor</option>
+  <option value="league" disabled>
+    League Sponsor (Future)
+  </option>
+</select>
 
           {scopeType === "tournament" && (
             <input
@@ -556,7 +556,7 @@ alert(
     max="18"
     value={holeNumber}
     onChange={(e) => setHoleNumber(e.target.value)}
-    placeholder="Hole Number Optional: 1-18"
+    placeholder="Tournament Hole Sponsor (1-18)"
     className="w-full rounded-2xl bg-black p-4 text-white outline-none"
   />
 )}
@@ -693,8 +693,13 @@ alert(
               </div>
 
               <div className="mt-2 text-xs uppercase tracking-[0.18em] text-white/50">
-                {placement.placement_label || "Presented By"} ·{" "}
-                {placement.placement_type} · {placement.scope_type}
+               {placement.placement_label || "Presented By"} ·{" "}
+{placement.placement_type} ·{" "}
+{placement.hole_number
+  ? `Tournament Hole Sponsor`
+  : placement.scope_type === "global"
+  ? "Global Sponsor"
+  : "Tournament Sponsor"}
               </div>
 
               <div className="mt-1 text-xs text-white/40">
@@ -702,10 +707,10 @@ alert(
                 
               </div>
               {placement.hole_number && (
-                <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-                  Hole {placement.hole_number} Sponsor
-                </div>
-              )}
+  <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+    Tournament Hole Sponsor • Hole {placement.hole_number}
+  </div>
+)}
               <div className="mt-1 text-xs text-white/40">
                 {placement.starts_at || "No start"} →{" "}
                 {placement.ends_at || "No end"} · Priority{" "}
