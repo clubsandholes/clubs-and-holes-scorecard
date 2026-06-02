@@ -958,9 +958,6 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
 
 
 
-  const grossTotal = getGrossTotal(headerScoreMap);
-const parPlayed = getParPlayed(headerScoreMap);
-  const net = grossTotal - parPlayed;
 
 // =========================
 // LEADERBOARD CALCULATIONS
@@ -982,6 +979,10 @@ const headerScoreMap =
   formatType === "individual"
     ? scores
     : getTeamScoreMap(selectedTeamId);
+
+    const grossTotal = getGrossTotal(headerScoreMap);
+const parPlayed = getParPlayed(headerScoreMap);
+const net = grossTotal - parPlayed;
 
 const playerLeaderboard = players.map((player) => {
 
