@@ -1136,12 +1136,15 @@ const holeSponsor = scorecardSponsors.find(
 
 const tournamentSponsors = scorecardSponsors.filter(
   (placement: any) =>
+    placement.scope_type === "tournament" &&
     placement.tournament_id === currentTournamentId &&
     !placement.hole_number
 );
 
 const globalSponsors = scorecardSponsors.filter(
-  (placement: any) => placement.scope_type === "global"
+  (placement: any) =>
+    placement.scope_type === "global" &&
+    !placement.hole_number
 );
 
 const rotatingTournamentSponsor =
@@ -1160,6 +1163,13 @@ const activeScorecardSponsor =
 const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
   : activeScorecardSponsor?.sponsors;
+
+  console.log("Current Tournament:", currentTournamentId);
+console.log("Hole Sponsor:", holeSponsor);
+console.log("Tournament Sponsors:", tournamentSponsors);
+console.log("Global Sponsors:", globalSponsors);
+
+
   return (
     <div
       className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
