@@ -114,6 +114,7 @@ export default function Home() {
   const [tournamentRules, setTournamentRules] = useState("");
   const [tournamentName, setTournamentName] = useState("");
   const [scorecardSponsors, setScorecardSponsors] = useState<ScorecardSponsor[]>([]);
+  const [leaderboardSponsors, setLeaderboardSponsors] = useState<ScorecardSponsor[]>([]);
   // =========================
   // COURSE DISPLAY STATE
   // =========================
@@ -293,6 +294,7 @@ await fetchTeamPlayers();
 await fetchTickerEvents(data.id);
 await fetchScorecardSponsors(data.id);
 
+
     setView((data.format_type || "individual") === "individual" ? "selectPlayer" : "selectTeam");
   };
 
@@ -388,6 +390,81 @@ const fetchScorecardSponsors = async (tournamentId?: string) => {
   console.log("ELIGIBLE SCORECARD SPONSORS:", eligibleSponsors);
 
   setScorecardSponsors(eligibleSponsors);
+};
+
+
+
+
+
+const fetchLeaderboardSponsors = async (tournamentId?: string) => {
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("sponsor_placements")
+    .select(`
+
+  sponsor_id,
+
+  placement_label,
+
+  priority,
+
+  scope_type,
+
+  tournament_id,
+
+  hole_number,
+
+  starts_at,
+
+  ends_at,
+
+  sponsors (
+
+    name,
+
+    image_url,
+
+    website_url,
+
+    is_active
+
+  )
+
+`)
+    .eq("placement_type", "leaderboard")
+    .eq("is_active", true)
+    .order("priority", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching leaderboard sponsors:", error);
+    return;
+  }
+
+  console.log("ALL SCORECARD PLACEMENTS:", data);
+
+  const eligibleSponsors = (data || []).filter((placement: any) => {
+    const sponsor = Array.isArray(placement.sponsors)
+      ? placement.sponsors[0]
+      : placement.sponsors;
+
+    const scopeMatches =
+      placement.scope_type === "global" ||
+      placement.tournament_id === idToUse;
+
+    const dateMatches =
+      (!placement.starts_at || placement.starts_at <= today) &&
+      (!placement.ends_at || placement.ends_at >= today);
+
+    return scopeMatches && dateMatches && sponsor?.is_active;
+  });
+
+  console.log("ELIGIBLE LEADERBOARD SPONSORS:", eligibleSponsors);
+
+  setLeaderboardSponsors(eligibleSponsors);
 };
 
 // =========================
@@ -563,6 +640,7 @@ const playersForSelectedTeam =
     await fetchTeams(tournamentId);
     await fetchTeamPlayers();
     await fetchScorecardSponsors(tournamentId);
+    await fetchLeaderboardSponsors(tournamentId);
   };
 
   useEffect(() => {
@@ -1159,6 +1237,17 @@ const rotatingGlobalSponsor =
 
 const activeScorecardSponsor =
   holeSponsor || rotatingTournamentSponsor || rotatingGlobalSponsor || null;
+
+  const activeLeaderboardSponsor =
+  leaderboardSponsors.length > 0
+    ? leaderboardSponsors[0]
+    : null;
+
+const activeLeaderboardSponsorData = Array.isArray(
+  activeLeaderboardSponsor?.sponsors
+)
+  ? activeLeaderboardSponsor?.sponsors[0]
+  : activeLeaderboardSponsor?.sponsors;
 
 const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
@@ -1759,7 +1848,25 @@ console.log("Global Sponsors:", globalSponsors);
                   Live Standings
                 </div>
                 <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
+                {activeLeaderboardSponsorData && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-white/50">
+                      {activeLeaderboardSponsor?.placement_label || "Presented By"}
+                    </div>
 
+                    {activeLeaderboardSponsorData.image_url ? (
+                      <img
+                        src={activeLeaderboardSponsorData.image_url}
+                        alt={activeLeaderboardSponsorData.name}
+                        className="h-8 w-auto object-contain"
+                      />
+                    ) : (
+                      <div className="text-sm font-black text-[#ff9900]">
+                        {activeLeaderboardSponsorData.name}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="mt-2 text-lg font-black text-white">
                   {tournamentName || "Tournament"}
                 </div>
