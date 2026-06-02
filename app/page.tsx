@@ -302,6 +302,7 @@ setView(
     ? "selectPlayer"
     : "selectTeam"
 );
+};
 
 
 // =========================
