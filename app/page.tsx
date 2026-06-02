@@ -956,10 +956,7 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
     return `${score}`;
   };
 
-const headerScoreMap =
-  formatType === "individual"
-    ? scores
-    : getTeamScoreMap(selectedTeamId);
+
 
   const grossTotal = getGrossTotal(headerScoreMap);
 const parPlayed = getParPlayed(headerScoreMap);
@@ -980,6 +977,11 @@ const getTeamScoreMap = (teamId: string) => {
 
   return map;
 };
+
+const headerScoreMap =
+  formatType === "individual"
+    ? scores
+    : getTeamScoreMap(selectedTeamId);
 
 const playerLeaderboard = players.map((player) => {
 
