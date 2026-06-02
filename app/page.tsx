@@ -1546,7 +1546,30 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
 
     <h1 className="mt-3 text-4xl font-black">Select Your Team</h1>
+          {activeTournamentSponsorData && (
+  <a
+    href={activeTournamentSponsorData.website_url || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 p-3"
+  >
+    <img
+      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+      alt={activeTournamentSponsorData.name}
+      className="h-14 w-14 rounded-xl object-contain"
+    />
 
+    <div>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+        {activeTournamentSponsor?.placement_label || "Presented By"}
+      </div>
+
+      <div className="mt-1 text-sm font-black text-white">
+        {activeTournamentSponsorData.name}
+      </div>
+    </div>
+  </a>
+)}
     <div className="mt-8 space-y-3">
       {teams.map((team) => (
         <button
@@ -1614,7 +1637,30 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
 
     <h1 className="mt-3 text-4xl font-black">Select Your Name</h1>
+          {activeTournamentSponsorData && (
+  <a
+    href={activeTournamentSponsorData.website_url || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 p-3"
+  >
+    <img
+      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+      alt={activeTournamentSponsorData.name}
+      className="h-14 w-14 rounded-xl object-contain"
+    />
 
+    <div>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+        {activeTournamentSponsor?.placement_label || "Presented By"}
+      </div>
+
+      <div className="mt-1 text-sm font-black text-white">
+        {activeTournamentSponsorData.name}
+      </div>
+    </div>
+  </a>
+)}
     {formatType !== "individual" && (
       <button
         onClick={() => {
