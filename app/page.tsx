@@ -283,21 +283,25 @@ const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
   return;
 }
 
-    setCurrentTournamentId(data.id);
-    await applyTournamentSettings(data);
+  setCurrentTournamentId(data.id);
+await applyTournamentSettings(data);
 
-    localStorage.setItem("currentTournamentId", data.id);
-    localStorage.setItem("tournamentCode", code);
+localStorage.setItem("currentTournamentId", data.id);
+localStorage.setItem("tournamentCode", code);
 
-    await fetchPlayers(data.id);
+await fetchScorecardSponsors(data.id);
+await fetchLeaderboardSponsors(data.id);
+
+await fetchPlayers(data.id);
 await fetchTeams(data.id);
 await fetchTeamPlayers();
 await fetchTickerEvents(data.id);
-await fetchScorecardSponsors(data.id);
 
-
-    setView((data.format_type || "individual") === "individual" ? "selectPlayer" : "selectTeam");
-  };
+setView(
+  (data.format_type || "individual") === "individual"
+    ? "selectPlayer"
+    : "selectTeam"
+);
 
 
 // =========================
@@ -1344,6 +1348,8 @@ const activeTournamentSponsorData = Array.isArray(
 )
   ? activeTournamentSponsor?.sponsors[0]
   : activeTournamentSponsor?.sponsors;
+  const activeTournamentSponsorImage =
+  activeTournamentSponsorData?.image_url || "";
 
   return (
     <div
@@ -1546,6 +1552,9 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
 
     <h1 className="mt-3 text-4xl font-black">Select Your Team</h1>
+    <div className="text-xs text-red-400">
+  Sponsor: {activeTournamentSponsorData?.name || "none"}
+</div>
           {activeTournamentSponsorData && (
   <a
     href={activeTournamentSponsorData.website_url || "#"}
