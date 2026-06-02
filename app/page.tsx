@@ -351,6 +351,8 @@ const fetchScorecardSponsors = async (tournamentId?: string) => {
     return;
   }
 
+  console.log("ALL SCORECARD PLACEMENTS:", data);
+
   const eligibleSponsors = (data || []).filter((placement: any) => {
     const sponsor = Array.isArray(placement.sponsors)
       ? placement.sponsors[0]
@@ -544,6 +546,7 @@ const playersForSelectedTeam =
     await fetchAllScores(tournamentId, data.format_type || "individual");
     await fetchTeams(tournamentId);
     await fetchTeamPlayers();
+    await fetchScorecardSponsors(tournamentId);
   };
 
   useEffect(() => {
