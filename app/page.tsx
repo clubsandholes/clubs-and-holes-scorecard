@@ -1110,7 +1110,10 @@ const headerSubName =
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
- const activeScorecardSponsor = scorecardSponsors[0];
+ const activeScorecardSponsor =
+  scorecardSponsors.length > 0
+    ? scorecardSponsors[currentHoleIndex % scorecardSponsors.length]
+    : null;
 
 const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
