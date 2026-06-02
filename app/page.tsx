@@ -1876,12 +1876,26 @@ console.log("Global Sponsors:", globalSponsors);
                 </div>
               </div>
 
-              <button
-                onClick={refreshLeaderboard}
-                className="rounded-full border border-white/10 bg-black/45 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#ff9900] backdrop-blur-md"
-              >
-                Refresh
-              </button>
+              {activeLeaderboardSponsorData?.website_url ? (
+  <a
+    href={activeLeaderboardSponsorData.website_url}
+    target="_blank"
+    rel="noreferrer"
+    className="flex items-center justify-center"
+  >
+    {activeLeaderboardSponsorData.image_url ? (
+      <img
+        src={activeLeaderboardSponsorData.image_url}
+        alt={activeLeaderboardSponsorData.name}
+        className="h-10 w-auto object-contain"
+      />
+    ) : (
+      <div className="text-sm font-black text-[#ff9900]">
+        {activeLeaderboardSponsorData.name}
+      </div>
+    )}
+  </a>
+) : null}
             </div>
 
             {leaderboardUpdatedMessage && (
