@@ -421,7 +421,7 @@ const fetchTeamPlayers = async () => {
     setPlayers(data || []);
   };
 
-  cconst fetchAllScores = async (
+  const fetchAllScores = async (
   tournamentId?: string,
   overrideFormatType?: string
 ) => {
