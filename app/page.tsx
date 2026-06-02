@@ -1553,9 +1553,7 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
 
     <h1 className="mt-3 text-4xl font-black">Select Your Team</h1>
-    <div className="text-xs text-red-400">
-  Sponsor: {activeTournamentSponsorData?.name || "none"}
-</div>
+    
           {activeTournamentSponsorData && (
   <a
     href={activeTournamentSponsorData.website_url || "#"}
