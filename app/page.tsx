@@ -1887,7 +1887,7 @@ console.log("Global Sponsors:", globalSponsors);
       <img
         src={activeLeaderboardSponsorData.image_url}
         alt={activeLeaderboardSponsorData.name}
-        className="h-10 w-auto object-contain"
+        className="h-24 w-24 rounded-xl object-contain"
       />
     ) : (
       <div className="text-sm font-black text-[#ff9900]">
