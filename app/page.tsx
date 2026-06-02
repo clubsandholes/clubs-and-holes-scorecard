@@ -328,20 +328,36 @@ const fetchScorecardSponsors = async (tournamentId?: string) => {
   const { data, error } = await supabase
     .from("sponsor_placements")
     .select(`
-      sponsor_id,
-      placement_label,
-      priority,
-      scope_type,
-      tournament_id,
-      starts_at,
-      ends_at,
-      sponsors (
-        name,
-        image_url,
-        website_url,
-        is_active
-      )
-    `)
+
+  sponsor_id,
+
+  placement_label,
+
+  priority,
+
+  scope_type,
+
+  tournament_id,
+
+  hole_number,
+
+  starts_at,
+
+  ends_at,
+
+  sponsors (
+
+    name,
+
+    image_url,
+
+    website_url,
+
+    is_active
+
+  )
+
+`)
     .eq("placement_type", "scorecard")
     .eq("is_active", true)
     .order("priority", { ascending: false });
@@ -1110,10 +1126,36 @@ const headerSubName =
   const dynamicBackground = `rgb(${backgroundShade}, ${backgroundShade}, ${backgroundShade})`;
   const currentHoleImage =  hole.image_url || "/default-hole.png";
   const phoneHref = coursePhone ? `tel:${coursePhone.replace(/\D/g, "")}` : "#";
- const activeScorecardSponsor =
-  scorecardSponsors.length > 0
-    ? scorecardSponsors[currentHoleIndex % scorecardSponsors.length]
+ const currentHoleNumber = hole.number;
+
+const holeSponsor = scorecardSponsors.find(
+  (placement: any) =>
+    placement.tournament_id === currentTournamentId &&
+    placement.hole_number === currentHoleNumber
+);
+
+const tournamentSponsors = scorecardSponsors.filter(
+  (placement: any) =>
+    placement.tournament_id === currentTournamentId &&
+    !placement.hole_number
+);
+
+const globalSponsors = scorecardSponsors.filter(
+  (placement: any) => placement.scope_type === "global"
+);
+
+const rotatingTournamentSponsor =
+  tournamentSponsors.length > 0
+    ? tournamentSponsors[currentHoleIndex % tournamentSponsors.length]
     : null;
+
+const rotatingGlobalSponsor =
+  globalSponsors.length > 0
+    ? globalSponsors[currentHoleIndex % globalSponsors.length]
+    : null;
+
+const activeScorecardSponsor =
+  holeSponsor || rotatingTournamentSponsor || rotatingGlobalSponsor || null;
 
 const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
