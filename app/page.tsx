@@ -541,7 +541,7 @@ const playersForSelectedTeam =
     }
 
     await applyTournamentSettings(data);
-    await fetchAllScores(data.id, data.format_type || "individual");
+    await fetchAllScores(tournamentId, data.format_type || "individual");
     await fetchTeams(tournamentId);
     await fetchTeamPlayers();
   };
