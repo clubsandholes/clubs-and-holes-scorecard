@@ -1380,7 +1380,30 @@ const activeTournamentSponsorData = Array.isArray(
           .replace("🚨 ADMIN ALERT:", "")
           .trim()}
       </div>
+          {activeTournamentSponsorData && (
+  <a
+    href={activeTournamentSponsorData.website_url || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="mt-5 flex items-center justify-center gap-3 rounded-2xl border border-white/20 bg-black/20 p-3"
+  >
+    <img
+      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+      alt={activeTournamentSponsorData.name}
+      className="h-14 w-14 rounded-xl object-contain"
+    />
 
+    <div className="text-left">
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">
+        {activeTournamentSponsor?.placement_label || "Presented By"}
+      </div>
+
+      <div className="mt-1 text-sm font-black text-white">
+        {activeTournamentSponsorData.name}
+      </div>
+    </div>
+  </a>
+)}
       <button
         onClick={() => {
 
