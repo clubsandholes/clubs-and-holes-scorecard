@@ -56,6 +56,8 @@ type Team = {
   name: string;
   image_url?: string;
   official_scorer_player_id?: string;
+  scorecard_status?: string | null;
+  scorecard_submitted_at?: string | null;
 };
 
 type TeamPlayer = {
@@ -156,6 +158,7 @@ export default function Home() {
   const [saveMessage, setSaveMessage] = useState("");
   const [leaderboardUpdatedMessage, setLeaderboardUpdatedMessage] = useState("");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [roundCompleteModalOpen, setRoundCompleteModalOpen] = useState(false);
 
   // =========================
   // TICKER / ALERT STATE
@@ -315,7 +318,7 @@ const fetchTeams = async (tournamentId?: string) => {
 
   const { data, error } = await supabase
     .from("teams")
-    .select("id, name, image_url, official_scorer_player_id")
+    .select("id, name, image_url, official_scorer_player_id, scorecard_status, scorecard_submitted_at")
     .eq("tournament_id", idToUse)
     .order("name");
 
@@ -1036,14 +1039,47 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
     );
 
     setTimeout(() => {
-      setIsSaving(false);
-      setSaveMessage("");
+  setIsSaving(false);
+  setSaveMessage("");
 
-      if (currentHoleIndex < holes.length - 1) {
-        setCurrentHoleIndex(currentHoleIndex + 1);
-      }
+  if (currentHoleIndex < holes.length - 1) {
+    setCurrentHoleIndex(currentHoleIndex + 1);
+  } else if (formatType !== "individual" && canScore) {
+    setRoundCompleteModalOpen(true);
+  }
     }, 10000);
   };
+
+
+  const submitScorecard = async () => {
+  if (!selectedTeamId) return;
+
+  const confirmed = confirm(
+    "Submit final scorecard? The Tournament Director can reopen it if corrections are needed."
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabase
+    .from("teams")
+    .update({
+      scorecard_status: "submitted",
+      scorecard_submitted_at: new Date().toISOString(),
+    })
+    .eq("id", selectedTeamId);
+
+  if (error) {
+    console.error("Error submitting scorecard:", error);
+    alert("Scorecard could not be submitted.");
+    return;
+  }
+
+  await fetchTeams(currentTournamentId);
+  setRoundCompleteModalOpen(false);
+  setView("leaderboard");
+};
+
+
 
   const goNext = () => {
     if (currentHoleIndex < holes.length - 1) {
@@ -1096,6 +1132,12 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
   const getSelectedTeam = () => {
   return teams.find((team) => team.id === selectedTeamId);
 };
+
+const selectedTeamData = teams.find((team) => team.id === selectedTeamId);
+
+const scorecardSubmitted =
+  formatType !== "individual" &&
+  selectedTeamData?.scorecard_status === "submitted";
 
   const getParPlayed = (scoreMap: Record<number, number>) => {
     return holes.reduce(
@@ -1423,6 +1465,40 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
   </div>
 )}
+
+        {roundCompleteModalOpen && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-md rounded-[2rem] border border-[#ff9900]/40 bg-black p-6 text-center text-white shadow-2xl">
+      <div className="text-xs font-black uppercase tracking-[0.3em] text-[#ff9900]">
+        🏁 Round Complete
+      </div>
+
+      <div className="mt-4 text-2xl font-black leading-tight">
+        You have entered all 18 holes.
+      </div>
+
+      <div className="mt-3 text-sm text-white/60">
+        Review your scorecard or submit it as complete.
+      </div>
+
+      <button
+        onClick={() => setRoundCompleteModalOpen(false)}
+        className="mt-6 w-full rounded-full border border-white/10 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-white"
+      >
+        Review Scorecard
+      </button>
+
+      <button
+        onClick={submitScorecard}
+        className="mt-3 w-full rounded-full bg-[#ff9900] px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black"
+      >
+        Submit Scorecard
+      </button>
+    </div>
+  </div>
+)}
+
+
 
         {saveMessage && (
   <div className="fixed bottom-6 left-4 right-4 z-[90]">
@@ -1835,7 +1911,7 @@ const activeTournamentSponsorData = Array.isArray(
 </div>
       </div>
 
-      {canScore ? (
+      {canScore && !scorecardSubmitted ? (
         <div className="mt-6 flex flex-col items-center">
           <div className="flex items-center justify-center gap-6">
             <button
@@ -1897,18 +1973,22 @@ const activeTournamentSponsorData = Array.isArray(
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            View Only
-          </div>
+            <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+              {scorecardSubmitted ? "Scorecard Submitted" : "View Only"}
+            </div>
 
-          <div className="mt-2 text-lg font-black">
-            Official scorer controls are locked.
-          </div>
+            <div className="mt-2 text-lg font-black">
+              {scorecardSubmitted
+                ? "Your final scorecard has been submitted."
+                : "Official scorer controls are locked."}
+            </div>
 
-          <div className="mt-2 text-sm text-white/60">
-            You can follow the round, leaderboard, and live ticker.
+            <div className="mt-2 text-sm text-white/60">
+              {scorecardSubmitted
+                ? "Waiting for tournament results."
+                : "You can follow the round, leaderboard, and live ticker."}
+            </div>
           </div>
-        </div>
       )}
     </div>
 
