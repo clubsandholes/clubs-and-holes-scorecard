@@ -1957,6 +1957,30 @@ const activeTournamentSponsorData = Array.isArray(
           <div className="mt-1 text-2xl font-black">
             {selectedLeaderboardPlayer.name}
           </div>
+          {activeTournamentSponsorData && (
+  <a
+    href={activeTournamentSponsorData.website_url || "#"}
+    target="_blank"
+    rel="noreferrer"
+    className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3"
+  >
+    <img
+      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+      alt={activeTournamentSponsorData.name}
+      className="h-12 w-12 rounded-xl object-contain"
+    />
+
+    <div>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+        {activeTournamentSponsor?.placement_label || "Presented By"}
+      </div>
+
+      <div className="mt-1 text-sm font-black text-white">
+        {activeTournamentSponsorData.name}
+      </div>
+    </div>
+  </a>
+)}
         </div>
 
         <button
