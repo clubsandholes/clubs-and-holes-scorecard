@@ -49,6 +49,8 @@ type Player = {
   name: string;
   claimed: boolean;
   profile_image_url?: string;
+  scorecard_status?: string | null;
+  scorecard_submitted_at?: string | null;
 };
 
 type Team = {
@@ -587,7 +589,7 @@ const fetchTeamPlayers = async () => {
 
     const { data, error } = await supabase
       .from("tournament_players")
-      .select("id, name, claimed, profile_image_url")
+      .select("id, name, claimed, profile_image_url, scorecard_status, scorecard_submitted_at")
       .eq("tournament_id", idToUse)
       .order("name");
 
@@ -1108,23 +1110,23 @@ await fetchAllScores(currentTournamentId);
 
   if (!confirmed) return;
 
-  if (formatType !== "individual") {
-    const { error } = await supabase
-      .from("teams")
-      .update({
-        scorecard_status: "submitted",
-        scorecard_submitted_at: new Date().toISOString(),
-      })
-      .eq("id", selectedTeamId);
+  if (formatType === "individual") {
+  const { error } = await supabase
+    .from("tournament_players")
+    .update({
+      scorecard_status: "submitted",
+      scorecard_submitted_at: new Date().toISOString(),
+    })
+    .eq("id", selectedPlayerId);
 
-    if (error) {
-      console.error("Error submitting scorecard:", error);
-      alert("Scorecard could not be submitted.");
-      return;
-    }
-
-    await fetchTeams(currentTournamentId);
+  if (error) {
+    console.error("Error submitting player scorecard:", error);
+    alert("Scorecard could not be submitted.");
+    return;
   }
+
+  await fetchPlayers(currentTournamentId);
+}
 
   setRoundCompleteModalOpen(false);
   setView("leaderboard");
@@ -1186,9 +1188,12 @@ await fetchAllScores(currentTournamentId);
 
 const selectedTeamData = teams.find((team) => team.id === selectedTeamId);
 
+const selectedPlayerData = players.find((player) => player.id === selectedPlayerId);
+
 const scorecardSubmitted =
-  formatType !== "individual" &&
-  selectedTeamData?.scorecard_status === "submitted";
+  formatType === "individual"
+    ? selectedPlayerData?.scorecard_status === "submitted"
+    : selectedTeamData?.scorecard_status === "submitted";
 
   const getParPlayed = (scoreMap: Record<number, number>) => {
     return holes.reduce(
