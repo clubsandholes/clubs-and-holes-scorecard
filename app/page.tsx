@@ -685,6 +685,26 @@ const playersForSelectedTeam =
     setScores(scoreMap);
   };
 
+  const fetchScoresForTeam = async (teamId: string) => {
+  const { data, error } = await supabase
+    .from("scores")
+    .select("hole_number, strokes")
+    .eq("team_id", teamId);
+
+  if (error) {
+    console.error("Error fetching team scores:", error);
+    return;
+  }
+
+  const scoreMap: Record<number, number> = {};
+
+  (data || []).forEach((score) => {
+    scoreMap[score.hole_number] = score.strokes;
+  });
+
+  setScores(scoreMap);
+};
+
   const fetchTickerEvents = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
     if (!idToUse) return;
@@ -773,9 +793,11 @@ const playersForSelectedTeam =
         async () => {
           await fetchAllScores(currentTournamentId);
 
-          if (selectedPlayerId) {
-            await fetchScoresForPlayer(selectedPlayerId);
-          }
+          if (formatType !== "individual" && selectedTeamId) {
+  await fetchScoresForTeam(selectedTeamId);
+} else if (selectedPlayerId) {
+  await fetchScoresForPlayer(selectedPlayerId);
+}
         }
       )
       .on(
@@ -899,8 +921,13 @@ console.log("Can Score:", isOfficialScorer);
 
     setView("scorecard");
 
-    fetchScoresForPlayer(data.id);
-    fetchPlayers();
+    if (formatType !== "individual") {
+  await fetchScoresForTeam(selectedTeamId);
+} else {
+  await fetchScoresForPlayer(data.id);
+}
+
+fetchPlayers();
   };
 
   const resetLocalPlayer = async () => {
@@ -1011,12 +1038,18 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
     const scoreDiff = draftScore - hole.par;
     let tickerMessage = "";
 
+    const tickerName =
+    formatType === "individual"
+      ? playerName
+      : selectedTeamName || selectedTeam?.name || "Team";
+
+
     if (scoreDiff <= -1) {
-      tickerMessage = `🔥 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+      tickerMessage = `🔥 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
     }
 
     if (scoreDiff >= 2) {
-      tickerMessage = `😬 ${playerName} made ${scoreLabel} on Hole ${hole.number}`;
+      tickerMessage = `😬 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
     }
 
     if (currentTournamentId && tickerMessage) {
@@ -1482,7 +1515,13 @@ const activeTournamentSponsorData = Array.isArray(
       </div>
 
       <button
-        onClick={() => setRoundCompleteModalOpen(false)}
+        onClick={async () => {
+          if (formatType !== "individual") {
+            await fetchScoresForTeam(selectedTeamId);
+          }
+
+          setRoundCompleteModalOpen(false);
+        }}
         className="mt-6 w-full rounded-full border border-white/10 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-white"
       >
         Review Scorecard
