@@ -685,6 +685,8 @@ const playersForSelectedTeam =
     setScores(scoreMap);
   };
 
+  
+
   const fetchScoresForTeam = async (teamId: string) => {
   const { data, error } = await supabase
     .from("scores")
@@ -775,11 +777,16 @@ const playersForSelectedTeam =
 }
 
     if (savedPlayerId && savedPlayerName) {
-      setSelectedPlayerId(savedPlayerId);
-      setPlayerName(savedPlayerName);
-      setView("scorecard");
-      fetchScoresForPlayer(savedPlayerId);
-    }
+  setSelectedPlayerId(savedPlayerId);
+  setPlayerName(savedPlayerName);
+  setView("scorecard");
+
+  if (savedTeamId) {
+    fetchScoresForTeam(savedTeamId);
+  } else {
+    fetchScoresForPlayer(savedPlayerId);
+  }
+  }
   }, []);
 
   useEffect(() => {
@@ -824,7 +831,7 @@ const playersForSelectedTeam =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentTournamentId, selectedPlayerId]);
+  }, [currentTournamentId, selectedPlayerId, selectedTeamId, formatType]);
 
   const scoreTickerEvents = tickerEvents.filter(
     (event) => event.event_type !== "admin"
@@ -1038,19 +1045,18 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
     const scoreDiff = draftScore - hole.par;
     let tickerMessage = "";
 
-    const tickerName =
-    formatType === "individual"
-      ? playerName
-      : selectedTeamName || selectedTeam?.name || "Team";
+   const tickerName =
+  formatType === "individual"
+    ? playerName
+    : selectedTeamName || selectedTeam?.name || "Team";
 
+if (scoreDiff <= -1) {
+  tickerMessage = `🔥 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
+}
 
-    if (scoreDiff <= -1) {
-      tickerMessage = `🔥 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
-    }
-
-    if (scoreDiff >= 2) {
-      tickerMessage = `😬 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
-    }
+if (scoreDiff >= 2) {
+  tickerMessage = `😬 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
+}
 
     if (currentTournamentId && tickerMessage) {
       await supabase.from("ticker_events").insert({
@@ -1065,6 +1071,14 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
       [hole.number]: draftScore,
     }));
 
+    if (formatType !== "individual") {
+  await fetchScoresForTeam(selectedTeamId);
+} else {
+  await fetchScoresForPlayer(selectedPlayerId);
+}
+
+await fetchAllScores(currentTournamentId);
+
     setSaveMessage(
       currentHoleIndex < holes.length - 1
         ? `Moving to Hole ${hole.number + 1}`
@@ -1077,15 +1091,17 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
 
   if (currentHoleIndex < holes.length - 1) {
     setCurrentHoleIndex(currentHoleIndex + 1);
-  } else if (formatType !== "individual" && canScore) {
-    setRoundCompleteModalOpen(true);
-  }
+  } else if (canScore) {
+
+  setRoundCompleteModalOpen(true);
+
+}
     }, 10000);
   };
 
 
   const submitScorecard = async () => {
-  if (!selectedTeamId) return;
+  if (formatType !== "individual" && !selectedTeamId) return;
 
   const confirmed = confirm(
     "Submit final scorecard? The Tournament Director can reopen it if corrections are needed."
@@ -1093,21 +1109,24 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
 
   if (!confirmed) return;
 
-  const { error } = await supabase
-    .from("teams")
-    .update({
-      scorecard_status: "submitted",
-      scorecard_submitted_at: new Date().toISOString(),
-    })
-    .eq("id", selectedTeamId);
+  if (formatType !== "individual") {
+    const { error } = await supabase
+      .from("teams")
+      .update({
+        scorecard_status: "submitted",
+        scorecard_submitted_at: new Date().toISOString(),
+      })
+      .eq("id", selectedTeamId);
 
-  if (error) {
-    console.error("Error submitting scorecard:", error);
-    alert("Scorecard could not be submitted.");
-    return;
+    if (error) {
+      console.error("Error submitting scorecard:", error);
+      alert("Scorecard could not be submitted.");
+      return;
+    }
+
+    await fetchTeams(currentTournamentId);
   }
 
-  await fetchTeams(currentTournamentId);
   setRoundCompleteModalOpen(false);
   setView("leaderboard");
 };
@@ -1227,10 +1246,7 @@ const getTeamScoreMap = (teamId: string) => {
   return map;
 };
 
-const headerScoreMap =
-  formatType === "individual"
-    ? scores
-    : getTeamScoreMap(selectedTeamId);
+const headerScoreMap = scores;
 
     const grossTotal = getGrossTotal(headerScoreMap);
 const parPlayed = getParPlayed(headerScoreMap);
