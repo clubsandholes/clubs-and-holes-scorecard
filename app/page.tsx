@@ -1085,18 +1085,17 @@ await fetchAllScores(currentTournamentId);
         : "Round complete"
     );
 
-    setTimeout(() => {
+  setTimeout(() => {
   setIsSaving(false);
   setSaveMessage("");
 
   if (currentHoleIndex < holes.length - 1) {
     setCurrentHoleIndex(currentHoleIndex + 1);
-  } else if (canScore) {
+    return;
+  }
 
   setRoundCompleteModalOpen(true);
-
-}
-    }, 10000);
+}, 10000);
   };
 
 
