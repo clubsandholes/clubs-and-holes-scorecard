@@ -1069,31 +1069,39 @@ const tickerName =
     ? playerName
     : selectedTeamName || selectedTeam?.name || "Team";
 
-let eventType: string | null = null;
-alert(`Score Diff: ${scoreDiff}`);
+let category = "progress";
+let eventType = "hole_complete";
 
-if (scoreDiff === -1) eventType = "birdie";
-if (scoreDiff === -2) eventType = "eagle";
-if (scoreDiff === 2) eventType = "double_bogey";
-if (scoreDiff >= 3) eventType = "triple_plus";
-
-if (eventType) {
-  console.log("FEED EVENT TYPE:", eventType);
-
-  const template = await getFeedTemplate("score", eventType);
-  alert(`Template: ${template || "NONE FOUND"}`);
-
-  console.log("FEED TEMPLATE:", template);
-
-  if (template) {
-    tickerMessage = applyFeedTemplate(template, {
-      name: tickerName,
-      hole: hole.number,
-    });
-
-    console.log("FINAL TICKER MESSAGE:", tickerMessage);
-  }
+if (scoreDiff === -1) {
+  category = "score";
+  eventType = "birdie";
 }
+
+if (scoreDiff === -2) {
+  category = "score";
+  eventType = "eagle";
+}
+
+if (scoreDiff === 2) {
+  category = "score";
+  eventType = "double_bogey";
+}
+
+if (scoreDiff >= 3) {
+  category = "score";
+  eventType = "triple_plus";
+}
+
+const template = await getFeedTemplate(category, eventType);
+
+if (template) {
+  tickerMessage = applyFeedTemplate(template, {
+    name: tickerName,
+    hole: hole.number,
+    score: formatScore(scoreDiff),
+  });
+}
+
 
   console.log("ABOUT TO INSERT TICKER:", {
   currentTournamentId,
@@ -1106,7 +1114,7 @@ if (currentTournamentId && tickerMessage) {
     .insert({
       tournament_id: currentTournamentId,
       message: tickerMessage,
-      event_type: "score",
+      event_type: category,
     })
     .select();
 
