@@ -1157,6 +1157,8 @@ await fetchAllScores(currentTournamentId);
 
   if (!confirmed) return;
 
+  alert("ENTER SCORE FUNCTION IS RUNNING");
+
   if (formatType === "individual") {
   const { error } = await supabase
     .from("tournament_players")
