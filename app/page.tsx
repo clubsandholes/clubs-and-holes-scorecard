@@ -1022,7 +1022,7 @@ fetchPlayers();
     );
 
     if (!confirmed) return;
-    alert("ENTER SCORE IS RUNNING");
+    //alert("ENTER SCORE IS RUNNING");
 
     setIsSaving(true);
 
