@@ -685,6 +685,7 @@ const playersForSelectedTeam =
     });
 
     setScores(scoreMap);
+    return scoreMap;
   };
 
   
@@ -707,6 +708,7 @@ const playersForSelectedTeam =
   });
 
   setScores(scoreMap);
+  return scoreMap;
 };
 
   const fetchTickerEvents = async (tournamentId?: string) => {
@@ -784,10 +786,18 @@ const playersForSelectedTeam =
   setView("scorecard");
 
   if (savedTeamId) {
-    fetchScoresForTeam(savedTeamId);
-  } else {
-    fetchScoresForPlayer(savedPlayerId);
-  }
+  fetchScoresForTeam(savedTeamId).then((scoreMap) => {
+    if (scoreMap) {
+      setCurrentHoleIndex(getResumeHoleIndex(scoreMap));
+    }
+  });
+} else {
+  fetchScoresForPlayer(savedPlayerId).then((scoreMap) => {
+    if (scoreMap) {
+      setCurrentHoleIndex(getResumeHoleIndex(scoreMap));
+    }
+  });
+}
   }
   }, []);
 
@@ -930,10 +940,16 @@ console.log("Can Score:", isOfficialScorer);
 
     setView("scorecard");
 
-    if (formatType !== "individual") {
-  await fetchScoresForTeam(selectedTeamId);
+   let loadedScores: Record<number, number> | undefined;
+
+if (formatType !== "individual") {
+  loadedScores = await fetchScoresForTeam(selectedTeamId);
 } else {
-  await fetchScoresForPlayer(data.id);
+  loadedScores = await fetchScoresForPlayer(data.id);
+}
+
+if (loadedScores) {
+  setCurrentHoleIndex(getResumeHoleIndex(loadedScores));
 }
 
 fetchPlayers();
@@ -1230,7 +1246,23 @@ const scorecardSubmitted =
     if (score === 0) return "E";
     return `${score}`;
   };
+const getResumeHoleIndex = (scoreMap: Record<number, number>) => {
 
+  const firstUnscoredHoleIndex = holes.findIndex(
+
+    (h) => scoreMap[h.number] === undefined
+
+  );
+
+  if (firstUnscoredHoleIndex === -1) {
+
+    return holes.length - 1;
+
+  }
+
+  return firstUnscoredHoleIndex;
+
+};
 
 
 
