@@ -1081,6 +1081,7 @@ if (eventType) {
   console.log("FEED EVENT TYPE:", eventType);
 
   const template = await getFeedTemplate("score", eventType);
+  alert(`Template: ${template || "NONE FOUND"}`);
 
   console.log("FEED TEMPLATE:", template);
 
