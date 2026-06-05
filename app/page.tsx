@@ -747,6 +747,26 @@ const playersForSelectedTeam =
     await applyTournamentSettings(data);
     await fetchAllScores(tournamentId, data.format_type || "individual");
     await fetchTeams(tournamentId);
+
+    const clubhouseTemplate = await getFeedTemplate(
+  "clubhouse",
+  "entered_clubhouse"
+);
+
+if (clubhouseTemplate) {
+  const clubhouseMessage = applyFeedTemplate(clubhouseTemplate, {
+    name: selectedTeamName,
+    score: formatScore(net),
+  });
+
+  await supabase.from("ticker_events").insert({
+    tournament_id: currentTournamentId,
+    message: clubhouseMessage,
+    event_type: "clubhouse",
+  });
+}
+
+
     await fetchTeamPlayers();
     await fetchScorecardSponsors(tournamentId);
     await fetchLeaderboardSponsors(tournamentId);
@@ -1136,6 +1156,25 @@ if (currentTournamentId && tickerMessage) {
   await fetchTickerEvents(currentTournamentId);
 }
 
+if (hole.number === 9) {
+  const frontNineTemplate = await getFeedTemplate(
+    "progress",
+    "front_nine_complete"
+  );
+
+  if (frontNineTemplate) {
+    const frontNineMessage = applyFeedTemplate(frontNineTemplate, {
+      name: tickerName,
+    });
+
+    await supabase.from("ticker_events").insert({
+      tournament_id: currentTournamentId,
+      message: frontNineMessage,
+      event_type: "progress",
+    });
+  }
+}
+
     setScores((prev) => ({
       ...prev,
       [hole.number]: draftScore,
@@ -1198,6 +1237,23 @@ await fetchAllScores(currentTournamentId);
   await fetchPlayers(currentTournamentId);
 }
 
+const clubhouseTemplate = await getFeedTemplate(
+  "clubhouse",
+  "entered_clubhouse"
+);
+
+if (clubhouseTemplate) {
+  const clubhouseMessage = applyFeedTemplate(clubhouseTemplate, {
+    name: playerName,
+    score: formatScore(net),
+  });
+
+  await supabase.from("ticker_events").insert({
+    tournament_id: currentTournamentId,
+    message: clubhouseMessage,
+    event_type: "clubhouse",
+  });
+}
   setRoundCompleteModalOpen(false);
   setView("leaderboard");
 };
