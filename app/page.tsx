@@ -1092,13 +1092,28 @@ if (eventType) {
   }
 }
 
-    if (currentTournamentId && tickerMessage) {
-      await supabase.from("ticker_events").insert({
-        tournament_id: currentTournamentId,
-        message: tickerMessage,
-        event_type: "score",
-      });
-    }
+  console.log("ABOUT TO INSERT TICKER:", {
+  currentTournamentId,
+  tickerMessage,
+});
+
+if (currentTournamentId && tickerMessage) {
+  const { data: tickerInsertData, error: tickerInsertError } = await supabase
+    .from("ticker_events")
+    .insert({
+      tournament_id: currentTournamentId,
+      message: tickerMessage,
+      event_type: "score",
+    })
+    .select();
+
+  console.log("TICKER INSERT RESULT:", {
+    tickerInsertData,
+    tickerInsertError,
+  });
+
+  await fetchTickerEvents(currentTournamentId);
+}
 
     setScores((prev) => ({
       ...prev,
