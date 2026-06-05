@@ -1022,6 +1022,7 @@ fetchPlayers();
     );
 
     if (!confirmed) return;
+    alert("ENTER SCORE IS RUNNING");
 
     setIsSaving(true);
 
@@ -1069,6 +1070,7 @@ const tickerName =
     : selectedTeamName || selectedTeam?.name || "Team";
 
 let eventType: string | null = null;
+alert(`Score Diff: ${scoreDiff}`);
 
 if (scoreDiff === -1) eventType = "birdie";
 if (scoreDiff === -2) eventType = "eagle";
@@ -1157,7 +1159,7 @@ await fetchAllScores(currentTournamentId);
 
   if (!confirmed) return;
 
-  alert("ENTER SCORE FUNCTION IS RUNNING");
+  
 
   if (formatType === "individual") {
   const { error } = await supabase
