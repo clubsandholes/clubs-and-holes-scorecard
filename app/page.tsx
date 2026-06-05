@@ -1107,6 +1107,16 @@ if (template) {
   currentTournamentId,
   tickerMessage,
 });
+alert(
+
+  `Category: ${category}
+
+Event: ${eventType}
+
+Message: ${tickerMessage || "EMPTY"}`
+
+);
+
 
 if (currentTournamentId && tickerMessage) {
   const { data: tickerInsertData, error: tickerInsertError } = await supabase
