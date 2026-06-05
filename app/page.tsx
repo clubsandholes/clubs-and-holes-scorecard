@@ -1076,13 +1076,19 @@ if (scoreDiff === 2) eventType = "double_bogey";
 if (scoreDiff >= 3) eventType = "triple_plus";
 
 if (eventType) {
+  console.log("FEED EVENT TYPE:", eventType);
+
   const template = await getFeedTemplate("score", eventType);
+
+  console.log("FEED TEMPLATE:", template);
 
   if (template) {
     tickerMessage = applyFeedTemplate(template, {
       name: tickerName,
       hole: hole.number,
     });
+
+    console.log("FINAL TICKER MESSAGE:", tickerMessage);
   }
 }
 
