@@ -1060,20 +1060,30 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
       return;
     }
 
-    const scoreDiff = draftScore - hole.par;
-    let tickerMessage = "";
+ const scoreDiff = draftScore - hole.par;
+let tickerMessage = "";
 
-   const tickerName =
+const tickerName =
   formatType === "individual"
     ? playerName
     : selectedTeamName || selectedTeam?.name || "Team";
 
-if (scoreDiff <= -1) {
-  tickerMessage = `🔥 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
-}
+let eventType: string | null = null;
 
-if (scoreDiff >= 2) {
-  tickerMessage = `😬 ${tickerName} made ${scoreLabel} on Hole ${hole.number}`;
+if (scoreDiff === -1) eventType = "birdie";
+if (scoreDiff === -2) eventType = "eagle";
+if (scoreDiff === 2) eventType = "double_bogey";
+if (scoreDiff >= 3) eventType = "triple_plus";
+
+if (eventType) {
+  const template = await getFeedTemplate("score", eventType);
+
+  if (template) {
+    tickerMessage = applyFeedTemplate(template, {
+      name: tickerName,
+      hole: hole.number,
+    });
+  }
 }
 
     if (currentTournamentId && tickerMessage) {
@@ -1264,7 +1274,38 @@ const getResumeHoleIndex = (scoreMap: Record<number, number>) => {
 
 };
 
+const getFeedTemplate = async (category: string, eventType: string) => {
+  const { data, error } = await supabase
+    .from("feed_templates")
+    .select("message_template")
+    .eq("category", category)
+    .eq("event_type", eventType)
+    .eq("is_active", true)
+    .or(`is_global.eq.true,tournament_id.eq.${currentTournamentId}`)
+    .order("priority", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
+  if (error) {
+    console.error("Error fetching feed template:", error);
+    return null;
+  }
+
+  return data?.message_template || null;
+};
+
+const applyFeedTemplate = (
+  template: string,
+  values: Record<string, string | number>
+) => {
+  let message = template;
+
+  Object.entries(values).forEach(([key, value]) => {
+    message = message.replaceAll(`{${key}}`, String(value));
+  });
+
+  return message;
+};
 
 // =========================
 // LEADERBOARD CALCULATIONS
