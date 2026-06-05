@@ -1283,21 +1283,34 @@ const getResumeHoleIndex = (scoreMap: Record<number, number>) => {
 const getFeedTemplate = async (category: string, eventType: string) => {
   const { data, error } = await supabase
     .from("feed_templates")
-    .select("message_template")
+    .select("message_template, is_global, tournament_id, priority")
     .eq("category", category)
     .eq("event_type", eventType)
     .eq("is_active", true)
-    .or(`is_global.eq.true,tournament_id.eq.${currentTournamentId}`)
-    .order("priority", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("is_global", { ascending: true })
+    .order("priority", { ascending: false });
 
   if (error) {
     console.error("Error fetching feed template:", error);
     return null;
   }
 
-  return data?.message_template || null;
+  const matchingTemplate = (data || []).find((template: any) => {
+    return (
+      template.tournament_id === currentTournamentId ||
+      template.is_global === true
+    );
+  });
+
+  console.log("FEED TEMPLATE SEARCH:", {
+    category,
+    eventType,
+    currentTournamentId,
+    data,
+    matchingTemplate,
+  });
+
+  return matchingTemplate?.message_template || null;
 };
 
 const applyFeedTemplate = (
