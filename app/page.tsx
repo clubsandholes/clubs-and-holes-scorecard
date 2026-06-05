@@ -218,7 +218,7 @@ const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
   }));
 
   setHoles(mappedHoles);
-  setCurrentHoleIndex(0);
+  //setCurrentHoleIndex(0);
 };
     const applyTournamentSettings = async (data: any) => {
   const newFormatType = data.format_type || "individual";
