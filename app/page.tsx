@@ -2404,7 +2404,7 @@ const activeTournamentSponsorData = Array.isArray(
         onClick={() => openView("leaderboard")}
         className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
       >
-        Leaderboard
+        The Turn
       </button>
 
       <button
@@ -2530,7 +2530,7 @@ const activeTournamentSponsorData = Array.isArray(
                 <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
                   Live Standings
                 </div>
-                <h1 className="mt-1 text-4xl font-black">Leaderboard</h1>
+                <h1 className="mt-1 text-4xl font-black">The Turn</h1>
                 {activeLeaderboardSponsorData && (
                   <div className="mt-2 flex items-center gap-3">
                     <div className="text-xs font-black uppercase tracking-[0.18em] text-white/50">
@@ -2754,6 +2754,49 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
   </div>
 )}
+<div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/90 backdrop-blur-xl">
+  <div className="mx-auto flex max-w-md items-center justify-around py-3">
+
+    <button
+      onClick={() => openView("scorecard")}
+      className={`flex flex-col items-center ${
+        view === "scorecard"
+          ? "text-[#ff9900]"
+          : "text-white/50"
+      }`}
+    >
+      <div className="text-xl">🏌️</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        Scorecard
+      </div>
+    </button>
+
+    <button
+      onClick={() => openView("leaderboard")}
+      className={`flex flex-col items-center ${
+        view === "leaderboard"
+          ? "text-[#ff9900]"
+          : "text-white/50"
+      }`}
+    >
+      <div className="text-xl">🔥</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        The Turn
+      </div>
+    </button>
+
+    <button
+      onClick={() => alert("Bunker Coming Soon")}
+      className="flex flex-col items-center text-white/50"
+    >
+      <div className="text-xl">🍻</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        Bunker
+      </div>
+    </button>
+
+  </div>
+</div>
       </div>
     </div>
   );
