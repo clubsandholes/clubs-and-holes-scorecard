@@ -475,7 +475,7 @@ const fetchLeaderboardSponsors = async (tournamentId?: string) => {
 
   console.log("ELIGIBLE LEADERBOARD SPONSORS:", eligibleSponsors);
 
-  setLeaderboardSponsors(eligibleSponsors);
+  setJoinSponsors(eligibleSponsors);
 };
 
 
@@ -748,23 +748,7 @@ const playersForSelectedTeam =
     await fetchAllScores(tournamentId, data.format_type || "individual");
     await fetchTeams(tournamentId);
 
-    const clubhouseTemplate = await getFeedTemplate(
-  "clubhouse",
-  "entered_clubhouse"
-);
-
-if (clubhouseTemplate) {
-  const clubhouseMessage = applyFeedTemplate(clubhouseTemplate, {
-    name: selectedTeamName,
-    score: formatScore(net),
-  });
-
-  await supabase.from("ticker_events").insert({
-    tournament_id: currentTournamentId,
-    message: clubhouseMessage,
-    event_type: "clubhouse",
-  });
-}
+    
 
 
     await fetchTeamPlayers();
@@ -1068,6 +1052,7 @@ const conflictTarget =
     ? "tournament_player_id,hole_number"
     : "team_id,hole_number";
 
+const leaderboardBefore = getLeaderboardSnapshot(allScores);    
 const { error } = await supabase.from("scores").upsert(scorePayload, {
   onConflict: conflictTarget,
 });
@@ -1127,15 +1112,7 @@ if (template) {
   currentTournamentId,
   tickerMessage,
 });
-alert(
 
-  `Category: ${category}
-
-Event: ${eventType}
-
-Message: ${tickerMessage || "EMPTY"}`
-
-);
 
 
 if (currentTournamentId && tickerMessage) {
@@ -1155,6 +1132,50 @@ if (currentTournamentId && tickerMessage) {
 
   await fetchTickerEvents(currentTournamentId);
 }
+
+const freshScoreRows = await fetchFreshScoreRowsForCurrentTournament();
+const leaderboardAfter = getLeaderboardSnapshot(freshScoreRows);
+
+const scorerId =
+  formatType === "individual" ? selectedPlayerId : selectedTeamId;
+
+const beforeScorer = leaderboardBefore.find((item) => item.id === scorerId);
+const afterScorer = leaderboardAfter.find((item) => item.id === scorerId);
+
+const beforeLast = leaderboardBefore[leaderboardBefore.length - 1];
+const afterLast = leaderboardAfter[leaderboardAfter.length - 1];
+
+if (beforeScorer && afterScorer) {
+  const wasLast = beforeLast?.id === scorerId;
+  const isLast = afterLast?.id === scorerId;
+
+  if (beforeScorer.position > 1 && afterScorer.position === 1) {
+    await createLeaderboardStoryEvent("took_lead", {
+      name: afterScorer.name,
+    });
+  } else if (wasLast && !isLast && afterLast) {
+    await createLeaderboardStoryEvent("escaped_last_place", {
+      escaped_name: afterScorer.name,
+      new_last_place_name: afterLast.name,
+    });
+  } else if (!wasLast && isLast) {
+    await createLeaderboardStoryEvent("last_place", {
+      name: afterScorer.name,
+    });
+  } else if (afterScorer.position < beforeScorer.position) {
+    await createLeaderboardStoryEvent("moved_up", {
+      name: afterScorer.name,
+    });
+  } else if (afterScorer.position > beforeScorer.position) {
+    await createLeaderboardStoryEvent("moved_down", {
+      name: afterScorer.name,
+    });
+  }
+}
+
+setAllScores(freshScoreRows);
+await fetchTickerEvents(currentTournamentId);
+
 
 if (hole.number === 9) {
   const frontNineTemplate = await getFeedTemplate(
@@ -1217,43 +1238,65 @@ await fetchAllScores(currentTournamentId);
 
   if (!confirmed) return;
 
-  
-
   if (formatType === "individual") {
-  const { error } = await supabase
-    .from("tournament_players")
-    .update({
-      scorecard_status: "submitted",
-      scorecard_submitted_at: new Date().toISOString(),
-    })
-    .eq("id", selectedPlayerId);
+    const { error } = await supabase
+      .from("tournament_players")
+      .update({
+        scorecard_status: "submitted",
+        scorecard_submitted_at: new Date().toISOString(),
+      })
+      .eq("id", selectedPlayerId);
 
-  if (error) {
-    console.error("Error submitting player scorecard:", error);
-    alert("Scorecard could not be submitted.");
-    return;
+    if (error) {
+      console.error("Error submitting player scorecard:", error);
+      alert("Scorecard could not be submitted.");
+      return;
+    }
+
+    await fetchPlayers(currentTournamentId);
+  } else {
+    const { error } = await supabase
+      .from("teams")
+      .update({
+        scorecard_status: "submitted",
+        scorecard_submitted_at: new Date().toISOString(),
+      })
+      .eq("id", selectedTeamId);
+
+    if (error) {
+      console.error("Error submitting team scorecard:", error);
+      alert("Scorecard could not be submitted.");
+      return;
+    }
+
+    await fetchTeams(currentTournamentId);
   }
 
-  await fetchPlayers(currentTournamentId);
-}
+  const clubhouseName =
+    formatType === "individual"
+      ? playerName
+      : selectedTeamName || selectedTeam?.name || "Team";
 
-const clubhouseTemplate = await getFeedTemplate(
-  "clubhouse",
-  "entered_clubhouse"
-);
+  const clubhouseTemplate = await getFeedTemplate(
+    "clubhouse",
+    "entered_clubhouse"
+  );
 
-if (clubhouseTemplate) {
-  const clubhouseMessage = applyFeedTemplate(clubhouseTemplate, {
-    name: playerName,
-    score: formatScore(net),
-  });
+  if (clubhouseTemplate) {
+    const clubhouseMessage = applyFeedTemplate(clubhouseTemplate, {
+      name: clubhouseName,
+      score: formatScore(net),
+    });
 
-  await supabase.from("ticker_events").insert({
-    tournament_id: currentTournamentId,
-    message: clubhouseMessage,
-    event_type: "clubhouse",
-  });
-}
+    await supabase.from("ticker_events").insert({
+      tournament_id: currentTournamentId,
+      message: clubhouseMessage,
+      event_type: "clubhouse",
+    });
+
+    await fetchTickerEvents(currentTournamentId);
+  }
+
   setRoundCompleteModalOpen(false);
   setView("leaderboard");
 };
@@ -1407,6 +1450,9 @@ const getFeedTemplate = async (category: string, eventType: string) => {
   return matchingTemplate?.message_template || null;
 };
 
+
+
+
 const applyFeedTemplate = (
   template: string,
   values: Record<string, string | number>
@@ -1418,6 +1464,108 @@ const applyFeedTemplate = (
   });
 
   return message;
+};
+
+const getLeaderboardSnapshot = (scoreRows: ScoreRow[]) => {
+  const competitors =
+    formatType === "individual"
+      ? players.map((player) => ({
+          id: player.id,
+          name: player.name,
+          scores: scoreRows.filter(
+            (score) => score.tournament_player_id === player.id
+          ),
+        }))
+      : teams.map((team) => ({
+          id: team.id,
+          name: team.name,
+          scores: scoreRows.filter((score) => score.team_id === team.id),
+        }));
+
+  return competitors
+    .map((competitor) => {
+      const scoreMap: Record<number, number> = {};
+
+      competitor.scores.forEach((score) => {
+        scoreMap[score.hole_number] = score.strokes;
+      });
+
+      const gross = getGrossTotal(scoreMap);
+      const par = getParPlayed(scoreMap);
+
+      return {
+        id: competitor.id,
+        name: competitor.name,
+        net: gross - par,
+        last6: getLastNToPar(scoreMap, 6),
+        last3: getLastNToPar(scoreMap, 3),
+        last1: getLastNToPar(scoreMap, 1),
+      };
+    })
+    .sort((a, b) => {
+      if (a.net !== b.net) return a.net - b.net;
+      if (a.last6 !== b.last6) return a.last6 - b.last6;
+      if (a.last3 !== b.last3) return a.last3 - b.last3;
+      if (a.last1 !== b.last1) return a.last1 - b.last1;
+      return a.name.localeCompare(b.name);
+    })
+    .map((item, index) => ({
+      ...item,
+      position: index + 1,
+    }));
+};
+
+const fetchFreshScoreRowsForCurrentTournament = async () => {
+  if (formatType === "individual") {
+    const playerIds = players.map((player) => player.id);
+
+    if (playerIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from("scores")
+      .select("tournament_player_id, team_id, hole_number, strokes")
+      .in("tournament_player_id", playerIds);
+
+    if (error) {
+      console.error("Error fetching fresh individual scores:", error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  const teamIds = teams.map((team) => team.id);
+
+  if (teamIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("scores")
+    .select("tournament_player_id, team_id, hole_number, strokes")
+    .in("team_id", teamIds);
+
+  if (error) {
+    console.error("Error fetching fresh team scores:", error);
+    return [];
+  }
+
+  return data || [];
+};
+
+const createLeaderboardStoryEvent = async (
+  eventType: string,
+  values: Record<string, string | number>
+) => {
+  const template = await getFeedTemplate("leaderboard", eventType);
+
+  if (!template || !currentTournamentId) return;
+
+  const message = applyFeedTemplate(template, values);
+
+  await supabase.from("ticker_events").insert({
+    tournament_id: currentTournamentId,
+    message,
+    event_type: "leaderboard",
+  });
 };
 
 // =========================
