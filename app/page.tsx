@@ -2504,25 +2504,24 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
           const backToPar = backScore - backPar;
           const totalToPar = totalScore - totalPar;
 
-          const cellClass =
-            "flex h-11 w-12 shrink-0 items-center justify-center border-r border-white/10 text-sm font-black";
+          const holeCellClass = "flex h-11 w-12 shrink-0 items-center justify-center border-r border-white/10 bg-gray-800 text-sm font-black text-white/60";
 
-          const labelClass =
-            "sticky left-0 z-10 flex h-11 w-20 shrink-0 items-center justify-start border-r border-white/20 bg-black px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]";
+          const parCellClass = "flex h-11 w-12 shrink-0 items-center justify-center border-r border-white/10 bg-gray-700 text-sm font-black text-white/80";
 
-          const totalClass =
-            "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-white/10 text-xs font-black text-[#ff9900]";
+          const scoreCellClass = "flex h-11 w-12 shrink-0 items-center justify-center border-r border-white/10 bg-black text-sm font-black text-white";
 
-          const scoreTotalClass =
-            "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-white/10 text-[11px] font-black leading-tight text-[#ff9900]";
+          const labelClass = "sticky left-0 z-10 flex h-11 w-20 shrink-0 items-center justify-start border-r border-white/20 bg-black px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]";
 
+          const totalClass = "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-gray-900 text-xs font-black text-[#ff9900]";
+
+          
           return (
             <div className="min-w-max overflow-hidden rounded-2xl border border-white/10 bg-white/5">
               <div className="flex">
                 <div className={labelClass}>Hole</div>
 
                 {frontHoles.map((h) => (
-                  <div key={`hole-front-${h.number}`} className={cellClass}>
+                  <div key={`hole-front-${h.number}`} className={holeCellClass}>
                     {h.number}
                   </div>
                 ))}
@@ -2543,7 +2542,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={labelClass}>Par</div>
 
                 {frontHoles.map((h) => (
-                  <div key={`par-front-${h.number}`} className={cellClass}>
+                  <div key={`par-front-${h.number}`} className={parCellClass}>
                     {h.par}
                   </div>
                 ))}
@@ -2579,7 +2578,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 </div>
 
                 {backHoles.map((h) => (
-                  <div key={`score-back-${h.number}`} className={cellClass}>
+                  <div key={`score-back-${h.number}`} className={scoreCellClass}>
                     {playerScores[h.number] ?? "-"}
                   </div>
                 ))}
