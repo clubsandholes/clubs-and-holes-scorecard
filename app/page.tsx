@@ -2348,21 +2348,39 @@ const activeTournamentSponsorData = Array.isArray(
             {getScoreLabel(draftScore, hole.par)}
           </div>
 
-          <button
-            onClick={enterScore}
-            disabled={isSaving}
-            className={`mt-7 w-full rounded-full px-8 py-4 text-sm font-black uppercase tracking-[0.18em] shadow-xl transition-all disabled:opacity-50 ${
-              scores[hole.number]
-                ? "bg-white/10 text-white"
-                : "bg-white text-black"
-            }`}
-          >
-            {isSaving
-              ? "SAVING..."
-              : scores[hole.number]
-              ? `EDIT HOLE ${hole.number} SCORE`
-              : `ENTER HOLE ${hole.number} SCORE`}
-          </button>
+          <div className="mt-7 flex w-full items-center gap-3">
+  <button
+    onClick={goPrev}
+    disabled={currentHoleIndex === 0}
+    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/10 bg-black/45 text-2xl font-black text-white disabled:opacity-20"
+  >
+    ←
+  </button>
+
+  <button
+    onClick={enterScore}
+    disabled={isSaving}
+    className={`flex-1 rounded-full px-5 py-4 text-sm font-black uppercase tracking-[0.16em] shadow-xl transition-all disabled:opacity-50 ${
+      scores[hole.number]
+        ? "bg-white/10 text-white"
+        : "bg-white text-black"
+    }`}
+  >
+    {isSaving
+      ? "SAVING..."
+      : scores[hole.number]
+      ? `EDIT HOLE ${hole.number} SCORE`
+      : `ENTER HOLE ${hole.number} SCORE`}
+  </button>
+
+  <button
+    onClick={goNext}
+    disabled={currentHoleIndex === holes.length - 1}
+    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/10 bg-black/45 text-2xl font-black text-white disabled:opacity-20"
+  >
+    →
+  </button>
+</div>
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
@@ -2397,7 +2415,7 @@ const activeTournamentSponsorData = Array.isArray(
         disabled={currentHoleIndex === 0}
         className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
-        ← Previous Hole
+        ←
       </button>
 
     
@@ -2407,7 +2425,7 @@ const activeTournamentSponsorData = Array.isArray(
         disabled={currentHoleIndex === holes.length - 1}
         className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
-       Next Hole →
+        →
       </button>
     </div>
   </>
