@@ -2447,177 +2447,197 @@ const activeTournamentSponsorData = Array.isArray(
   </>
 )}
 
-        {selectedLeaderboardPlayer && (
+       {selectedLeaderboardPlayer && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
     <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-black p-5 text-white">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            Hole By Hole
+            Scorecard
           </div>
 
           <div className="mt-1 text-2xl font-black">
             {selectedLeaderboardPlayer.name}
           </div>
-          {activeTournamentSponsorData && (
-  <a
-    href={activeTournamentSponsorData.website_url || "#"}
-    target="_blank"
-    rel="noreferrer"
-    className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3"
-  >
-    <img
-      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
-      alt={activeTournamentSponsorData.name}
-      className="h-12 w-12 rounded-xl object-contain"
-    />
-
-    <div>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-        {activeTournamentSponsor?.placement_label || "Presented By"}
-      </div>
-
-      <div className="mt-1 text-sm font-black text-white">
-        {activeTournamentSponsorData.name}
-      </div>
-    </div>
-  </a>
-)}
         </div>
 
         <button
           onClick={() => setSelectedLeaderboardPlayer(null)}
-          className="text-3xl"
+          className="text-3xl leading-none"
         >
           ×
         </button>
       </div>
 
       <div className="mt-6 overflow-x-auto">
-  {(() => {
-    const playerScores =
-      formatType === "individual"
-        ? getPlayerScoreMap(selectedLeaderboardPlayer.id)
-        : getTeamScoreMap(selectedLeaderboardPlayer.id);
+        {(() => {
+          const playerScores =
+            formatType === "individual"
+              ? getPlayerScoreMap(selectedLeaderboardPlayer.id)
+              : getTeamScoreMap(selectedLeaderboardPlayer.id);
 
-    const frontHoles = holes.slice(0, 9);
-    const backHoles = holes.slice(9, 18);
+          const frontHoles = holes.slice(0, 9);
+          const backHoles = holes.slice(9, 18);
 
-    const frontPar = frontHoles.reduce((t, h) => t + h.par, 0);
-    const backPar = backHoles.reduce((t, h) => t + h.par, 0);
-    const totalPar = frontPar + backPar;
+          const frontPar = frontHoles.reduce((t, h) => t + h.par, 0);
+          const backPar = backHoles.reduce((t, h) => t + h.par, 0);
+          const totalPar = frontPar + backPar;
 
-    const frontScore = frontHoles.reduce(
-      (t, h) => t + (playerScores[h.number] ?? 0),
-      0
-    );
+          const frontScore = frontHoles.reduce(
+            (t, h) => t + (playerScores[h.number] ?? 0),
+            0
+          );
 
-    const backScore = backHoles.reduce(
-      (t, h) => t + (playerScores[h.number] ?? 0),
-      0
-    );
+          const backScore = backHoles.reduce(
+            (t, h) => t + (playerScores[h.number] ?? 0),
+            0
+          );
 
-    const totalScore = frontScore + backScore;
+          const totalScore = frontScore + backScore;
 
-    const frontToPar = frontScore - frontPar;
-    const backToPar = backScore - backPar;
-    const totalToPar = totalScore - totalPar;
+          const frontToPar = frontScore - frontPar;
+          const backToPar = backScore - backPar;
+          const totalToPar = totalScore - totalPar;
 
-    const cellClass =
-      "flex h-10 min-w-10 items-center justify-center border-r border-white/10 px-2 text-sm font-black";
+          const cellClass =
+            "flex h-11 w-12 shrink-0 items-center justify-center border-r border-white/10 text-sm font-black";
 
-    const labelClass =
-      "sticky left-0 z-10 flex h-10 min-w-16 items-center justify-start border-r border-white/20 bg-black px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]";
+          const labelClass =
+            "sticky left-0 z-10 flex h-11 w-20 shrink-0 items-center justify-start border-r border-white/20 bg-black px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]";
 
-    const totalClass =
-      "flex h-10 min-w-14 items-center justify-center border-r border-white/10 bg-white/10 px-2 text-sm font-black text-[#ff9900]";
+          const totalClass =
+            "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-white/10 text-xs font-black text-[#ff9900]";
 
-    return (
-      <div className="min-w-max overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <div className="flex">
-          <div className={labelClass}>Hole</div>
+          const scoreTotalClass =
+            "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-white/10 text-[11px] font-black leading-tight text-[#ff9900]";
 
-          {frontHoles.map((h) => (
-            <div key={`hole-front-${h.number}`} className={cellClass}>
-              {h.number}
+          return (
+            <div className="min-w-max overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+              <div className="flex">
+                <div className={labelClass}>Hole</div>
+
+                {frontHoles.map((h) => (
+                  <div key={`hole-front-${h.number}`} className={cellClass}>
+                    {h.number}
+                  </div>
+                ))}
+
+                <div className={totalClass}>OUT</div>
+
+                {backHoles.map((h) => (
+                  <div key={`hole-back-${h.number}`} className={cellClass}>
+                    {h.number}
+                  </div>
+                ))}
+
+                <div className={totalClass}>IN</div>
+                <div className={totalClass}>TOT</div>
+              </div>
+
+              <div className="flex border-t border-white/10">
+                <div className={labelClass}>Par</div>
+
+                {frontHoles.map((h) => (
+                  <div key={`par-front-${h.number}`} className={cellClass}>
+                    {h.par}
+                  </div>
+                ))}
+
+                <div className={totalClass}>{frontPar}</div>
+
+                {backHoles.map((h) => (
+                  <div key={`par-back-${h.number}`} className={cellClass}>
+                    {h.par}
+                  </div>
+                ))}
+
+                <div className={totalClass}>{backPar}</div>
+                <div className={totalClass}>{totalPar}</div>
+              </div>
+
+              <div className="flex border-t border-white/10">
+                <div className={labelClass}>Score</div>
+
+                {frontHoles.map((h) => (
+                  <div key={`score-front-${h.number}`} className={cellClass}>
+                    {playerScores[h.number] ?? "-"}
+                  </div>
+                ))}
+
+                <div className={scoreTotalClass}>
+                  <div>{frontScore || "-"}</div>
+                  {frontScore ? (
+                    <div className="text-[9px] text-white/60">
+                      {formatScore(frontToPar)}
+                    </div>
+                  ) : null}
+                </div>
+
+                {backHoles.map((h) => (
+                  <div key={`score-back-${h.number}`} className={cellClass}>
+                    {playerScores[h.number] ?? "-"}
+                  </div>
+                ))}
+
+                <div className={scoreTotalClass}>
+                  <div>{backScore || "-"}</div>
+                  {backScore ? (
+                    <div className="text-[9px] text-white/60">
+                      {formatScore(backToPar)}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className={scoreTotalClass}>
+                  <div>{totalScore || "-"}</div>
+                  {totalScore ? (
+                    <div className="text-[9px] text-white/60">
+                      {formatScore(totalToPar)}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </div>
-          ))}
-
-          <div className={totalClass}>OUT</div>
-
-          {backHoles.map((h) => (
-            <div key={`hole-back-${h.number}`} className={cellClass}>
-              {h.number}
-            </div>
-          ))}
-
-          <div className={totalClass}>IN</div>
-          <div className={totalClass}>TOTAL</div>
-        </div>
-
-        <div className="flex border-t border-white/10">
-          <div className={labelClass}>Par</div>
-
-          {frontHoles.map((h) => (
-            <div key={`par-front-${h.number}`} className={cellClass}>
-              {h.par}
-            </div>
-          ))}
-
-          <div className={totalClass}>{frontPar}</div>
-
-          {backHoles.map((h) => (
-            <div key={`par-back-${h.number}`} className={cellClass}>
-              {h.par}
-            </div>
-          ))}
-
-          <div className={totalClass}>{backPar}</div>
-          <div className={totalClass}>{totalPar}</div>
-        </div>
-
-        <div className="flex border-t border-white/10">
-          <div className={labelClass}>Score</div>
-
-          {frontHoles.map((h) => (
-            <div key={`score-front-${h.number}`} className={cellClass}>
-              {playerScores[h.number] ?? "-"}
-            </div>
-          ))}
-
-          <div className={totalClass}>
-            {frontScore || "-"}
-            {frontScore ? ` (${formatScore(frontToPar)})` : ""}
-          </div>
-
-          {backHoles.map((h) => (
-            <div key={`score-back-${h.number}`} className={cellClass}>
-              {playerScores[h.number] ?? "-"}
-            </div>
-          ))}
-
-          <div className={totalClass}>
-            {backScore || "-"}
-            {backScore ? ` (${formatScore(backToPar)})` : ""}
-          </div>
-
-          <div className={totalClass}>
-            {totalScore || "-"}
-            {totalScore ? ` (${formatScore(totalToPar)})` : ""}
-          </div>
-        </div>
+          );
+        })()}
       </div>
-    );
-  })()}
-</div>
 
-      <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-        <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-          Total
-        </div>
+      <div className="mt-5 grid grid-cols-[1fr_auto] gap-3">
+        {activeTournamentSponsorData ? (
+          <a
+            href={activeTournamentSponsorData.website_url || "#"}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3"
+          >
+            <img
+              src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+              alt={activeTournamentSponsorData.name}
+              className="h-12 w-12 rounded-xl object-contain"
+            />
 
-        <div className="mt-1 text-3xl font-black">
-          {formatScore(selectedLeaderboardPlayer.net)}
+            <div className="min-w-0">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+                Powered By
+              </div>
+
+              <div className="mt-1 truncate text-sm font-black text-white">
+                {activeTournamentSponsorData.name}
+              </div>
+            </div>
+          </a>
+        ) : (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-3" />
+        )}
+
+        <div className="flex min-w-[110px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/50">
+            Total
+          </div>
+
+          <div className="mt-1 text-3xl font-black text-[#ff9900]">
+            {formatScore(selectedLeaderboardPlayer.net)}
+          </div>
         </div>
       </div>
     </div>
