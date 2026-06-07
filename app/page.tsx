@@ -1404,49 +1404,28 @@ const getScoreStyle = (
   score: number | undefined,
   par: number
 ) => {
-  if (!score) {
-    return {
-      symbol: "",
-      color: "text-white",
-    };
-  }
+  if (!score) return "";
 
   const diff = score - par;
 
   if (diff <= -2) {
-    return {
-      symbol: "◎",
-      color: "text-yellow-400",
-    };
+    return "h-7 w-7 rounded-full border-4 border-yellow-400 text-yellow-400";
   }
 
   if (diff === -1) {
-    return {
-      symbol: "◯",
-      color: "text-green-400",
-    };
+    return "h-7 w-7 rounded-full border-2 border-green-400 text-green-400";
   }
 
   if (diff === 1) {
-    return {
-      symbol: "□",
-      color: "text-orange-400",
-    };
+    return "h-7 w-7 rounded-none border-2 border-orange-400 text-orange-400";
   }
 
   if (diff >= 2) {
-    return {
-      symbol: "▣",
-      color: "text-red-500",
-    };
+    return "h-7 w-7 rounded-none border-4 border-red-500 text-red-500";
   }
 
-  return {
-    symbol: "",
-    color: "text-white",
-  };
+  return "";
 };
-
 const getResumeHoleIndex = (scoreMap: Record<number, number>) => {
 
   const firstUnscoredHoleIndex = holes.findIndex(
@@ -2618,15 +2597,14 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
     const score = playerScores[h.number];
     const style = getScoreStyle(score, h.par);
 
-    return (
-      <div className={`flex items-center gap-1 ${style.color}`}>
-        {style.symbol && (
-          <span className="text-[10px]">
-            {style.symbol}
-          </span>
-        )}
-        <span>{score ?? "-"}</span>
+    return score ? (
+      <div
+        className={`flex items-center justify-center text-sm font-black ${style}`}
+      >
+        {score}
       </div>
+    ) : (
+      "-"
     );
   })()}
 </div>
@@ -2642,20 +2620,19 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 </div>
 
                 {backHoles.map((h) => (
-                  <div key={`score-front-${h.number}`} className={scoreCellClass}>
+                  <div key={`score-back-${h.number}`} className={scoreCellClass}>
   {(() => {
     const score = playerScores[h.number];
     const style = getScoreStyle(score, h.par);
 
-    return (
-      <div className={`flex items-center gap-1 ${style.color}`}>
-        {style.symbol && (
-          <span className="text-[10px]">
-            {style.symbol}
-          </span>
-        )}
-        <span>{score ?? "-"}</span>
+    return score ? (
+      <div
+        className={`flex items-center justify-center text-sm font-black ${style}`}
+      >
+        {score}
       </div>
+    ) : (
+      "-"
     );
   })()}
 </div>
