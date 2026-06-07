@@ -2369,8 +2369,8 @@ const activeTournamentSponsorData = Array.isArray(
     {isSaving
       ? "SAVING..."
       : scores[hole.number]
-      ? `EDIT HOLE ${hole.number} SCORE`
-      : `ENTER HOLE ${hole.number} SCORE`}
+      ? `EDIT SCORE`
+      : `ENTER SCORE`}
   </button>
 
   <button
