@@ -2616,7 +2616,7 @@ const activeTournamentSponsorData = Array.isArray(
               </div>
             )}
 
-            <div className="mt-5 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
+            <div className="sticky top-2 z-40 mt-5 rounded-2xl border border-white/10 bg-black/80 px-4 py-3 text-center shadow-xl backdrop-blur-md">
               <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
                 {latestTickerMessage}
               </div>
