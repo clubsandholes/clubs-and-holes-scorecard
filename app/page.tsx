@@ -2781,16 +2781,16 @@ const activeTournamentSponsorData = Array.isArray(
             </div>
 
             <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
-              {activeTournamentSponsorData && (
+              {activeLeaderboardSponsorData && (
   <a
-    href={activeTournamentSponsorData.website_url || "#"}
+    href={activeLeaderboardSponsorData.website_url || "#"}
     target="_blank"
     rel="noreferrer"
     className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 p-3"
   >
     <img
-      src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
-      alt={activeTournamentSponsorData.name}
+      src={activeLeaderboardSponsorData.image_url || "/ch-logo.png"}
+      alt={activeLeaderboardSponsorData.name}
       className="h-14 w-14 rounded-xl object-contain"
     />
 
@@ -2800,7 +2800,7 @@ const activeTournamentSponsorData = Array.isArray(
       </div>
 
       <div className="mt-1 text-sm font-black text-white">
-        {activeTournamentSponsorData.name}
+        {activeLeaderboardSponsorData.name}
       </div>
     </div>
   </a>
