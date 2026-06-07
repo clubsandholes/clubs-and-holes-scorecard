@@ -2658,24 +2658,24 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                   Live Standings
                 </div>
                 <h1 className="mt-1 text-4xl font-black">The Turn</h1>
-                {activeLeaderboardSponsorData && (
-                  <div className="mt-2 flex items-center gap-3">
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-white/50">
-                      {activeLeaderboardSponsor?.placement_label || "Presented By"}
-                    </div>
-
-                    {activeLeaderboardSponsorData.image_url ? (
-                      <img
-                        src={activeLeaderboardSponsorData.image_url}
-                        alt={activeLeaderboardSponsorData.name}
-                        className="h-8 w-auto object-contain"
-                      />
-                    ) : (
-                      <div className="text-sm font-black text-[#ff9900]">
-                        {activeLeaderboardSponsorData.name}
-                      </div>
-                    )}
+                {activeTournamentSponsorData && (
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/50">
+                    {activeTournamentSponsor?.placement_label || "Presented By"}
                   </div>
+
+                  {activeTournamentSponsorData.image_url ? (
+                    <img
+                      src={activeTournamentSponsorData.image_url}
+                      alt={activeTournamentSponsorData.name}
+                      className="h-8 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="text-sm font-black text-[#ff9900]">
+                      {activeTournamentSponsorData.name}
+                    </div>
+                  )}
+                </div>
                 )}
                 <div className="mt-2 text-lg font-black text-white">
                   {tournamentName || "Tournament"}
@@ -2686,22 +2686,22 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 </div>
               </div>
 
-              {activeLeaderboardSponsorData?.website_url ? (
+              {activeTournamentSponsorData?.website_url ? (
   <a
-    href={activeLeaderboardSponsorData.website_url}
+    href={activeTournamentSponsorData.website_url}
     target="_blank"
     rel="noreferrer"
     className="flex items-center justify-center"
   >
-    {activeLeaderboardSponsorData.image_url ? (
+    {activeTournamentSponsorData.image_url ? (
       <img
-        src={activeLeaderboardSponsorData.image_url}
-        alt={activeLeaderboardSponsorData.name}
+        src={activeTournamentSponsorData.image_url}
+        alt={activeTournamentSponsorData.name}
         className="h-24 w-24 rounded-xl object-contain"
       />
     ) : (
       <div className="text-sm font-black text-[#ff9900]">
-        {activeLeaderboardSponsorData.name}
+        {activeTournamentSponsorData.name}
       </div>
     )}
   </a>
