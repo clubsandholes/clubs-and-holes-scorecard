@@ -2514,6 +2514,8 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
           const totalClass = "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-gray-900 text-xs font-black text-[#ff9900]";
 
+          const scoreTotalClass =
+  "flex h-11 w-12 shrink-0 flex-col items-center justify-center border-r border-white/10 bg-gray-900 text-[11px] font-black leading-tight text-[#ff9900]";
           
           return (
             <div className="min-w-max overflow-hidden rounded-2xl border border-white/10 bg-white/5">
