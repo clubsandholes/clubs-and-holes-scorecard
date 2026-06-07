@@ -2436,57 +2436,7 @@ const activeTournamentSponsorData = Array.isArray(
       
     
 
-  <div className="grid grid-cols-3 gap-3 text-center">
-
-    <div>
-
-      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
-
-        Position
-
-      </div>
-
-      <div className="mt-1 text-2xl font-black text-[#ff9900]">
-
-        T{currentPosition}
-
-      </div>
-
-    </div>
-
-    <div>
-
-      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
-
-        Behind
-
-      </div>
-
-      <div className="mt-1 text-2xl font-black text-[#ff9900]">
-
-        {strokesBehind}
-
-      </div>
-
-    </div>
-
-    <div>
-
-      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
-
-        Beat
-
-      </div>
-
-      <div className="mt-1 text-2xl font-black text-[#ff9900]">
-
-        {betterThanLastPlace}
-
-      </div>
-
-    </div>
-
-  </div>
+  
 
       <div className="mt-2 text-sm font-black leading-snug text-[#ff9900]">
         Don&apos;t be a bitch. Use your driver.
