@@ -2494,48 +2494,121 @@ const activeTournamentSponsorData = Array.isArray(
       </div>
 
       <div className="mt-6 overflow-x-auto">
-  <div className="flex min-w-max items-end gap-1">
-    {holes.map((holeInfo) => {
-      const playerScores =
-        formatType === "individual"
-          ? getPlayerScoreMap(selectedLeaderboardPlayer.id)
-          : getTeamScoreMap(selectedLeaderboardPlayer.id);
+  {(() => {
+    const playerScores =
+      formatType === "individual"
+        ? getPlayerScoreMap(selectedLeaderboardPlayer.id)
+        : getTeamScoreMap(selectedLeaderboardPlayer.id);
 
-      const score = playerScores[holeInfo.number];
-      const diff = score ? score - holeInfo.par : null;
+    const frontHoles = holes.slice(0, 9);
+    const backHoles = holes.slice(9, 18);
 
-      const scoreShape =
-        diff === null
-          ? ""
-          : diff <= -2
-          ? "border-double border-4 rounded-full"
-          : diff === -1
-          ? "border rounded-full"
-          : diff === 1
-          ? "border rounded-none"
-          : diff >= 2
-          ? "border-double border-4 rounded-none"
-          : "";
+    const frontPar = frontHoles.reduce((t, h) => t + h.par, 0);
+    const backPar = backHoles.reduce((t, h) => t + h.par, 0);
+    const totalPar = frontPar + backPar;
 
-      return (
-        <div key={holeInfo.number} className="w-10 shrink-0 text-center">
-          <div className="mb-1 bg-black text-[10px] font-black text-white">
-            {holeInfo.number}
+    const frontScore = frontHoles.reduce(
+      (t, h) => t + (playerScores[h.number] ?? 0),
+      0
+    );
+
+    const backScore = backHoles.reduce(
+      (t, h) => t + (playerScores[h.number] ?? 0),
+      0
+    );
+
+    const totalScore = frontScore + backScore;
+
+    const frontToPar = frontScore - frontPar;
+    const backToPar = backScore - backPar;
+    const totalToPar = totalScore - totalPar;
+
+    const cellClass =
+      "flex h-10 min-w-10 items-center justify-center border-r border-white/10 px-2 text-sm font-black";
+
+    const labelClass =
+      "sticky left-0 z-10 flex h-10 min-w-16 items-center justify-start border-r border-white/20 bg-black px-3 text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]";
+
+    const totalClass =
+      "flex h-10 min-w-14 items-center justify-center border-r border-white/10 bg-white/10 px-2 text-sm font-black text-[#ff9900]";
+
+    return (
+      <div className="min-w-max overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="flex">
+          <div className={labelClass}>Hole</div>
+
+          {frontHoles.map((h) => (
+            <div key={`hole-front-${h.number}`} className={cellClass}>
+              {h.number}
+            </div>
+          ))}
+
+          <div className={totalClass}>OUT</div>
+
+          {backHoles.map((h) => (
+            <div key={`hole-back-${h.number}`} className={cellClass}>
+              {h.number}
+            </div>
+          ))}
+
+          <div className={totalClass}>IN</div>
+          <div className={totalClass}>TOTAL</div>
+        </div>
+
+        <div className="flex border-t border-white/10">
+          <div className={labelClass}>Par</div>
+
+          {frontHoles.map((h) => (
+            <div key={`par-front-${h.number}`} className={cellClass}>
+              {h.par}
+            </div>
+          ))}
+
+          <div className={totalClass}>{frontPar}</div>
+
+          {backHoles.map((h) => (
+            <div key={`par-back-${h.number}`} className={cellClass}>
+              {h.par}
+            </div>
+          ))}
+
+          <div className={totalClass}>{backPar}</div>
+          <div className={totalClass}>{totalPar}</div>
+        </div>
+
+        <div className="flex border-t border-white/10">
+          <div className={labelClass}>Score</div>
+
+          {frontHoles.map((h) => (
+            <div key={`score-front-${h.number}`} className={cellClass}>
+              {playerScores[h.number] ?? "-"}
+            </div>
+          ))}
+
+          <div className={totalClass}>
+            {frontScore || "-"}
+            {frontScore ? ` (${formatScore(frontToPar)})` : ""}
           </div>
 
-          <div
-            className={`mx-auto flex h-8 w-8 items-center justify-center text-sm font-black ${
-              scoreShape
-                ? `${scoreShape} border-[#ff9900] text-white`
-                : "text-white"
-            }`}
-          >
-            {score ?? "-"}
+          {backHoles.map((h) => (
+            <div key={`score-back-${h.number}`} className={cellClass}>
+              {playerScores[h.number] ?? "-"}
+            </div>
+          ))}
+
+          <div className={totalClass}>
+            {backScore || "-"}
+            {backScore ? ` (${formatScore(backToPar)})` : ""}
+          </div>
+
+          <div className={totalClass}>
+            {totalScore || "-"}
+            {totalScore ? ` (${formatScore(totalToPar)})` : ""}
           </div>
         </div>
-      );
-    })}
-  </div>
+      </div>
+    );
+  })()}
 </div>
 
       <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
