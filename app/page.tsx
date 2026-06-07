@@ -2780,6 +2780,9 @@ const activeTournamentSponsorData = Array.isArray(
               Course Info
             </div>
 
+          console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
+          console.log("Tournament Sponsor:", activeTournamentSponsorData);
+
             <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
               {activeLeaderboardSponsorData && (
   <a
