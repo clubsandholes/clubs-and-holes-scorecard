@@ -1791,6 +1791,9 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
   : activeScorecardSponsor?.sponsors;
 
+  console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
+console.log("Tournament Sponsor:", activeTournamentSponsorData);
+
   console.log("Current Tournament:", currentTournamentId);
 console.log("Hole Sponsor:", holeSponsor);
 console.log("Tournament Sponsors:", tournamentSponsors);
