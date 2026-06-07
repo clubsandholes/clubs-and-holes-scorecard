@@ -2552,7 +2552,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={totalClass}>{frontPar}</div>
 
                 {backHoles.map((h) => (
-                  <div key={`par-back-${h.number}`} className={holeCellClass}>
+                  <div key={`par-back-${h.number}`} className={parCellClass}>
                     {h.par}
                   </div>
                 ))}
