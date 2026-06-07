@@ -2565,7 +2565,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={labelClass}>Score</div>
 
                 {frontHoles.map((h) => (
-                  <div key={`score-front-${h.number}`} className={holeCellClass}>
+                  <div key={`score-front-${h.number}`} className={scoreCellClass}>
                     {playerScores[h.number] ?? "-"}
                   </div>
                 ))}
