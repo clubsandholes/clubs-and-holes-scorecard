@@ -2404,13 +2404,87 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
 
     <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
-  <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/40">
-    🎯 Caddie
+      
+      const currentPosition =
+  sortedLeaderboard.findIndex(
+    (entry) =>
+      entry.id ===
+      (formatType === "individual"
+        ? selectedPlayerId
+        : selectedTeamId)
+  ) + 1;
+
+const leaderScore =
+  sortedLeaderboard.length > 0
+    ? sortedLeaderboard[0].net
+    : 0;
+
+const strokesBehind =
+  currentPosition > 1
+    ? net - leaderScore
+    : 0;
+
+const betterThanLastPlace =
+  Math.max(
+    0,
+    sortedLeaderboard.length - currentPosition
+  );
+
+  <div className="grid grid-cols-3 gap-3 text-center">
+
+    <div>
+
+      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+
+        Position
+
+      </div>
+
+      <div className="mt-1 text-2xl font-black text-[#ff9900]">
+
+        T{currentPosition}
+
+      </div>
+
+    </div>
+
+    <div>
+
+      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+
+        Behind
+
+      </div>
+
+      <div className="mt-1 text-2xl font-black text-[#ff9900]">
+
+        {strokesBehind}
+
+      </div>
+
+    </div>
+
+    <div>
+
+      <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+
+        Beat
+
+      </div>
+
+      <div className="mt-1 text-2xl font-black text-[#ff9900]">
+
+        {betterThanLastPlace}
+
+      </div>
+
+    </div>
+
   </div>
 
-  <div className="mt-2 text-sm font-black leading-snug text-[#ff9900]">
-    Don&apos;t be a bitch. Use your driver.
-  </div>
+      <div className="mt-2 text-sm font-black leading-snug text-[#ff9900]">
+        Don&apos;t be a bitch. Use your driver.
+      </div>
 </div>
 
     
