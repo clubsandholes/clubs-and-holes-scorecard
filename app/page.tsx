@@ -1638,6 +1638,8 @@ const teamLeaderboard = teams.map((team) => {
 };
 });
 
+
+
 const leaderboard =
   formatType === "individual" ? playerLeaderboard : teamLeaderboard;
 
@@ -1650,6 +1652,33 @@ const leaderboard =
     if (a.last1 !== b.last1) return a.last1 - b.last1;
     return a.name.localeCompare(b.name);
   });
+
+
+  const currentPosition =
+  sortedLeaderboard.findIndex(
+    (entry) =>
+      entry.id ===
+      (formatType === "individual"
+        ? selectedPlayerId
+        : selectedTeamId)
+  ) + 1;
+
+const leaderScore =
+  sortedLeaderboard.length > 0
+    ? sortedLeaderboard[0].net
+    : 0;
+
+const strokesBehind =
+  currentPosition > 1
+    ? net - leaderScore
+    : 0;
+
+const betterThanLastPlace =
+  Math.max(
+    0,
+    sortedLeaderboard.length - currentPosition
+  );
+
 
   useEffect(() => {
     const currentOrder = sortedLeaderboard.map((player) => player.id);
@@ -2405,30 +2434,7 @@ const activeTournamentSponsorData = Array.isArray(
 
     <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
       
-      const currentPosition =
-  sortedLeaderboard.findIndex(
-    (entry) =>
-      entry.id ===
-      (formatType === "individual"
-        ? selectedPlayerId
-        : selectedTeamId)
-  ) + 1;
-
-const leaderScore =
-  sortedLeaderboard.length > 0
-    ? sortedLeaderboard[0].net
-    : 0;
-
-const strokesBehind =
-  currentPosition > 1
-    ? net - leaderScore
-    : 0;
-
-const betterThanLastPlace =
-  Math.max(
-    0,
-    sortedLeaderboard.length - currentPosition
-  );
+    
 
   <div className="grid grid-cols-3 gap-3 text-center">
 
