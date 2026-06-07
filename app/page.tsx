@@ -2403,11 +2403,15 @@ const activeTournamentSponsorData = Array.isArray(
       )}
     </div>
 
-    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-center backdrop-blur-md">
-      <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
-        {latestTickerMessage}
-      </div>
-    </div>
+    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
+  <div className="text-[10px] font-black uppercase tracking-[0.25em] text-white/40">
+    🎯 Caddie
+  </div>
+
+  <div className="mt-2 text-sm font-black leading-snug text-[#ff9900]">
+    Don&apos;t be a bitch. Use your driver.
+  </div>
+</div>
 
     
   </>
