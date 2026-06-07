@@ -2529,7 +2529,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={totalClass}>OUT</div>
 
                 {backHoles.map((h) => (
-                  <div key={`hole-back-${h.number}`} className={cellClass}>
+                  <div key={`hole-back-${h.number}`} className={holeCellClass}>
                     {h.number}
                   </div>
                 ))}
@@ -2550,7 +2550,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={totalClass}>{frontPar}</div>
 
                 {backHoles.map((h) => (
-                  <div key={`par-back-${h.number}`} className={cellClass}>
+                  <div key={`par-back-${h.number}`} className={holeCellClass}>
                     {h.par}
                   </div>
                 ))}
@@ -2563,7 +2563,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 <div className={labelClass}>Score</div>
 
                 {frontHoles.map((h) => (
-                  <div key={`score-front-${h.number}`} className={cellClass}>
+                  <div key={`score-front-${h.number}`} className={holeCellClass}>
                     {playerScores[h.number] ?? "-"}
                   </div>
                 ))}
