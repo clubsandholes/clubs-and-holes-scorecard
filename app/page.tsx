@@ -1791,27 +1791,29 @@ const activeSponsor = Array.isArray(activeScorecardSponsor?.sponsors)
   ? activeScorecardSponsor?.sponsors[0]
   : activeScorecardSponsor?.sponsors;
 
-  console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
-console.log("Tournament Sponsor:", activeTournamentSponsorData);
+
 
   console.log("Current Tournament:", currentTournamentId);
 console.log("Hole Sponsor:", holeSponsor);
 console.log("Tournament Sponsors:", tournamentSponsors);
 console.log("Global Sponsors:", globalSponsors);
-const activeTournamentSponsor = scorecardSponsors.find(
-  (placement: any) =>
-    placement.scope_type === "tournament" &&
-    placement.tournament_id === currentTournamentId &&
-    !placement.hole_number
-);
+
+const activeTournamentSponsor =
+  tournamentSponsors[0] ||
+  globalSponsors[0] ||
+  null;
 
 const activeTournamentSponsorData = Array.isArray(
   activeTournamentSponsor?.sponsors
 )
   ? activeTournamentSponsor?.sponsors[0]
   : activeTournamentSponsor?.sponsors;
-  const activeTournamentSponsorImage =
+
+const activeTournamentSponsorImage =
   activeTournamentSponsorData?.image_url || "";
+
+console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
+console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
   return (
     <div
