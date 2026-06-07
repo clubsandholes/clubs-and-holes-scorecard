@@ -2397,22 +2397,17 @@ const activeTournamentSponsorData = Array.isArray(
         disabled={currentHoleIndex === 0}
         className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
-        ←
+        ← Previous Hole
       </button>
 
-      <button
-        onClick={() => openView("leaderboard")}
-        className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
-      >
-        The Turn
-      </button>
+    
 
       <button
         onClick={goNext}
         disabled={currentHoleIndex === holes.length - 1}
         className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
       >
-        →
+       Next Hole →
       </button>
     </div>
   </>
