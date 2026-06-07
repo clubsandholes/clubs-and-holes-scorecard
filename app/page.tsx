@@ -1409,19 +1409,19 @@ const getScoreStyle = (
   const diff = score - par;
 
   if (diff <= -2) {
-    return "h-7 w-7 rounded-full border-4 border-yellow-400 text-yellow-400";
+    return "h-10 w-10 rounded-full border-4 border-yellow-400 text-yellow-400";
   }
 
   if (diff === -1) {
-    return "h-7 w-7 rounded-full border-2 border-green-400 text-green-400";
+    return "h-10 w-10 rounded-full border-2 border-green-400 text-green-400";
   }
 
   if (diff === 1) {
-    return "h-7 w-7 rounded-none border-2 border-orange-400 text-orange-400";
+    return "h-10 w-10 rounded-none border-2 border-orange-400 text-orange-400";
   }
 
   if (diff >= 2) {
-    return "h-7 w-7 rounded-none border-4 border-red-500 text-red-500";
+    return "h-10 w-10 rounded-none border-4 border-red-500 text-red-500";
   }
 
   return "";
