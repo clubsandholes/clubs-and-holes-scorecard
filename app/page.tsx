@@ -2409,25 +2409,7 @@ const activeTournamentSponsorData = Array.isArray(
       </div>
     </div>
 
-    <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 p-3 backdrop-blur-md">
-      <button
-        onClick={goPrev}
-        disabled={currentHoleIndex === 0}
-        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-      >
-        ←
-      </button>
-
     
-
-      <button
-        onClick={goNext}
-        disabled={currentHoleIndex === holes.length - 1}
-        className="rounded-full border border-white/10 px-4 py-2 text-2xl disabled:opacity-20"
-      >
-        →
-      </button>
-    </div>
   </>
 )}
 
@@ -2767,7 +2749,49 @@ const activeTournamentSponsorData = Array.isArray(
     </div>
   </div>
 )}
+<div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/90 backdrop-blur-xl">
+  <div className="mx-auto flex max-w-md items-center justify-around py-3">
 
+    <button
+      onClick={() => openView("scorecard")}
+      className={`flex flex-col items-center ${
+        view === "scorecard"
+          ? "text-[#ff9900]"
+          : "text-white/50"
+      }`}
+    >
+      <div className="text-xl">🏌️</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        Scorecard
+      </div>
+    </button>
+
+    <button
+      onClick={() => openView("leaderboard")}
+      className={`flex flex-col items-center ${
+        view === "leaderboard"
+          ? "text-[#ff9900]"
+          : "text-white/50"
+      }`}
+    >
+      <div className="text-xl">🔥</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        The Turn
+      </div>
+    </button>
+
+    <button
+      onClick={() => alert("Bunker Coming Soon")}
+      className="flex flex-col items-center text-white/50"
+    >
+      <div className="text-xl">🍻</div>
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        Bunker
+      </div>
+    </button>
+
+  </div>
+</div>
       </div>
     </div>
   );
