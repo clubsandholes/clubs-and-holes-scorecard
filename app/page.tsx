@@ -2888,7 +2888,7 @@ const caddieMessage = getCaddieMessage();
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 space-y-3 pb-32">
               {sortedLeaderboard.map((player, index) => (
                 <div
   key={player.id}
