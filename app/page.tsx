@@ -2389,7 +2389,7 @@ const caddieMessage = getCaddieMessage();
 
         {view === "scorecard" && (
   <>
-    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
+    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50 pb-32">
       <div
         className="h-full rounded-full transition-all duration-500"
         style={{
@@ -2579,12 +2579,16 @@ const caddieMessage = getCaddieMessage();
 
   
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-5 text-center backdrop-blur-md">
-  <div className="text-xl font-black leading-snug text-[#ff9900]">
+      <div className="mt-5 text-center">
+  <div className="text-4xl">
+    🔥
+  </div>
+
+  <div className="mt-3 text-2xl font-black leading-tight text-[#ff9900]">
     {caddieMessage.line1}
   </div>
 
-  <div className="mt-1 text-xl font-black leading-snug text-[#ff9900]">
+  <div className="mt-2 text-xl font-black leading-tight text-white">
     {caddieMessage.line2}
   </div>
 </div>
