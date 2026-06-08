@@ -965,9 +965,10 @@ const { data, error } = await supabase
   }, [scoreTickerEvents.length]);
 
   const latestTickerMessage =
-    scoreTickerEvents.length > 0
-      ? scoreTickerEvents[tickerIndex]?.message || "Live ticker will appear here"
-      : "Live ticker will appear here";
+  scoreTickerEvents.length > 0
+    ? scoreTickerEvents[tickerIndex]?.message ||
+      "🏌️ Everybody starts even. That ends now."
+    : "🏌️ Everybody starts even. That ends now.";
 
  useEffect(() => {
   const latestAdminAlert = tickerEvents.find(
