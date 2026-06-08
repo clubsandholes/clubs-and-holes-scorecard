@@ -714,13 +714,17 @@ const playersForSelectedTeam =
   const fetchTickerEvents = async (tournamentId?: string) => {
     const idToUse = tournamentId || currentTournamentId;
     if (!idToUse) return;
+const twentyMinutesAgo = new Date(
+  Date.now() - 20 * 60 * 1000
+).toISOString();
 
-    const { data, error } = await supabase
-      .from("ticker_events")
-      .select("id, message, event_type, created_at")
-      .eq("tournament_id", idToUse)
-      .order("created_at", { ascending: false })
-      .limit(10);
+const { data, error } = await supabase
+  .from("ticker_events")
+  .select("id, message, event_type, created_at")
+  .eq("tournament_id", idToUse)
+  .gte("created_at", twentyMinutesAgo)
+  .order("created_at", { ascending: false })
+  .limit(10);
 
     if (error) {
       console.error("Error fetching ticker events:", error);
@@ -2768,7 +2772,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
               </div>
             )}
 
-            <div className="sticky top-2 z-40 mt-5 rounded-2xl border border-white/10 bg-black/80 px-4 py-3 text-center shadow-xl backdrop-blur-md">
+            <div className="sticky top-2 z-40 mt-5 rounded-2xl border border-white/10 bg-black/85 px-4 py-3 text-center shadow-xl backdrop-blur-md">
               <div className="animate-ticker-fade text-sm font-bold text-[#ff9900]">
                 {latestTickerMessage}
               </div>
