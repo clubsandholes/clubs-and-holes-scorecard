@@ -1084,7 +1084,7 @@ fetchPlayers();
   setCurrentHoleIndex(0);
   setMenuOpen(false);
 
-  setView(formatType === "individual" ? "join" : "selectTeam");
+  setView("join");
 };
 
   useEffect(() => {
@@ -1945,7 +1945,7 @@ const caddieMessage = getCaddieMessage();
 
   return (
     <div
-      className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
+      className="relative min-h-[100dvh] overflow-y-auto p-4 text-white"
       style={{ backgroundColor: dynamicBackground }}
     >
       <div
@@ -3052,6 +3052,13 @@ const caddieMessage = getCaddieMessage();
     </div>
   </div>
 )}
+{selectedPlayerId &&
+
+  view !== "join" &&
+
+  view !== "selectTeam" &&
+
+  view !== "selectPlayer" && (
 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/90 backdrop-blur-xl">
   <div className="mx-auto flex max-w-md items-center justify-around py-3">
 
@@ -3095,6 +3102,7 @@ const caddieMessage = getCaddieMessage();
 
   </div>
 </div>
+)}
       </div>
     </div>
   );
