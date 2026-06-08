@@ -162,6 +162,8 @@ export default function Home() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [roundCompleteModalOpen, setRoundCompleteModalOpen] = useState(false);
 
+  
+
   // =========================
   // TICKER / ALERT STATE
   // =========================
@@ -688,7 +690,9 @@ const playersForSelectedTeam =
     return scoreMap;
   };
 
-  
+  const allHolesScored = holes.every(
+  (h) => scores[h.number] !== undefined
+  );
 
   const fetchScoresForTeam = async (teamId: string) => {
   const { data, error } = await supabase
@@ -2467,7 +2471,14 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
           </div>
       )}
     </div>
-
+      {allHolesScored && !scorecardSubmitted && (
+  <button
+    onClick={() => setRoundCompleteModalOpen(true)}
+    className="mt-4 w-full rounded-full bg-[#ff9900] px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black shadow-xl"
+  >
+    Finish Scorecard
+  </button>
+)}
     <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
       
     
