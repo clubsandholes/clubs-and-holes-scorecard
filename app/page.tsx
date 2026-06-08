@@ -312,6 +312,97 @@ setView(
 };
 
 
+
+// =========================
+// Caddie Messages
+// =========================
+const getCaddieMessage = () => {
+  const playedHoleNumbers = Object.keys(scores)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  const lastHoleNumber = playedHoleNumbers[playedHoleNumbers.length - 1];
+  const lastHoleInfo = holes.find((h) => h.number === lastHoleNumber);
+  const lastScore =
+    lastHoleNumber !== undefined ? scores[lastHoleNumber] : undefined;
+
+  const golferType = formatType === "individual" ? "you" : "your team";
+
+  if (!lastScore || !lastHoleInfo) {
+    if (formatType !== "individual") {
+      return {
+        line1: "Your teammate picked you.",
+        line2: "Try to justify it.",
+      };
+    }
+
+    return {
+      line1: "New day.",
+      line2: "New mistakes.",
+    };
+  }
+
+  const lastDiff = lastScore - lastHoleInfo.par;
+
+  if (lastDiff <= -2) {
+    return {
+      line1: "Easy there, Tiger.",
+      line2: "Act like you've done it before.",
+    };
+  }
+
+  if (lastDiff === -1) {
+    return {
+      line1: "Okay, we see you.",
+      line2: "Don't get cute now.",
+    };
+  }
+
+  if (lastDiff === 0) {
+    return {
+      line1: "Par is never bad.",
+      line2: "Keep stacking boring golf.",
+    };
+  }
+
+  if (lastDiff === 1) {
+    return {
+      line1: "Bogey happens.",
+      line2: "Just don't make it a lifestyle.",
+    };
+  }
+
+  if (lastDiff >= 2) {
+    return {
+      line1: "That hole is behind you.",
+      line2: "Unfortunately it's still on the card.",
+    };
+  }
+
+  if (hole.par === 5) {
+    return {
+      line1: "Par 5.",
+      line2: "We didn't come here to lay up.",
+    };
+  }
+
+  if (hole.par === 3) {
+    return {
+      line1: "Par 3.",
+      line2: "One swing. No excuses.",
+    };
+  }
+
+  return {
+    line1: `This hole belongs to ${golferType}.`,
+    line2: "Go prove it.",
+  };
+};
+
+
+
+
+
 // =========================
 // TEAM FETCH FUNCTIONS
 // =========================
@@ -1850,6 +1941,8 @@ const activeTournamentSponsorImage =
 console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
 console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
+const caddieMessage = getCaddieMessage();
+
   return (
     <div
       className="relative min-h-[100dvh] overflow-hidden p-4 text-white"
@@ -2485,9 +2578,15 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
   
 
-      <div className="mt-2 text-sm font-black leading-snug text-[#ff9900]">
-        Don&apos;t be a bitch. Use your driver.
-      </div>
+      <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-5 text-center backdrop-blur-md">
+  <div className="text-xl font-black leading-snug text-[#ff9900]">
+    {caddieMessage.line1}
+  </div>
+
+  <div className="mt-1 text-xl font-black leading-snug text-[#ff9900]">
+    {caddieMessage.line2}
+  </div>
+</div>
 </div>
 
     
