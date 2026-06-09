@@ -929,12 +929,13 @@ const submitBunkerPost = async () => {
         setCanScore(savedCanScore === "true");
       }
 
-    if (savedTournamentId) {
+ if (savedTournamentId) {
   setCurrentTournamentId(savedTournamentId);
   setTournamentCode(savedTournamentCode || "");
 
   fetchPlayers(savedTournamentId);
   fetchTickerEvents(savedTournamentId);
+  fetchBunkerEvents(savedTournamentId);
   fetchTournamentSettings(savedTournamentId);
 }
 
