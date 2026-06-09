@@ -2719,17 +2719,41 @@ const caddieMessage = getCaddieMessage();
 
   
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
-        <div className="text-2xl leading-none">🔥</div>
+      {/* =========================
+    BROWN BOMBER SECTION START
+========================= */}
 
-        <div className="mt-2 text-lg font-black leading-snug text-[#ff9900]">
-          {caddieMessage.line1}
-        </div>
+<div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-md">
+  <div className="flex items-center gap-3">
+    <img
+      src="/brown-bomber-avatar.png"
+      alt="Brown Bomber"
+      className="h-12 w-12 rounded-full border border-[#ff9900]/30 object-cover"
+    />
 
-        <div className="mt-1 text-base font-black leading-snug text-white">
-          {caddieMessage.line2}
-        </div>
+    <div>
+      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff9900]">
+        Brown Bomber
       </div>
+
+      <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] text-white/45">
+        Official Bad Advice
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-3 text-lg font-black leading-snug text-[#ff9900]">
+    {caddieMessage.line1}
+  </div>
+
+  <div className="mt-1 text-base font-black leading-snug text-white">
+    {caddieMessage.line2}
+  </div>
+</div>
+
+{/* =========================
+    BROWN BOMBER SECTION END
+========================= */}
 
 
     
