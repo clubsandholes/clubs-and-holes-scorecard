@@ -2387,6 +2387,13 @@ const caddieMessage = getCaddieMessage();
   </div>
 )}
 
+
+{/* =========================
+
+    scorecard SECTION Begin
+
+========================= */}
+
     {view === "scorecard" && (
   <div className="pb-32">
     
@@ -2598,7 +2605,11 @@ const caddieMessage = getCaddieMessage();
     
   </div>
 )}
-//end of the scorecard area.
+{/* =========================
+
+    scorecard SECTION End
+
+========================= */}
 
        {selectedLeaderboardPlayer && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
