@@ -328,7 +328,7 @@ const getCaddieMessage = () => {
 
   // No scores yet
   if (!lastScore || !lastHoleInfo) {
-    if (formatType !== "individual") {
+    if (formatType !== "individual" || selectedTeamId) {
       return {
         line1: "Your teammate picked you.",
         line2: "Try to justify it.",
