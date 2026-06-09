@@ -2776,24 +2776,20 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
       </div>
 
       <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] text-white/45">
-        Official Bad Advice
+        Golf Influencer
       </div>
     </div>
   </div>
 
-  <div className="mt-3 text-lg font-black leading-snug text-[#ff9900]">
-    {caddieMessage.line1}
-  </div>
-
-  <div className="mt-1 text-base font-black leading-snug text-white">
-    {caddieMessage.line2}
+  <div className="mt-3 text-base font-black leading-snug text-white">
+    {typedCaddieText}
+    <span className="animate-pulse text-[#ff9900]">|</span>
   </div>
 </div>
 
 {/* =========================
     BROWN BOMBER SECTION END
 ========================= */}
-
 
     
   </div>
