@@ -2082,7 +2082,7 @@ const caddieMessage = getCaddieMessage();
           </div>
 
           <div className="mt-1 text-2xl font-black">
-            Say it with your chest!
+            SAY IT WITH YOUR CHEST!
           </div>
         </div>
 
@@ -3218,11 +3218,11 @@ const caddieMessage = getCaddieMessage();
     </div>
 
     <button
-      onClick={() => setBunkerModalOpen(true)}
-      className="fixed bottom-24 right-4 z-50 rounded-full bg-[#ff9900] px-5 py-4 text-sm font-black uppercase tracking-[0.14em] text-black shadow-2xl"
-    >
-      💬 Say It
-    </button>
+  onClick={() => setBunkerModalOpen(true)}
+  className="fixed bottom-24 right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#ff9900] text-4xl font-black leading-none text-black shadow-2xl"
+>
+  +
+</button>
   </div>
 )}
 
