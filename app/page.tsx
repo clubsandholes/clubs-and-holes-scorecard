@@ -326,8 +326,7 @@ const getCaddieMessage = () => {
   const lastScore =
     lastHoleNumber !== undefined ? scores[lastHoleNumber] : undefined;
 
-  const golferType = formatType === "individual" ? "you" : "your team";
-
+  // No scores yet
   if (!lastScore || !lastHoleInfo) {
     if (formatType !== "individual") {
       return {
@@ -379,27 +378,15 @@ const getCaddieMessage = () => {
     };
   }
 
-  if (hole.par === 5) {
-    return {
-      line1: "Par 5.",
-      line2: "We didn't come here to lay up.",
-    };
-  }
-
-  if (hole.par === 3) {
-    return {
-      line1: "Par 3.",
-      line2: "One swing. No excuses.",
-    };
-  }
-
   return {
-    line1: `This hole belongs to ${golferType}.`,
-    line2: "Go prove it.",
+    line1: "Stay locked in.",
+    line2: "This thing can turn quick.",
   };
 };
 
-
+// =========================
+// End of Caddie Messages
+// =========================
 
 
 
