@@ -988,6 +988,7 @@ const submitBunkerPost = async () => {
             },
         async () => {
           await fetchTickerEvents(currentTournamentId);
+          await fetchBunkerEvents(currentTournamentId);
         }
       )
       .on(
