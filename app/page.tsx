@@ -1926,8 +1926,7 @@ const activeTournamentSponsorData = Array.isArray(
 const activeTournamentSponsorImage =
   activeTournamentSponsorData?.image_url || "";
 
-console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
-console.log("Tournament Sponsor:", activeTournamentSponsorData);
+
 
 const caddieMessage = getCaddieMessage();
 
@@ -3014,10 +3013,7 @@ const caddieMessage = getCaddieMessage();
                 OPEN MAP
               </a>
 
-              <div className="rounded-2xl border border-gray-800 bg-gray-950 p-4">
-                <div className="text-sm text-gray-500">Tournament Start</div>
-                <div className="mt-1 text-lg font-bold">May 16 · Time TBD</div>
-              </div>
+              
             </div>
           </div>
         )}
