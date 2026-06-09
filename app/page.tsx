@@ -2477,6 +2477,9 @@ const caddieMessage = getCaddieMessage();
 
       {canScore && !scorecardSubmitted ? (
         <div className="mt-6 flex flex-col items-center">
+          <div className="mb-2 text-center text-lg font-black uppercase tracking-[0.25em] text-[#ff9900]">
+              HOLE {hole.number}
+            </div>
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={() => changeDraftScore(draftScore - 1)}
@@ -2488,9 +2491,7 @@ const caddieMessage = getCaddieMessage();
             >
               −
             </button>
-            <div className="mb-2 text-center text-lg font-black uppercase tracking-[0.25em] text-[#ff9900]">
-              HOLE {hole.number}
-            </div>
+            
             <div
               className={`select-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
                 currentHoleHasScore ? "text-white/45" : "text-white"
