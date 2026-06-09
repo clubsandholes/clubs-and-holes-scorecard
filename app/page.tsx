@@ -401,7 +401,7 @@ const getCaddieMessage = () => {
   };
 };
 
-const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
+
 
 // =========================
 // End of Caddie Messages
@@ -2028,6 +2028,7 @@ console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
 console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
 const caddieMessage = getCaddieMessage();
+const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
 
   return (
     <div
