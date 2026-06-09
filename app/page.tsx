@@ -2414,9 +2414,7 @@ const caddieMessage = getCaddieMessage();
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            HOLE {hole.number}
-          </div>
+          
 
          <div className="mt-2 text-xl font-black text-white">
             {tournamentName}
@@ -2490,7 +2488,9 @@ const caddieMessage = getCaddieMessage();
             >
               −
             </button>
-
+            <div className="mb-2 text-center text-lg font-black uppercase tracking-[0.25em] text-[#ff9900]">
+              HOLE {hole.number}
+            </div>
             <div
               className={`select-none text-[7.5rem] font-black leading-none tracking-[-0.08em] transition-colors ${
                 currentHoleHasScore ? "text-white/45" : "text-white"
