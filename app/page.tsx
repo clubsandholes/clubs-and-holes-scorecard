@@ -38,7 +38,9 @@ type View =
   | "scorecard"
   | "leaderboard"
   | "courseInfo"
+  | "bunker"
   | "rules";
+
 
 // =========================
 // DATA TYPES
@@ -176,6 +178,15 @@ export default function Home() {
   const [lastAdminAlertId, setLastAdminAlertId] = useState("");
 
 
+
+  // =========================
+  // Bunker / ALERT STATE
+  // =========================
+
+const [bunkerEvents, setBunkerEvents] = useState<TickerEvent[]>([]);
+const [bunkerModalOpen, setBunkerModalOpen] = useState(false);
+const [bunkerPost, setBunkerPost] = useState("");
+
   // =========================
 // LEADERBOARD DETAIL STATE
 // =========================
@@ -303,6 +314,7 @@ await fetchPlayers(data.id);
 await fetchTeams(data.id);
 await fetchTeamPlayers();
 await fetchTickerEvents(data.id);
+await fetchBunkerEvents(data.id);
 
 setView(
   (data.format_type || "individual") === "individual"
@@ -815,6 +827,62 @@ const { data, error } = await supabase
 
     setTickerEvents(data || []);
   };
+
+
+  const fetchBunkerEvents = async (tournamentId?: string) => {
+  const idToUse = tournamentId || currentTournamentId;
+  if (!idToUse) return;
+
+  const { data, error } = await supabase
+    .from("ticker_events")
+    .select("id, message, event_type, created_at")
+    .eq("tournament_id", idToUse)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error("Error fetching bunker events:", error);
+    return;
+  }
+
+  setBunkerEvents(data || []);
+};
+
+
+const submitBunkerPost = async () => {
+  const cleanPost = bunkerPost.trim();
+
+  if (!cleanPost) return;
+
+  if (cleanPost.length > 140) {
+    alert("Keep it under 140 characters.");
+    return;
+  }
+
+  const author =
+    formatType === "individual"
+      ? playerName
+      : `${selectedTeamName} | ${playerName}`;
+
+  const message = `🎙️ ${author}: ${cleanPost}`;
+
+  const { error } = await supabase.from("ticker_events").insert({
+    tournament_id: currentTournamentId,
+    message,
+    event_type: "bunker_post",
+  });
+
+  if (error) {
+    console.error("Error posting to bunker:", error);
+    alert("Post did not save.");
+    return;
+  }
+
+  setBunkerPost("");
+  setBunkerModalOpen(false);
+  await fetchBunkerEvents(currentTournamentId);
+  await fetchTickerEvents(currentTournamentId);
+};
 
   const fetchTournamentSettings = async (tournamentId: string) => {
     const { data, error } = await supabase
@@ -2003,6 +2071,77 @@ const caddieMessage = getCaddieMessage();
   </div>
 )}
 
+
+{bunkerModalOpen && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-black p-5 text-white shadow-2xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            The Bunker
+          </div>
+
+          <div className="mt-1 text-2xl font-black">
+            Say it with your chest!
+          </div>
+        </div>
+
+        <button
+          onClick={() => setBunkerModalOpen(false)}
+          className="text-3xl leading-none"
+        >
+          ×
+        </button>
+      </div>
+
+      <textarea
+        value={bunkerPost}
+        onChange={(e) => setBunkerPost(e.target.value.slice(0, 140))}
+        placeholder="The Bunker is listening..."
+        className="mt-5 h-32 w-full resize-none rounded-2xl border border-white/10 bg-white/5 p-4 text-lg font-bold text-white outline-none"
+      />
+
+      <div className="mt-2 text-right text-xs font-black uppercase tracking-[0.14em] text-white/40">
+        {140 - bunkerPost.length} characters left
+      </div>
+
+      {activeTournamentSponsorData && (
+        <a
+          href={activeTournamentSponsorData.website_url || "#"}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3"
+        >
+          <img
+            src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+            alt={activeTournamentSponsorData.name}
+            className="h-12 w-12 rounded-xl object-contain"
+          />
+
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+              Powered By
+            </div>
+
+            <div className="mt-1 text-sm font-black text-white">
+              {activeTournamentSponsorData.name}
+            </div>
+          </div>
+        </a>
+      )}
+
+      <button
+        onClick={submitBunkerPost}
+        className="mt-5 w-full rounded-full bg-[#ff9900] px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black"
+      >
+        Post To The Bunker
+      </button>
+    </div>
+  </div>
+)}
+
+
+
         {roundCompleteModalOpen && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
     <div className="w-full max-w-md rounded-[2rem] border border-[#ff9900]/40 bg-black p-6 text-center text-white shadow-2xl">
@@ -3019,6 +3158,79 @@ const caddieMessage = getCaddieMessage();
         )}
 
 
+{view === "bunker" && (
+  <div className="mt-8 pb-32">
+    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+      The Story of the Day
+    </div>
+
+    <h1 className="mt-1 text-4xl font-black">The Bunker</h1>
+
+    {activeTournamentSponsorData && (
+      <a
+        href={activeTournamentSponsorData.website_url || "#"}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 p-3"
+      >
+        <img
+          src={activeTournamentSponsorData.image_url || "/ch-logo.png"}
+          alt={activeTournamentSponsorData.name}
+          className="h-14 w-14 rounded-xl object-contain"
+        />
+
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+            {activeTournamentSponsor?.placement_label || "Presented By"}
+          </div>
+
+          <div className="mt-1 text-sm font-black text-white">
+            {activeTournamentSponsorData.name}
+          </div>
+        </div>
+      </a>
+    )}
+
+    <div className="mt-6 space-y-3">
+      {bunkerEvents.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-black/55 p-5 text-center text-white/60">
+          Nothing in The Bunker yet.
+        </div>
+      ) : (
+        bunkerEvents.map((event) => (
+          <div
+            key={event.id}
+            className="rounded-2xl border border-white/10 bg-black/55 p-4 backdrop-blur-md"
+          >
+            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+              {new Date(event.created_at).toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </div>
+
+            <div className="mt-2 text-sm font-bold leading-snug text-white">
+              {event.message}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+
+    <button
+      onClick={() => setBunkerModalOpen(true)}
+      className="fixed bottom-24 right-4 z-50 rounded-full bg-[#ff9900] px-5 py-4 text-sm font-black uppercase tracking-[0.14em] text-black shadow-2xl"
+    >
+      💬 Say It
+    </button>
+  </div>
+)}
+
+
+
+
+
+
 {view === "rules" && (
   <div className="mt-10">
     <div className="text-sm uppercase tracking-[0.3em] text-[#ff9900]">
@@ -3094,12 +3306,14 @@ const caddieMessage = getCaddieMessage();
     </button>
 
     <button
-      onClick={() => alert("Bunker Coming Soon")}
-      className="flex flex-col items-center text-white/50"
+      onClick={() => openView("bunker")}
+      className={`flex flex-col items-center ${
+        view === "bunker" ? "text-[#ff9900]" : "text-white/50"
+      }`}
     >
       <div className="text-xl">🍻</div>
       <div className="text-[11px] font-black uppercase tracking-[0.12em]">
-        THE Bunker
+        The Bunker
       </div>
     </button>
 
