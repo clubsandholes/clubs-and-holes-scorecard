@@ -2058,7 +2058,7 @@ const caddieMessage = getCaddieMessage();
 )}
 
         {view !== "join" && view !== "selectTeam" && view !== "selectPlayer" && (
-          <div className="flex items-center justify-between gap-3">
+          <div className="sticky top-0 z-50 -mx-4 flex items-center justify-between gap-3 bg-black/40 px-4 py-3 backdrop-blur-md">
             <button
               onClick={() => openView("scorecard")}
               className="flex min-w-0 items-center gap-2"
