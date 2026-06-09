@@ -328,6 +328,11 @@ setView(
 // =========================
 // Caddie Messages
 // =========================
+
+const [typedCaddieText, setTypedCaddieText] = useState("");
+
+
+
 const getCaddieMessage = () => {
   const playedHoleNumbers = Object.keys(scores)
     .map(Number)
@@ -395,6 +400,8 @@ const getCaddieMessage = () => {
     line2: "This thing can turn quick.",
   };
 };
+
+const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
 
 // =========================
 // End of Caddie Messages
@@ -959,6 +966,27 @@ const submitBunkerPost = async () => {
 }
   }
   }, []);
+
+useEffect(() => {
+  setTypedCaddieText("");
+
+  let index = 0;
+  const text = fullCaddieText;
+
+  const interval = setInterval(() => {
+    index += 1;
+    setTypedCaddieText(text.slice(0, index));
+
+    if (index >= text.length) {
+      clearInterval(interval);
+    }
+  }, 25);
+
+  return () => clearInterval(interval);
+}, [fullCaddieText]);
+
+
+
 
   useEffect(() => {
     if (!currentTournamentId) return;
@@ -2719,7 +2747,7 @@ const caddieMessage = getCaddieMessage();
 
   
 
-      {/* =========================
+{/* =========================
     BROWN BOMBER SECTION START
 ========================= */}
 
