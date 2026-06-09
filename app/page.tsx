@@ -2441,31 +2441,31 @@ const caddieMessage = getCaddieMessage();
         </div>
 
         <div className="flex h-32 w-32 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/70 p-2">
-  {activeSponsor?.image_url ? (
-    <a
-      href={activeSponsor.website_url || "#"}
-      target="_blank"
-      rel="noreferrer"
-      className="flex h-full w-full flex-col items-center justify-center"
-    >
-      <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/50">
-        {activeScorecardSponsor?.placement_label || "Presented By"}
-      </div>
+              {activeSponsor?.image_url ? (
+                <a
+                  href={activeSponsor.website_url || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-full w-full flex-col items-center justify-center"
+                >
+                  <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/50">
+                    {activeScorecardSponsor?.placement_label || "Presented By"}
+                  </div>
 
-      <img
-        src={activeSponsor.image_url}
-        alt={activeSponsor.name}
-        className="max-h-[88px] w-full object-contain"
-      />
-    </a>
-  ) : (
-    <img
-      src="/ch-logo.png"
-      alt="Clubs & Holes"
-      className="h-full w-full object-contain p-2 opacity-80"
-    />
-    
-  )}
+                  <img
+                    src={activeSponsor.image_url}
+                    alt={activeSponsor.name}
+                    className="max-h-[88px] w-full object-contain"
+                  />
+                </a>
+              ) : (
+                <img
+                  src="/ch-logo.png"
+                  alt="Clubs & Holes"
+                  className="h-full w-full object-contain p-2 opacity-80"
+                />
+                
+              )}
   
 </div>
       </div>
@@ -2576,24 +2576,24 @@ const caddieMessage = getCaddieMessage();
     Finish Scorecard
   </button>
 )}
-    <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
+   
       
     
 
   
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
-  <div className="text-3xl leading-none">🔥</div>
+          <div className="text-3xl leading-none">🔥</div>
 
-  <div className="mt-2 text-xl font-black leading-tight text-[#ff9900]">
-    {caddieMessage.line1}
-  </div>
+          <div className="mt-2 text-xl font-black leading-tight text-[#ff9900]">
+            {caddieMessage.line1}
+          </div>
 
-  <div className="mt-1 text-lg font-black leading-tight text-white">
-    {caddieMessage.line2}
-  </div>
-</div>
-</div>
+          <div className="mt-1 text-lg font-black leading-tight text-white">
+            {caddieMessage.line2}
+          </div>
+      </div>
+
 
     
   </>
