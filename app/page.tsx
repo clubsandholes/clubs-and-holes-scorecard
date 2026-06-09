@@ -968,13 +968,15 @@ const submitBunkerPost = async () => {
   }, []);
 
   const caddieMessage = getCaddieMessage();
-const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
+
 
 useEffect(() => {
+  const message = getCaddieMessage();
+  const text = `${message.line1} ${message.line2}`;
+
   setTypedCaddieText("");
 
   let index = 0;
-  const text = fullCaddieText;
 
   const interval = setInterval(() => {
     index += 1;
@@ -983,10 +985,16 @@ useEffect(() => {
     if (index >= text.length) {
       clearInterval(interval);
     }
-  }, 25);
+  }, 30);
 
   return () => clearInterval(interval);
-}, [fullCaddieText]);
+}, [
+  currentHoleIndex,
+  scores,
+  formatType,
+  selectedTeamId,
+  selectedPlayerId,
+]);
 
 
 
