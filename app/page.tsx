@@ -2387,8 +2387,8 @@ const caddieMessage = getCaddieMessage();
   </div>
 )}
 
-        {view === "scorecard" && (
-  <>
+    {view === "scorecard" && (
+  <div className="pb-32">
     
     <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50">
       <div
@@ -2583,21 +2583,22 @@ const caddieMessage = getCaddieMessage();
   
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 text-center backdrop-blur-md">
-          <div className="text-3xl leading-none">🔥</div>
+        <div className="text-2xl leading-none">🔥</div>
 
-          <div className="mt-2 text-xl font-black leading-tight text-[#ff9900]">
-            {caddieMessage.line1}
-          </div>
+        <div className="mt-2 text-lg font-black leading-snug text-[#ff9900]">
+          {caddieMessage.line1}
+        </div>
 
-          <div className="mt-1 text-lg font-black leading-tight text-white">
-            {caddieMessage.line2}
-          </div>
+        <div className="mt-1 text-base font-black leading-snug text-white">
+          {caddieMessage.line2}
+        </div>
       </div>
 
 
     
-  </>
+  </div>
 )}
+//end of the scorecard area.
 
        {selectedLeaderboardPlayer && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
