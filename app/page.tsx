@@ -2119,10 +2119,10 @@ const caddieMessage = getCaddieMessage();
 
             <div className="mt-10 flex flex-col gap-4">
               {[
-                ["Scorecard", "scorecard"],
-                ["Leaderboard", "leaderboard"],
-                ["Course Info", "courseInfo"],
-                ["Tournament Rules", "rules"],
+                ["THE SCORE", "scorecard"],
+                ["THE TURN", "leaderboard"],
+                ["THE COURSE", "courseInfo"],
+                ["THE RULES", "rules"],
               ].map(([label, target]) => (
                 <button
                   key={label}
@@ -2137,7 +2137,7 @@ const caddieMessage = getCaddieMessage();
                 onClick={resetLocalPlayer}
                 className="rounded-xl border border-red-900 p-4 text-left text-xl font-bold text-red-400"
               >
-                Change Player
+                CHANGE PLAYER
               </button>
             </div>
           </div>
@@ -3079,7 +3079,7 @@ const caddieMessage = getCaddieMessage();
     >
       <div className="text-xl">🏌️</div>
       <div className="text-[11px] font-black uppercase tracking-[0.12em]">
-        Scorecard
+        The Score
       </div>
     </button>
 
@@ -3103,7 +3103,7 @@ const caddieMessage = getCaddieMessage();
     >
       <div className="text-xl">🍻</div>
       <div className="text-[11px] font-black uppercase tracking-[0.12em]">
-        Bunker
+        THE Bunker
       </div>
     </button>
 
