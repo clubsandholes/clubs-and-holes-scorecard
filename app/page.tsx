@@ -1926,7 +1926,8 @@ const activeTournamentSponsorData = Array.isArray(
 const activeTournamentSponsorImage =
   activeTournamentSponsorData?.image_url || "";
 
-
+console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
+console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
 const caddieMessage = getCaddieMessage();
 
@@ -2959,8 +2960,7 @@ const caddieMessage = getCaddieMessage();
               Course Info
             </div>
 
-          console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
-          console.log("Tournament Sponsor:", activeTournamentSponsorData);
+          
 
             <h1 className="mt-3 text-4xl font-black">{courseName}</h1>
               {activeLeaderboardSponsorData && (
