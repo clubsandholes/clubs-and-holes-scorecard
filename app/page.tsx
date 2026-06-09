@@ -967,6 +967,9 @@ const submitBunkerPost = async () => {
   }
   }, []);
 
+  const caddieMessage = getCaddieMessage();
+const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
+
 useEffect(() => {
   setTypedCaddieText("");
 
@@ -2027,8 +2030,7 @@ const activeTournamentSponsorImage =
 console.log("Leaderboard Sponsor:", activeLeaderboardSponsorData);
 console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
-const caddieMessage = getCaddieMessage();
-const fullCaddieText = `${caddieMessage.line1} ${caddieMessage.line2}`;
+
 
   return (
     <div
