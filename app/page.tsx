@@ -1857,9 +1857,7 @@ const getFeedTemplate = async (category: string, eventType: string) => {
     .select("message_template, is_global, tournament_id, priority")
     .eq("category", category)
     .eq("event_type", eventType)
-    .eq("is_active", true)
-    .order("is_global", { ascending: true })
-    .order("priority", { ascending: false });
+    .eq("is_active", true);
 
   if (error) {
     console.error("Error fetching feed template:", error);
@@ -1867,20 +1865,27 @@ const getFeedTemplate = async (category: string, eventType: string) => {
   }
 
   const matchingTemplates = (data || []).filter((template: any) => {
-  return (
-    template.tournament_id === currentTournamentId ||
-    template.is_global === true
-  );
-});
+    return (
+      template.tournament_id === currentTournamentId ||
+      template.is_global === true
+    );
+  });
 
-const matchingTemplate =
-  matchingTemplates.length > 0
-    ? matchingTemplates[Math.floor(Math.random() * matchingTemplates.length)]
-    : null;
+  if (matchingTemplates.length === 0) return null;
 
-  return matchingTemplate?.message_template || null;
+  const randomIndex = Math.floor(Math.random() * matchingTemplates.length);
+  const matchingTemplate = matchingTemplates[randomIndex];
+
+  console.log("RANDOM FEED TEMPLATE:", {
+    category,
+    eventType,
+    count: matchingTemplates.length,
+    randomIndex,
+    selected: matchingTemplate.message_template,
+  });
+
+  return matchingTemplate.message_template;
 };
-
 
 
 
@@ -1895,6 +1900,8 @@ const applyFeedTemplate = (
   });
 
   return message;
+
+  
 };
 
 const getLeaderboardSnapshot = (scoreRows: ScoreRow[]) => {
