@@ -3070,11 +3070,11 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
 <div className="mt-4 rounded-2xl border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-md">
   <div className="flex items-center gap-3">
-    <img
-      src="/brown-bomber-avatar.png"
-      alt="Brown Bomber"
-      className="h-12 w-12 rounded-full border border-[#ff9900]/30 object-cover"
-    />
+   <img
+  src={caddieMessage.avatar}
+  alt={caddieMessage.character}
+  className="h-12 w-12 rounded-full border border-[#ff9900]/30 object-cover"
+/>
 
     <div>
       <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff9900]">
