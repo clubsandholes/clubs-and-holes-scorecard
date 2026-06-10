@@ -1866,12 +1866,17 @@ const getFeedTemplate = async (category: string, eventType: string) => {
     return null;
   }
 
-  const matchingTemplate = (data || []).find((template: any) => {
-    return (
-      template.tournament_id === currentTournamentId ||
-      template.is_global === true
-    );
-  });
+  const matchingTemplates = (data || []).filter((template: any) => {
+  return (
+    template.tournament_id === currentTournamentId ||
+    template.is_global === true
+  );
+});
+
+const matchingTemplate =
+  matchingTemplates.length > 0
+    ? matchingTemplates[Math.floor(Math.random() * matchingTemplates.length)]
+    : null;
 
   console.log("FEED TEMPLATE SEARCH:", {
     category,
