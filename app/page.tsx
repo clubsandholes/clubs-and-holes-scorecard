@@ -1481,7 +1481,19 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
       setIsSaving(false);
       return;
     }
-    const caddieCategory = getCaddieCategory();
+const getCaddieCategoryFromScore = (strokes: number, par: number) => {
+  const diff = strokes - par;
+
+  if (diff <= -3) return "triple_bogey";
+  if (diff === 2) return "double_bogey";
+  if (diff === 1) return "bogey";
+  if (diff === 0) return "par";
+  if (diff <= -1) return "birdie";
+
+  return "random";
+};
+
+const caddieCategory = getCaddieCategoryFromScore(draftScore, hole.par);
 const databaseCaddieMessage = await fetchCaddieTemplate(caddieCategory);
 
 setCurrentCharacterMessage(
