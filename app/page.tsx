@@ -332,8 +332,247 @@ setView(
 const [typedCaddieText, setTypedCaddieText] = useState("");
 
 
+const pickBrownBomberLine = (
+  pool: { line1: string; line2: string }[],
+  seed: number
+) => {
+  return pool[Math.abs(seed) % pool.length];
+};
 
 const getCaddieMessage = () => {
+  const brownBomberBase = {
+    character: "Brown Bomber",
+    title: "Golf Influencer",
+    avatar: "/brown-bomber-avatar.png",
+  };
+
+  const firstTee = [
+    {
+      line1: "Alright sweetheart, this ain't foreplay anymore.",
+      line2: "Time to see what kind of relationship you got with that driver.",
+    },
+    {
+      line1: "Take a deep breath.",
+      line2: "Half these guys are scared. The other half should be.",
+    },
+    {
+      line1: "Swing hard.",
+      line2: "If you fall down, we'll call it athletic.",
+    },
+    {
+      line1: "Confidence is sexy.",
+      line2: "Right now you're looking like a Craigslist ad.",
+    },
+    {
+      line1: "Let's find out if we're Tiger Woods today",
+      line2: "or just some idiot with expensive hobbies.",
+    },
+  ];
+
+  const birdie = [
+    {
+      line1: "WOOOOOO!",
+      line2: "Somebody call the clubhouse. Daddy's getting hot!",
+    },
+    {
+      line1: "That shot was so dirty",
+      line2: "I need to clear my browser history.",
+    },
+    {
+      line1: "That's grown men",
+      line2: "updating the leaderboard with tears in their eyes.",
+    },
+    {
+      line1: "Birdie, baby!",
+      line2: "Strut a little. You earned some swagger.",
+    },
+    {
+      line1: "The Brown Bomber has entered the chat",
+      line2: "and chose violence.",
+    },
+  ];
+
+  const par = [
+    {
+      line1: "Par.",
+      line2: "Like kissing your cousin. Technically it works.",
+    },
+    {
+      line1: "Boring golf wins tournaments.",
+      line2: "Unfortunately it also gets zero women.",
+    },
+    {
+      line1: "That's a grown-man par.",
+      line2: "Ugly enough to survive.",
+    },
+    {
+      line1: "You didn't gain anything,",
+      line2: "but you didn't light anything on fire either.",
+    },
+    {
+      line1: "Par is like cargo shorts.",
+      line2: "Not exciting, but surprisingly effective.",
+    },
+  ];
+
+  const bogey = [
+    {
+      line1: "Alright, one bogey.",
+      line2: "Nobody's building a documentary about it.",
+    },
+    {
+      line1: "That hole got a little handsy.",
+      line2: "Don't let it happen again.",
+    },
+    {
+      line1: "Shake it off.",
+      line2: "We've all done stupid things.",
+    },
+    {
+      line1: "Bogey ain't the problem.",
+      line2: "Acting like a victim afterward is.",
+    },
+    {
+      line1: "That hole charged you a toll.",
+      line2: "Pay it and keep driving.",
+    },
+  ];
+
+  const doubleBogey = [
+    {
+      line1: "Double bogey?",
+      line2: "Damn. Did you play golf or fight a bear?",
+    },
+    {
+      line1: "I've seen drunk uncles at weddings",
+      line2: "with a better recovery plan than that.",
+    },
+    {
+      line1: "That scorecard just looked at me",
+      line2: "and said, 'You seeing this crap?'",
+    },
+    {
+      line1: "You took a perfectly innocent hole",
+      line2: "and turned it into a felony.",
+    },
+    {
+      line1: "Well...",
+      line2: "at least nobody died.",
+    },
+  ];
+
+  const tripleBogey = [
+    {
+      line1: "Triple?!",
+      line2: "Sweet baby Jesus riding a golf cart.",
+    },
+    {
+      line1: "That hole beat you so bad",
+      line2: "it took your lunch money on the way out.",
+    },
+    {
+      line1: "We're not discussing what happened.",
+      line2: "That hole is under federal investigation.",
+    },
+    {
+      line1: "Walk directly to the next tee",
+      line2: "and pretend none of us saw that.",
+    },
+    {
+      line1: "That wasn't golf.",
+      line2: "That was performance art.",
+    },
+  ];
+
+  const par3 = [
+    {
+      line1: "One swing. One chance.",
+      line2: "One chance to look better than you are.",
+    },
+    {
+      line1: "Don't hit it in the water.",
+      line2: "The fish don't need another Pro V1.",
+    },
+    {
+      line1: "Middle of the green.",
+      line2: "We ain't smart enough for hero shots today.",
+    },
+    {
+      line1: "This hole is short enough to make you cocky",
+      line2: "and dangerous enough to punish it.",
+    },
+    {
+      line1: "Trust the club.",
+      line2: "Right now it has a better track record than you.",
+    },
+  ];
+
+  const par5 = [
+    {
+      line1: "Par 5, baby.",
+      line2: "Time to separate lions from salad people.",
+    },
+    {
+      line1: "Big dog coming out.",
+      line2: "Hide your wives and your scorecards.",
+    },
+    {
+      line1: "Can we reach it? Absolutely.",
+      line2: "Should we? That's quitter talk.",
+    },
+    {
+      line1: "I don't know where this ball's going.",
+      line2: "But it's leaving here angry.",
+    },
+    {
+      line1: "Today's forecast calls for bombs",
+      line2: "with bad decisions.",
+    },
+  ];
+
+  const randoms = [
+    {
+      line1: "Confidence isn't a skill.",
+      line2: "It's a decision.",
+    },
+    {
+      line1: "You miss 100% of the shots",
+      line2: "you baby.",
+    },
+    {
+      line1: "That swing had more commitment",
+      line2: "than most marriages.",
+    },
+    {
+      line1: "Hit it like",
+      line2: "you're deleting evidence.",
+    },
+    {
+      line1: "The ball doesn't care",
+      line2: "about your feelings.",
+    },
+    {
+      line1: "Grip it",
+      line2: "and let destiny sort it out.",
+    },
+    {
+      line1: "Hero shot or stupid shot?",
+      line2: "Depends if it works.",
+    },
+    {
+      line1: "You're not talented enough",
+      line2: "to get mad.",
+    },
+    {
+      line1: "Trust the swing,",
+      line2: "not the idiot in your head.",
+    },
+    {
+      line1: "Golf is simple.",
+      line2: "Hit ball. Find ball. Lie. Repeat.",
+    },
+  ];
+
   const playedHoleNumbers = Object.keys(scores)
     .map(Number)
     .sort((a, b) => a - b);
@@ -343,61 +582,33 @@ const getCaddieMessage = () => {
   const lastScore =
     lastHoleNumber !== undefined ? scores[lastHoleNumber] : undefined;
 
-  // No scores yet
+  const seed =
+    currentHoleIndex +
+    playedHoleNumbers.length +
+    draftScore +
+    hole.number;
+
+  let selectedPool = randoms;
+
   if (!lastScore || !lastHoleInfo) {
-    if (formatType !== "individual" || selectedTeamId) {
-      return {
-        line1: "Your teammate picked you.",
-        line2: "Try to justify it.",
-      };
-    }
+    selectedPool = firstTee;
+  } else {
+    const lastDiff = lastScore - lastHoleInfo.par;
 
-    return {
-      line1: "New day.",
-      line2: "New mistakes.",
-    };
+    if (lastDiff <= -3) selectedPool = tripleBogey;
+    else if (lastDiff === 2) selectedPool = doubleBogey;
+    else if (lastDiff === 1) selectedPool = bogey;
+    else if (lastDiff === 0) selectedPool = par;
+    else if (lastDiff <= -1) selectedPool = birdie;
+    else if (hole.par === 3) selectedPool = par3;
+    else if (hole.par === 5) selectedPool = par5;
   }
 
-  const lastDiff = lastScore - lastHoleInfo.par;
-
-  if (lastDiff <= -2) {
-    return {
-      line1: "Easy there, Tiger.",
-      line2: "Act like you've done it before.",
-    };
-  }
-
-  if (lastDiff === -1) {
-    return {
-      line1: "Okay, we see you.",
-      line2: "Don't get cute now.",
-    };
-  }
-
-  if (lastDiff === 0) {
-    return {
-      line1: "Par is never bad.",
-      line2: "Keep stacking boring golf.",
-    };
-  }
-
-  if (lastDiff === 1) {
-    return {
-      line1: "Bogey happens.",
-      line2: "Just don't make it a lifestyle.",
-    };
-  }
-
-  if (lastDiff >= 2) {
-    return {
-      line1: "That hole is behind you.",
-      line2: "Unfortunately it's still on the card.",
-    };
-  }
+  const selectedMessage = pickBrownBomberLine(selectedPool, seed);
 
   return {
-    line1: "Stay locked in.",
-    line2: "This thing can turn quick.",
+    ...brownBomberBase,
+    ...selectedMessage,
   };
 };
 
@@ -985,7 +1196,7 @@ useEffect(() => {
     if (index >= text.length) {
       clearInterval(interval);
     }
-  }, 30);
+  }, 60);
 
   return () => clearInterval(interval);
 }, [
@@ -2772,11 +2983,11 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
     <div>
       <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff9900]">
-        Brown Bomber
+        {caddieMessage.character}
       </div>
 
       <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] text-white/45">
-        Golf Influencer
+        {caddieMessage.title}
       </div>
     </div>
   </div>
