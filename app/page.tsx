@@ -1474,6 +1474,7 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
       setIsSaving(false);
       return;
     }
+    setCurrentCharacterMessage(getCaddieMessage());
 
  const scoreDiff = draftScore - hole.par;
 let tickerMessage = "";
