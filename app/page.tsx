@@ -3472,7 +3472,13 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
         bunkerEvents.map((event) => (
           <div
             key={event.id}
-            className="rounded-2xl border border-white/10 bg-black/55 p-4 backdrop-blur-md"
+            className={`rounded-2xl border p-4 backdrop-blur-md ${
+  event.event_type === "admin_alert"
+    ? "border-red-500/30 bg-red-500/10"
+    : event.event_type === "bunker_post"
+    ? "border-white/10 bg-black/55"
+    : "border-[#ff9900]/20 bg-[#ff9900]/10"
+}`}
           >
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
               {new Date(event.created_at).toLocaleTimeString([], {
@@ -3480,7 +3486,13 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 minute: "2-digit",
               })}
             </div>
-
+            <div className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+  {event.event_type === "admin_alert"
+    ? "Tournament Alert"
+    : event.event_type === "bunker_post"
+    ? "Player Post"
+    : "Story Event"}
+</div>
             <div className="mt-2 text-sm font-bold leading-snug text-white">
               {event.message}
             </div>
