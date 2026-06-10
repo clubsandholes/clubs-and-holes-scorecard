@@ -3489,17 +3489,20 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
       )}
     </div>
 
-    <button
-  onClick={() => setBunkerModalOpen(true)}
-  className="fixed bottom-24 right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#ff9900] text-4xl font-black leading-none text-black shadow-2xl"
->
-  +
-</button>
+   
   </div>
 )}
 
 
-
+{selectedPlayerId &&
+  !["join", "selectTeam", "selectPlayer"].includes(view) && (
+    <button
+      onClick={() => setBunkerModalOpen(true)}
+      className="fixed bottom-24 right-4 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-[#ff9900] text-4xl font-black leading-none text-black shadow-2xl transition-transform active:scale-95"
+    >
+      +
+    </button>
+)}
 
 
 
