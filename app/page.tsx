@@ -3414,7 +3414,11 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
                 >
                   <div>
                     <div className="text-xs font-black uppercase tracking-[0.18em] opacity-70">
-                      {index === 0 ? "🏆 Current Leader" : `#${index + 1}`}
+                      {index === 0
+                        ? "🏆 Current Leader"
+                        : index === sortedLeaderboard.length - 1
+                        ? "🗑️ Last Place"
+                        : `#${index + 1}`}
                     </div>
 
                     <div className="mt-1 flex items-center gap-3">
