@@ -1878,14 +1878,6 @@ const matchingTemplate =
     ? matchingTemplates[Math.floor(Math.random() * matchingTemplates.length)]
     : null;
 
-  console.log("FEED TEMPLATE SEARCH:", {
-    category,
-    eventType,
-    currentTournamentId,
-    data,
-    matchingTemplate,
-  });
-
   return matchingTemplate?.message_template || null;
 };
 
