@@ -95,7 +95,14 @@ type ScorecardSponsor = {
   }[];
 };
 
-
+type CaddieTemplate = {
+  character_name: string;
+  character_title: string;
+  avatar_url: string;
+  category: string;
+  message_line_1: string;
+  message_line_2: string;
+};
 
 
 
@@ -1474,7 +1481,12 @@ const { error } = await supabase.from("scores").upsert(scorePayload, {
       setIsSaving(false);
       return;
     }
-    setCurrentCharacterMessage(getCaddieMessage());
+    const caddieCategory = getCaddieCategory();
+const databaseCaddieMessage = await fetchCaddieTemplate(caddieCategory);
+
+setCurrentCharacterMessage(
+  databaseCaddieMessage || getCaddieMessage()
+);
 
  const scoreDiff = draftScore - hole.par;
 let tickerMessage = "";
@@ -1852,6 +1864,70 @@ const getResumeHoleIndex = (scoreMap: Record<number, number>) => {
 
   return firstUnscoredHoleIndex;
 
+};
+
+
+const fetchCaddieTemplate = async (category: string) => {
+  const { data, error } = await supabase
+    .from("caddie_templates")
+    .select(
+      "character_name, character_title, avatar_url, category, message_line_1, message_line_2, is_global, tournament_id, priority"
+    )
+    .eq("category", category)
+    .eq("is_active", true);
+
+  if (error) {
+    console.error("Error fetching caddie template:", error);
+    return null;
+  }
+
+  const matchingTemplates = (data || []).filter((template: any) => {
+    return (
+      template.tournament_id === currentTournamentId ||
+      template.is_global === true
+    );
+  });
+
+  if (matchingTemplates.length === 0) return null;
+
+  const randomIndex = Math.floor(Math.random() * matchingTemplates.length);
+  const selectedTemplate = matchingTemplates[randomIndex];
+
+  return {
+    character: selectedTemplate.character_name,
+    title: selectedTemplate.character_title,
+    avatar: selectedTemplate.avatar_url,
+    line1: selectedTemplate.message_line_1,
+    line2: selectedTemplate.message_line_2,
+  };
+};
+
+const getCaddieCategory = () => {
+  if (formatType !== "individual" && !canScore) return "view_only";
+
+  const playedHoleNumbers = Object.keys(scores)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  const lastHoleNumber = playedHoleNumbers[playedHoleNumbers.length - 1];
+  const lastHoleInfo = holes.find((h) => h.number === lastHoleNumber);
+  const lastScore =
+    lastHoleNumber !== undefined ? scores[lastHoleNumber] : undefined;
+
+  if (!lastScore || !lastHoleInfo) return "first_tee";
+
+  const lastDiff = lastScore - lastHoleInfo.par;
+
+  if (lastDiff <= -3) return "triple_bogey";
+  if (lastDiff === 2) return "double_bogey";
+  if (lastDiff === 1) return "bogey";
+  if (lastDiff === 0) return "par";
+  if (lastDiff <= -1) return "birdie";
+
+  if (hole.par === 3) return "par_3";
+  if (hole.par === 5) return "par_5";
+
+  return "random";
 };
 
 const getFeedTemplate = async (category: string, eventType: string) => {
