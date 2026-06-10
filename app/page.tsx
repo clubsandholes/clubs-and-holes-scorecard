@@ -330,6 +330,9 @@ setView(
 // =========================
 
 const [typedCaddieText, setTypedCaddieText] = useState("");
+const [currentCharacterMessage, setCurrentCharacterMessage] =
+
+  useState<any | null>(null);
 
 
 const pickBrownBomberLine = (
@@ -1178,12 +1181,15 @@ const submitBunkerPost = async () => {
   }
   }, []);
 
-  const caddieMessage = getCaddieMessage();
+  const caddieMessage =
+  currentCharacterMessage || getCaddieMessage();
 
 
 useEffect(() => {
-  const message = getCaddieMessage();
-  const text = `${message.line1} ${message.line2}`;
+  const message =
+  currentCharacterMessage || getCaddieMessage();
+
+const text = `${message.line1} ${message.line2}`;
 
   setTypedCaddieText("");
 
@@ -1199,13 +1205,9 @@ useEffect(() => {
   }, 60);
 
   return () => clearInterval(interval);
-}, [
-  currentHoleIndex,
-  scores,
-  formatType,
-  selectedTeamId,
-  selectedPlayerId,
-]);
+}, [currentCharacterMessage]
+
+);
 
 
 
