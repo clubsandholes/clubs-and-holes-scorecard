@@ -168,116 +168,72 @@ export default function AdminPage() {
 return (
   <div className="min-h-screen bg-black p-6 text-white">
     <div className="mx-auto max-w-6xl">
-    <AdminNav />
+      <AdminNav />
 
-      <div className="flex items-center justify-between">
-
-        <div>
-
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-
-            Clubs & Holes
-
-          </div>
-
-          <h1 className="mt-1 text-4xl font-black">
-
-            Tournament Manager
-
-          </h1>
-
+      <div>
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Clubs & Holes
         </div>
 
-        <button
-            onClick={createTournament}
-            className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black"
-          >
-            + New Tournament
-          </button>
+        <h1 className="mt-1 text-4xl font-black">
+          Tournament Operations Center
+        </h1>
 
+        <p className="mt-2 text-white/60">
+          Select an area to manage.
+        </p>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
 
-        {loading ? (
+        <Link
+          href="/admin/tournaments"
+          className="rounded-[2rem] border border-white/10 bg-black/50 p-6 shadow-xl backdrop-blur-md transition-all hover:border-[#ff9900]"
+        >
+          <div className="text-4xl">🏆</div>
 
-          <div className="text-gray-500">Loading tournaments...</div>
-
-        ) : tournaments.length === 0 ? (
-
-          <div className="rounded-2xl border border-white/10 bg-black/40 p-6 text-center text-gray-400">
-
-            No tournaments found.
-
+          <div className="mt-4 text-2xl font-black">
+            Tournaments
           </div>
 
-        ) : (
+          <div className="mt-2 text-sm text-white/60">
+            Create, edit and manage tournaments.
+          </div>
+        </Link>
 
-          <div className="space-y-4">
+        <Link
+          href="/admin/courses"
+          className="rounded-[2rem] border border-white/10 bg-black/50 p-6 shadow-xl backdrop-blur-md transition-all hover:border-[#ff9900]"
+        >
+          <div className="text-4xl">⛳</div>
 
-            {tournaments.map((tournament) => (
-
-              <Link
-
-                key={tournament.id}
-
-                href={`/admin/tournament/${tournament.id}`}
-
-                className="block rounded-[2rem] border border-white/10 bg-black/50 p-5 shadow-xl backdrop-blur-md transition-all hover:border-[#ff9900]"
-
-              >
-
-                <div className="flex items-center justify-between">
-
-                  <div>
-
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-
-                      Tournament
-
-                    </div>
-
-                    <div className="mt-1 text-2xl font-black">
-
-                      {tournament.name}
-
-                    </div>
-
-                    <div className="mt-2 text-sm uppercase tracking-[0.18em] text-white/60">
-
-                      Code: {tournament.code}
-                      <div
-                        className={`mt-3 inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${getStatusStyle(
-                          tournament.status
-                        )}`}
-                      >
-                        {tournament.status}
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <div className="text-3xl text-white/30">
-
-                    →
-
-                  </div>
-
-                </div>
-
-              </Link>
-
-            ))}
-
+          <div className="mt-4 text-2xl font-black">
+            Courses
           </div>
 
-        )}
+          <div className="mt-2 text-sm text-white/60">
+            Manage courses, holes and layouts.
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/sponsors"
+          className="rounded-[2rem] border border-white/10 bg-black/50 p-6 shadow-xl backdrop-blur-md transition-all hover:border-[#ff9900]"
+        >
+          <div className="text-4xl">🤝</div>
+
+          <div className="mt-4 text-2xl font-black">
+            Sponsors
+          </div>
+
+          <div className="mt-2 text-sm text-white/60">
+            Manage sponsors and placements.
+          </div>
+        </Link>
 
       </div>
-        </div>
     </div>
-
-  );
+  </div>
+);
 
 }
