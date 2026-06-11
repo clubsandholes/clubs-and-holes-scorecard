@@ -167,6 +167,7 @@ export default function AdminPage() {
 
 return (
   <div className="min-h-screen bg-black p-6 text-white">
+    <div className="mx-auto max-w-6xl">
     <AdminNav />
 
       <div className="flex items-center justify-between">
@@ -274,7 +275,7 @@ return (
         )}
 
       </div>
-
+        </div>
     </div>
 
   );
