@@ -103,7 +103,7 @@ export default function AdminPage() {
     return (
 
       <div className="min-h-screen bg-black p-6 text-white">
-        
+        <div className="mx-auto max-w-6xl">
 
         <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center">
 
@@ -142,7 +142,7 @@ export default function AdminPage() {
           </button>
 
         </div>
-
+        </div>
       </div>
 
     );
