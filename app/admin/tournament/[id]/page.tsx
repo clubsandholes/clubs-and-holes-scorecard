@@ -668,7 +668,8 @@ const updateTournamentStatus = async (
   // =========================
 
   return (
-    <div className="min-h-screen bg-black p-6 text-white">
+  <div className="min-h-screen bg-black p-6 text-white">
+    <div className="mx-auto max-w-6xl">
       <AdminNav />
 
       {adminNotice && (
@@ -741,7 +742,7 @@ const updateTournamentStatus = async (
 </div>
 
       {/* TOURNAMENT SETTINGS */}
-      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+      <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Tournament Info
         </div>
@@ -828,7 +829,7 @@ const updateTournamentStatus = async (
       
 
       {/* LIVE CONTROLS */}
-        <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+        <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
           <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
             Live Controls
           </div>
@@ -853,7 +854,7 @@ const updateTournamentStatus = async (
 
       {/* TEAM MANAGER */}
       {formatType !== "individual" && (
-        <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+        <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
           <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
             Teams
           </div>
@@ -990,7 +991,7 @@ const updateTournamentStatus = async (
       )}
 
       {/* PLAYER MANAGER */}
-      <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+      <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Players
         </div>
@@ -1069,5 +1070,6 @@ const updateTournamentStatus = async (
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
