@@ -8,13 +8,10 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Tournament = {
-
   id: string;
-
   name: string;
-
   code: string;
-
+  status: "draft" | "active" | "completed" | "archived";
 };
 
 export default function AdminPage() {
@@ -49,7 +46,7 @@ export default function AdminPage() {
 
       .from("tournaments")
 
-      .select("id, name, code")
+      .select("id, name, code, status")
 
       .order("created_at", { ascending: false });
 
@@ -152,6 +149,22 @@ export default function AdminPage() {
 
   }
 
+ const getStatusStyle = (status: Tournament["status"]) => {
+  if (status === "draft") {
+    return "border-white/10 bg-white/10 text-white";
+  }
+
+  if (status === "active") {
+    return "border-green-400/30 bg-green-500/15 text-green-300";
+  }
+
+  if (status === "completed") {
+    return "border-[#ff9900]/30 bg-[#ff9900]/15 text-[#ff9900]";
+  }
+
+  return "border-red-400/30 bg-red-500/15 text-red-300";
+}; 
+
 return (
   <div className="min-h-screen bg-black p-6 text-white">
     <AdminNav />
@@ -232,6 +245,13 @@ return (
                     <div className="mt-2 text-sm uppercase tracking-[0.18em] text-white/60">
 
                       Code: {tournament.code}
+                      <div
+                        className={`mt-3 inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${getStatusStyle(
+                          tournament.status
+                        )}`}
+                      >
+                        {tournament.status}
+                      </div>
 
                     </div>
 
