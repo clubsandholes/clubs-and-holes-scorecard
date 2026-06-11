@@ -68,10 +68,11 @@ const sendAdminAlert = async () => {
   }
 
   setAdminMessage("");
-  showAdminNotice("Admin alert sent.");
+setAdminAlertModalOpen(false);
+showAdminNotice("Admin alert sent.");
 };
 
-
+const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
 
   // =========================
   // LOADING / UI
@@ -668,9 +669,53 @@ const updateTournamentStatus = async (
   // =========================
 
   return (
+
+
+
+
+    
   <div className="min-h-screen bg-black p-6 text-white">
     <div className="mx-auto max-w-6xl">
       <AdminNav />
+
+      {adminAlertModalOpen && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-md rounded-[2rem] border border-red-500/40 bg-black p-5 text-white shadow-2xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
+            Tournament Alert
+          </div>
+
+          <div className="mt-1 text-2xl font-black">
+            Send Announcement
+          </div>
+        </div>
+
+        <button
+          onClick={() => setAdminAlertModalOpen(false)}
+          className="text-3xl leading-none"
+        >
+          ×
+        </button>
+      </div>
+
+      <textarea
+        value={adminMessage}
+        onChange={(e) => setAdminMessage(e.target.value)}
+        placeholder="Type tournament announcement..."
+        className="mt-5 min-h-32 w-full resize-none rounded-2xl border border-white/10 bg-white/5 p-4 text-lg font-bold text-white outline-none"
+      />
+
+      <button
+        onClick={sendAdminAlert}
+        className="mt-5 w-full rounded-full bg-red-500 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-white"
+      >
+        Send Alert
+      </button>
+    </div>
+  </div>
+)}
 
       {adminNotice && (
         <div className="mb-4 rounded-2xl border border-[#ff9900] bg-[#ff9900]/10 p-4 text-sm font-black uppercase tracking-[0.18em] text-[#ff9900]">
@@ -1070,6 +1115,13 @@ const updateTournamentStatus = async (
         </div>
       </div>
     </div>
+
+    <button
+  onClick={() => setAdminAlertModalOpen(true)}
+  className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-red-500 text-4xl font-black leading-none text-white shadow-2xl transition-transform active:scale-95"
+>
+  +
+</button>
   </div>
 );
 }
