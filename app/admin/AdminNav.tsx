@@ -6,7 +6,7 @@ export default function AdminNav() {
       <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <Link href="/admin" className="flex items-center gap-3">
           <img
-            src="/ch-logo.png"
+            src="/clubs-n-holes.png"
             alt="Clubs & Holes"
             className="h-12 w-auto"
           />
