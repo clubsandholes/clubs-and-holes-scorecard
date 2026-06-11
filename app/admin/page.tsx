@@ -29,7 +29,7 @@ export default function AdminPage() {
   const unlockAdmin = () => {
 
     if (password === "swingreckless") {
-
+      localStorage.setItem("adminUnlocked", "true");
       setIsUnlocked(true);
 
     } else {

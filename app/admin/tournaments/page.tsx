@@ -44,11 +44,19 @@ export default function TournamentsPage() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (isUnlocked) {
-      fetchTournaments();
-    }
-  }, [isUnlocked]);
+useEffect(() => {
+  const unlocked = localStorage.getItem("adminUnlocked");
+
+  if (unlocked === "true") {
+    setIsUnlocked(true);
+  }
+}, []);
+
+useEffect(() => {
+  if (isUnlocked) {
+    fetchTournaments();
+  }
+}, [isUnlocked]);
 
   const createTournament = async () => {
     const defaultName = "New Tournament";
