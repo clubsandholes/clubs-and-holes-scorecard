@@ -639,7 +639,30 @@ const handleTeamImageUpload = async (
 
   showAdminNotice("Team image uploaded.");
 };
+const updateTournamentStatus = async (
+  nextStatus: "draft" | "active" | "completed" | "archived"
+) => {
+  const confirmed = confirm(`Change tournament status to ${nextStatus}?`);
+  if (!confirmed) return;
 
+  const { error } = await supabase
+    .from("tournaments")
+    .update({
+      status: nextStatus,
+    })
+    .eq("id", tournamentId);
+
+  if (error) {
+    console.error(error);
+    alert("Tournament status could not be updated.");
+    return;
+  }
+
+  setTournamentStatus(nextStatus);
+  await fetchTournament();
+
+  showAdminNotice(`Tournament marked ${nextStatus}.`);
+};
   // =========================
   // UI
   // =========================
@@ -660,6 +683,62 @@ const handleTeamImageUpload = async (
       </div>
 
       <h1 className="mt-2 text-4xl font-black">{tournament.name}</h1>
+
+      <div className="mt-5 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Tournament Status
+      </div>
+
+      <div className="mt-2 text-2xl font-black uppercase">
+        {tournamentStatus}
+      </div>
+
+      <div className="mt-1 text-sm text-white/50">
+        Draft = setup · Active = playable · Completed = historical · Archived = hidden
+      </div>
+    </div>
+
+    <div className="flex flex-wrap gap-2">
+      {tournamentStatus === "draft" && (
+        <button
+          onClick={() => updateTournamentStatus("active")}
+          className="rounded-full bg-green-500 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-black"
+        >
+          Activate
+        </button>
+      )}
+
+      {tournamentStatus === "active" && (
+        <button
+          onClick={() => updateTournamentStatus("completed")}
+          className="rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-black"
+        >
+          Complete
+        </button>
+      )}
+
+      {tournamentStatus === "completed" && (
+        <button
+          onClick={() => updateTournamentStatus("archived")}
+          className="rounded-full bg-red-500 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-black"
+        >
+          Archive
+        </button>
+      )}
+
+      {tournamentStatus === "archived" && (
+        <button
+          onClick={() => updateTournamentStatus("completed")}
+          className="rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-[#ff9900]"
+        >
+          Restore
+        </button>
+      )}
+    </div>
+  </div>
+</div>
 
       {/* TOURNAMENT SETTINGS */}
       <div className="mt-8 rounded-[2rem] border border-white/10 bg-gray-950 p-5">
