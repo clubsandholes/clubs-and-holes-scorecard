@@ -314,6 +314,12 @@ const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
 
   setView("completedTournament");
 
+  const completedQuote = await fetchCaddieTemplate("tournament_complete");
+
+setCurrentCharacterMessage(
+  completedQuote || getCaddieMessage()
+);
+
   return;
 }
 
