@@ -3632,6 +3632,27 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 )}
 
 
+
+{view === "completedTournament" && (
+  <div className="mt-10">
+    <div className="text-center">
+      <img
+        src="/clubs-n-holes.png"
+        alt="Clubs & Holes"
+        className="mx-auto h-24 w-auto"
+      />
+
+      <div className="mt-6 text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Tournament Complete
+      </div>
+
+      <h1 className="mt-2 text-4xl font-black">
+        {tournamentName}
+      </h1>
+    </div>
+  </div>
+)}
+
 {selectedPlayerId &&
   !["join", "selectTeam", "selectPlayer"].includes(view) && (
     <button
