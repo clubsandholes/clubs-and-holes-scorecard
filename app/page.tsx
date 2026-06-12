@@ -39,7 +39,8 @@ type View =
   | "leaderboard"
   | "courseInfo"
   | "bunker"
-  | "rules";
+  | "rules"
+  | "completedTournament";
 
 
 // =========================
@@ -294,10 +295,27 @@ const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
     return;
   }
 
-  if (data.status === "completed") {
-    alert("This tournament has been completed.");
-    return;
-  }
+ if (data.status === "completed") {
+  setCurrentTournamentId(data.id);
+
+  await applyTournamentSettings(data);
+
+  localStorage.setItem("currentTournamentId", data.id);
+  localStorage.setItem("tournamentCode", code);
+
+  await fetchScorecardSponsors(data.id);
+  await fetchLeaderboardSponsors(data.id);
+  await fetchPlayers(data.id);
+  await fetchTeams(data.id);
+  await fetchTeamPlayers();
+  await fetchTickerEvents(data.id);
+  await fetchBunkerEvents(data.id);
+  await fetchAllScores(data.id, data.format_type || "individual");
+
+  setView("completedTournament");
+
+  return;
+}
 
   if (data.status === "archived") {
     alert("This tournament is archived.");
