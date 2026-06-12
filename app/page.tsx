@@ -3693,6 +3693,40 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 
 </div>
     </div>
+
+    <div className="mt-6 rounded-2xl border border-white/10 bg-black/55 p-5 backdrop-blur-md">
+  <div className="flex items-center gap-3">
+    <img
+      src={caddieMessage.avatar}
+      alt={caddieMessage.character}
+      className="h-12 w-12 rounded-full border border-[#ff9900]/30 object-cover"
+    />
+
+    <div>
+      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff9900]">
+        {caddieMessage.character}
+      </div>
+
+      <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] text-white/45">
+        {caddieMessage.title}
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-3 text-base font-black leading-snug text-white">
+    {typedCaddieText}
+    <span className="animate-pulse text-[#ff9900]">|</span>
+  </div>
+</div>
+
+<a
+  href="https://live.clubsandholes.com"
+  target="_blank"
+  rel="noreferrer"
+  className="mt-6 block w-full rounded-full bg-[#ff9900] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.18em] text-black"
+>
+  View Tournament Feed
+</a>
   </div>
 )}
 
