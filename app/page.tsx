@@ -3649,6 +3649,43 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
       <h1 className="mt-2 text-4xl font-black">
         {tournamentName}
       </h1>
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+
+  <div className="rounded-[2rem] border border-[#ff9900]/30 bg-[#ff9900]/10 p-6 text-center">
+    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+      🏆 Winner
+    </div>
+
+    <div className="mt-3 text-3xl font-black">
+      {sortedLeaderboard[0]?.name || "--"}
+    </div>
+
+    <div className="mt-2 text-xl font-black text-[#ff9900]">
+      {sortedLeaderboard[0]
+        ? formatScore(sortedLeaderboard[0].net)
+        : "--"}
+    </div>
+  </div>
+
+  <div className="rounded-[2rem] border border-red-500/30 bg-red-500/10 p-6 text-center">
+    <div className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
+      🗑️ Last Place
+    </div>
+
+    <div className="mt-3 text-3xl font-black">
+      {sortedLeaderboard[sortedLeaderboard.length - 1]?.name || "--"}
+    </div>
+
+    <div className="mt-2 text-xl font-black text-red-400">
+      {sortedLeaderboard.length > 0
+        ? formatScore(
+            sortedLeaderboard[sortedLeaderboard.length - 1].net
+          )
+        : "--"}
+    </div>
+  </div>
+
+</div>
     </div>
   </div>
 )}
