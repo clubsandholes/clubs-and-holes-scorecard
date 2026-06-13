@@ -1677,12 +1677,7 @@ await fetchAllScores(currentTournamentId);
   setIsSaving(false);
   setSaveMessage("");
 
-  if (currentHoleIndex < holes.length - 1) {
-    setCurrentHoleIndex(currentHoleIndex + 1);
-    return;
-  }
-
-  setRoundCompleteModalOpen(true);
+ 
 }, 10000);
   };
 
