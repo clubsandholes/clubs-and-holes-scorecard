@@ -1676,7 +1676,11 @@ await fetchAllScores(currentTournamentId);
   setTimeout(() => {
   setIsSaving(false);
   setSaveMessage("");
+    if (currentHoleIndex < holes.length - 1) {
 
+    setCurrentHoleIndex(currentHoleIndex + 1);
+
+  }
  
 }, 10000);
   };
