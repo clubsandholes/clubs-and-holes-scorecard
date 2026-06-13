@@ -2196,9 +2196,9 @@ const teamLeaderboard = teams.map((team) => {
 const leaderboard =
   formatType === "individual" ? playerLeaderboard : teamLeaderboard;
 
+const activeLeaderboard = leaderboard.filter((entry) => entry.thru > 0);
 
-
-  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+const sortedLeaderboard = [...activeLeaderboard].sort((a, b) => {
     if (a.net !== b.net) return a.net - b.net;
     if (a.last6 !== b.last6) return a.last6 - b.last6;
     if (a.last3 !== b.last3) return a.last3 - b.last3;
@@ -3074,12 +3074,12 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
           </div>
       )}
     </div>
-      {allHolesScored && !scorecardSubmitted && (
+      {allHolesScored && !scorecardSubmitted && canScore && view === "scorecard" && (
   <button
     onClick={() => setRoundCompleteModalOpen(true)}
-    className="mt-4 w-full rounded-full bg-[#ff9900] px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-black shadow-xl"
+    className="fixed bottom-24 left-4 z-50 rounded-full bg-green-500 px-5 py-4 text-xs font-black uppercase tracking-[0.16em] text-black shadow-2xl transition-transform active:scale-95"
   >
-    Finish Scorecard
+    ✅ Finish Round
   </button>
 )}
    
