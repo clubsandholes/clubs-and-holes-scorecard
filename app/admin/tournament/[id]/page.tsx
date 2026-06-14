@@ -1068,8 +1068,8 @@ const updateTournamentStatus = async (
 >
   +
 </button>
-  </div>
-  
-);
 
+    </div>
+  </div>
+);
 }
