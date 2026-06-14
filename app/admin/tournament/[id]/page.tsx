@@ -126,6 +126,24 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
 
   const [teamPlayers, setTeamPlayers] = useState<TeamPlayer[]>([]);
 
+
+  // =========================
+  // SECTION STATE
+  // =========================
+  const [openSections, setOpenSections] = useState({
+  info: true,
+  live: false,
+  teams: false,
+  players: false,
+});
+
+const toggleSection = (section: keyof typeof openSections) => {
+  setOpenSections((prev) => ({
+    ...prev,
+    [section]: !prev[section],
+  }));
+};
+
   // =========================
   // LIVE CONTROL STATE
   // =========================
@@ -824,281 +842,153 @@ const updateTournamentStatus = async (
 </div>
 
       {/* TOURNAMENT SETTINGS */}
-      <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-          Tournament Info
-        </div>
-
-        <h2 className="mt-2 text-2xl font-black">Event Setup</h2>
-
-        <div className="mt-6 space-y-4">
-          <input
-            value={tournamentName}
-            onChange={(e) => setTournamentName(e.target.value)}
-            placeholder="Tournament Name"
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          />
-
-          <input
-            value={tournamentCodeValue}
-            onChange={(e) =>
-              setTournamentCodeValue(
-                e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
-              )
-            }
-            placeholder="Tournament Code"
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          />
-
-          <input
-            type="date"
-            value={tournamentDate}
-            onChange={(e) => setTournamentDate(e.target.value)}
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          />
-
-          <select
-            value={tournamentStatus}
-            onChange={(e) => setTournamentStatus(e.target.value)}
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          >
-            <option value="draft">Draft</option>
-            <option value="active">Active</option>
-            <option value="completed">Completed</option>
-            <option value="archived">Archived</option>
-          </select>
-
-          <select
-            value={formatType}
-            onChange={(e) => setFormatType(e.target.value)}
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          >
-            <option value="individual">Individual</option>
-            <option value="2v2">2v2 Team</option>
-            <option value="4v4">4v4 Team</option>
-            <option value="custom">Custom</option>
-          </select>
-
-          <select
-            value={selectedCourseId}
-            onChange={(e) => handleCourseSelect(e.target.value)}
-            className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-          >
-            <option value="">Select Course</option>
-
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
-
-          <textarea
-            value={tournamentRules}
-            onChange={(e) => setTournamentRules(e.target.value)}
-            placeholder="Tournament Rules"
-            className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
-          />
-         <div className="rounded-2xl border border-white/10 bg-black p-4">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-              Tournament Background
-            </div>
-
-            <label className="mt-4 flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
-              Upload Background
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleTournamentBackgroundUpload}
-                className="hidden"
-              />
-            </label>
-
-            {backgroundImageUrl && (
-              <div className="mt-4 overflow-hidden rounded-xl">
-                <img
-                  src={backgroundImageUrl}
-                  alt="Tournament Background"
-                  className="h-40 w-full object-cover"
-                />
-              </div>
-            )}
-          </div>
-          <button
-            onClick={saveTournamentSettings}
-            className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
-          >
-            SAVE TOURNAMENT SETTINGS
-          </button>
-        </div>
+<div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <button
+    onClick={() => toggleSection("info")}
+    className="flex w-full items-center justify-between text-left"
+  >
+    <div>
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Tournament Info
       </div>
-      
 
-      {/* LIVE CONTROLS */}
-        <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            Live Controls
-          </div>
+      <h2 className="mt-2 text-2xl font-black">Event Setup</h2>
+    </div>
 
-          <h2 className="mt-2 text-2xl font-black">Event Control Room</h2>
+    <div className="text-3xl font-black text-[#ff9900]">
+      {openSections.info ? "−" : "+"}
+    </div>
+  </button>
 
-          <textarea
-            value={adminMessage}
-            onChange={(e) => setAdminMessage(e.target.value)}
-            placeholder="Type admin alert..."
-            className="mt-5 min-h-28 w-full rounded-2xl bg-black p-4 text-white outline-none"
+  {openSections.info && (
+    <div className="mt-6 space-y-4">
+      <input
+        value={tournamentName}
+        onChange={(e) => setTournamentName(e.target.value)}
+        placeholder="Tournament Name"
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <input
+        value={tournamentCodeValue}
+        onChange={(e) =>
+          setTournamentCodeValue(
+            e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+          )
+        }
+        placeholder="Tournament Code"
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <input
+        type="date"
+        value={tournamentDate}
+        onChange={(e) => setTournamentDate(e.target.value)}
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <select
+        value={tournamentStatus}
+        onChange={(e) => setTournamentStatus(e.target.value)}
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      >
+        <option value="draft">Draft</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="archived">Archived</option>
+      </select>
+
+      <select
+        value={formatType}
+        onChange={(e) => setFormatType(e.target.value)}
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      >
+        <option value="individual">Individual</option>
+        <option value="2v2">2v2 Team</option>
+        <option value="4v4">4v4 Team</option>
+        <option value="custom">Custom</option>
+      </select>
+
+      <select
+        value={selectedCourseId}
+        onChange={(e) => handleCourseSelect(e.target.value)}
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+      >
+        <option value="">Select Course</option>
+
+        {courses.map((course) => (
+          <option key={course.id} value={course.id}>
+            {course.name}
+          </option>
+        ))}
+      </select>
+
+      <textarea
+        value={tournamentRules}
+        onChange={(e) => setTournamentRules(e.target.value)}
+        placeholder="Tournament Rules"
+        className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <div className="rounded-2xl border border-white/10 bg-black p-4">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+          Tournament Background
+        </div>
+
+        <label className="mt-4 flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
+          Upload Background
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleTournamentBackgroundUpload}
+            className="hidden"
           />
+        </label>
 
-          <button
-            onClick={sendAdminAlert}
-            className="mt-4 w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
-          >
-            SEND ADMIN ALERT
-          </button>
-        </div>
-
-
-      {/* TEAM MANAGER */}
-      {formatType !== "individual" && (
-        <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            Teams
-          </div>
-
-          <h2 className="mt-2 text-2xl font-black">Team Manager</h2>
-
-          <div className="mt-5 flex gap-3">
-            <input
-              value={newTeamName}
-              onChange={(e) => setNewTeamName(e.target.value)}
-              placeholder="Add team..."
-              className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+        {backgroundImageUrl && (
+          <div className="mt-4 overflow-hidden rounded-xl">
+            <img
+              src={backgroundImageUrl}
+              alt="Tournament Background"
+              className="h-40 w-full object-cover"
             />
-
-            <button
-              onClick={addTeam}
-              className="rounded-full bg-[#ff9900] px-6 font-black text-black"
-            >
-              ADD
-            </button>
           </div>
+        )}
+      </div>
 
-          <div className="mt-6 space-y-3">
-            {teams.map((team) => (
-              <div
-                key={team.id}
-                className="rounded-2xl border border-white/10 bg-black p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-black leading-none whitespace-nowrap overflow-hidden text-ellipsis">
-
-                    {team.name}
-
-                  </div>
-                  
-                  <button
-                    onClick={() => deleteTeam(team.id)}
-                    className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
-                  >
-                    Delete
-                  </button>
-                </div>
-
-                <div className="mt-4 rounded-2xl border border-white/10 bg-gray-950 p-4">
-                    <label className="flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
-                      Upload Team Photo
-
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleTeamImageUpload(team.id, e)}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {team.image_url && (
-                      <div className="mt-4 flex h-40 items-center justify-center overflow-hidden rounded-xl bg-black p-4">
-                        <img
-                          src={team.image_url}
-                          alt={team.name}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                <div className="mt-4">
-                  <select
-                    defaultValue=""
-                    onChange={(e) =>
-                      assignPlayerToTeam(team.id, e.target.value)
-                    }
-                    className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
-                  >
-                    <option value="">Assign player...</option>
-
-                    {players.map((player) => (
-                      <option key={player.id} value={player.id}>
-                        {player.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <div className="mt-3 space-y-2">
-                    {teamPlayers
-                      .filter((tp) => tp.team_id === team.id)
-                      .map((tp) => {
-                        const player = players.find(
-                          (p) => p.id === tp.tournament_player_id
-                        );
-
-                        return (
-                          <div
-                            key={tp.id}
-                            className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
-                          >
-                            <div>
-                              <div className="font-bold">
-                                {player?.name || "Unknown Player"}
-                              </div>
-
-                              {team.official_scorer_player_id === player?.id ? (
-                                <div className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-                                  ⭐ Official Scorer
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() =>
-                                    player &&
-                                    setOfficialScorer(team.id, player.id)
-                                  }
-                                  className="mt-2 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
-                                >
-                                  Make Official Scorer
-                                </button>
-                              )}
-                            </div>
-
-                            <button
-                              onClick={() => removePlayerFromTeam(tp.id)}
-                              className="text-xs font-black uppercase text-red-400"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <button
+        onClick={saveTournamentSettings}
+        className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+      >
+        SAVE TOURNAMENT SETTINGS
+      </button>
+    </div>
+  )}
+</div>
 
       {/* PLAYER MANAGER */}
-      <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+      {/* PLAYER MANAGER */}
+<div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <button
+    onClick={() => toggleSection("players")}
+    className="flex w-full items-center justify-between text-left"
+  >
+    <div>
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Players
+      </div>
+
+      <h2 className="mt-2 text-2xl font-black">Tournament Players</h2>
+    </div>
+
+    <div className="text-3xl font-black text-[#ff9900]">
+      {openSections.players ? "−" : "+"}
+    </div>
+  </button>
+
+  {openSections.players && (
+    <>
         <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
           Players
         </div>
@@ -1171,11 +1061,17 @@ const updateTournamentStatus = async (
     >
       Delete
     </button>
+    
   </div>
+  
 </div>
+    
           ))}
+          
         </div>
+        
       </div>
+      
     </div>
 
     <button
@@ -1185,5 +1081,7 @@ const updateTournamentStatus = async (
   +
 </button>
   </div>
+  
 );
+
 }
