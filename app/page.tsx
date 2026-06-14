@@ -2628,7 +2628,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
             </div>
           
         )}
-        <div className="h-20" />
+        <div className="h-10" />
         {menuOpen && (
           <div className="absolute inset-0 z-50 bg-black/95 p-6">
             <div className="flex items-center justify-between">
