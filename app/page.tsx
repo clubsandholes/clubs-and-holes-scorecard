@@ -1667,11 +1667,7 @@ if (hole.number === 9) {
 
 await fetchAllScores(currentTournamentId);
 
-    setSaveMessage(
-      currentHoleIndex < holes.length - 1
-        ? `Moving to Hole ${hole.number + 1}`
-        : "Round complete"
-    );
+  setSaveMessage("Score Saved");
 
   setTimeout(() => {
   setIsSaving(false);
