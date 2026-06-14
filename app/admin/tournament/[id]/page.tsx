@@ -108,6 +108,9 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
   const [liveVideoUrl, setLiveVideoUrl] = useState("");
 
 
+  const [selectedLeaderboardEntry, setSelectedLeaderboardEntry] = useState<any | null>(null);
+
+
 
 
   // =========================
@@ -1109,7 +1112,8 @@ const sortedAdminLeaderboard = adminLeaderboard
         sortedAdminLeaderboard.map((entry, index) => (
           <div
             key={entry.id}
-            className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
+            onClick={() => setSelectedLeaderboardEntry(entry)}
+            className="flex cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-black p-4 transition-all hover:border-[#ff9900]"
           >
             <div>
               <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
@@ -1373,6 +1377,46 @@ const sortedAdminLeaderboard = adminLeaderboard
     </div>
   )}
 </div>
+
+{selectedLeaderboardEntry && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-lg rounded-[2rem] border border-white/10 bg-black p-6 text-white shadow-2xl">
+
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            Scorecard
+          </div>
+
+          <div className="mt-1 text-2xl font-black">
+            {selectedLeaderboardEntry.name}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setSelectedLeaderboardEntry(null)}
+          className="text-3xl leading-none"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-white/10 bg-gray-950 p-5 text-center">
+        <div className="text-sm uppercase tracking-[0.18em] text-white/50">
+          Coming Next
+        </div>
+
+        <div className="mt-3 text-lg font-black">
+          Hole-by-hole scorecard view
+        </div>
+
+        <div className="mt-3 text-white/60">
+          This modal is now connected to the leaderboard.
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
 <button
   onClick={() => setAdminAlertModalOpen(true)}
