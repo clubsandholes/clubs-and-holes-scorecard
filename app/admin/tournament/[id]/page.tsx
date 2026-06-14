@@ -110,6 +110,8 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
 
   const [selectedLeaderboardEntry, setSelectedLeaderboardEntry] = useState<any | null>(null);
 
+  const [selectedScorecard, setSelectedScorecard] = useState<any[]>([]);
+
 
 
 
@@ -820,6 +822,28 @@ const sortedAdminLeaderboard = adminLeaderboard
   .sort((a, b) => a.net - b.net);
 
 
+  const openScorecard = async (entry: any) => {
+  setSelectedLeaderboardEntry(entry);
+
+  const scoreField =
+    formatType === "individual"
+      ? "tournament_player_id"
+      : "team_id";
+
+  const { data, error } = await supabase
+    .from("scores")
+    .select("*")
+    .eq(scoreField, entry.id)
+    .order("hole_number");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setSelectedScorecard(data || []);
+};
+
   // =========================
   // UI
   // =========================
@@ -1112,7 +1136,7 @@ const sortedAdminLeaderboard = adminLeaderboard
         sortedAdminLeaderboard.map((entry, index) => (
           <div
             key={entry.id}
-            onClick={() => setSelectedLeaderboardEntry(entry)}
+            onClick={() => openScorecard(entry)}
             className="flex cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-black p-4 transition-all hover:border-[#ff9900]"
           >
             <div>
@@ -1403,7 +1427,28 @@ const sortedAdminLeaderboard = adminLeaderboard
 
       <div className="mt-6 rounded-2xl border border-white/10 bg-gray-950 p-5 text-center">
         <div className="text-sm uppercase tracking-[0.18em] text-white/50">
-          Coming Next
+          <div className="mt-6 space-y-2">
+              {selectedScorecard.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-gray-950 p-5 text-center text-white/50">
+                  No scores entered.
+                </div>
+              ) : (
+                selectedScorecard.map((score) => (
+                  <div
+                    key={score.id}
+                    className="flex items-center justify-between rounded-xl border border-white/10 bg-gray-950 p-3"
+                  >
+                    <div className="font-black">
+                      Hole {score.hole_number}
+                    </div>
+
+                    <div className="text-xl font-black text-[#ff9900]">
+                      {score.strokes}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
         </div>
 
         <div className="mt-3 text-lg font-black">
