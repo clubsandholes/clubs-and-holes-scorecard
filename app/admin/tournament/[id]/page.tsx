@@ -18,6 +18,7 @@ type Tournament = {
   course_address?: string;
   course_phone?: string;
   course_map_url?: string;
+  live_video_url?: string;
 };
 
 type Team = {
@@ -93,6 +94,7 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
   const [tournamentStatus, setTournamentStatus] = useState("draft");
   const [formatType, setFormatType] = useState("individual");
   const [tournamentRules, setTournamentRules] = useState("");
+  const [liveVideoUrl, setLiveVideoUrl] = useState("");
 
 
 
@@ -193,7 +195,8 @@ const toggleSection = (section: keyof typeof openSections) => {
         background_image_url,
         course_address,
         course_phone,
-        course_map_url
+        course_map_url,
+        live_video_url
       `)
       .eq("id", tournamentId)
       .single();
@@ -213,6 +216,7 @@ const toggleSection = (section: keyof typeof openSections) => {
     setTournamentStatus(data.status || "draft");
     setFormatType(data.format_type || "individual");
     setTournamentRules(data.rules || "");
+    setLiveVideoUrl(data.live_video_url || "");
 
     setSelectedCourseId(data.course_id || "");
 
@@ -320,6 +324,7 @@ const toggleSection = (section: keyof typeof openSections) => {
         course_address: courseAddress,
         course_phone: coursePhone,
         course_map_url: courseMapUrl,
+        live_video_url: liveVideoUrl || null
       })
       .eq("id", tournamentId);
 
@@ -928,6 +933,13 @@ const updateTournamentStatus = async (
         onChange={(e) => setTournamentRules(e.target.value)}
         placeholder="Tournament Rules"
         className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
+      />
+
+      <input
+        value={liveVideoUrl}
+        onChange={(e) => setLiveVideoUrl(e.target.value)}
+        placeholder="Live Video URL: YouTube / Twitch / Kick"
+        className="w-full rounded-2xl bg-black p-4 text-white outline-none"
       />
 
       <div className="rounded-2xl border border-white/10 bg-black p-4">

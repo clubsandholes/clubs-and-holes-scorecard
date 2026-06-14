@@ -109,6 +109,7 @@ type CaddieTemplate = {
 
 
 
+
 export default function Home() {
   // =========================
   // VIEW / MENU STATE
@@ -130,6 +131,7 @@ export default function Home() {
   const [scorecardSponsors, setScorecardSponsors] = useState<ScorecardSponsor[]>([]);
   const [leaderboardSponsors, setLeaderboardSponsors] = useState<ScorecardSponsor[]>([]);
   const [joinSponsors, setJoinSponsors] = useState<ScorecardSponsor[]>([]);
+
   // =========================
   // COURSE DISPLAY STATE
   // =========================
