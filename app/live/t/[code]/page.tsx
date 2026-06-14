@@ -14,6 +14,31 @@ type Tournament = {
   live_video_url?: string | null;
 };
 
+type ScoreRow = {
+  tournament_player_id?: string | null;
+  team_id?: string | null;
+  hole_number: number;
+  strokes: number;
+};
+
+type Team = {
+  id: string;
+  name: string;
+};
+
+type Player = {
+  id: string;
+  name: string;
+};
+
+
+const [scores, setScores] = useState<ScoreRow[]>([]);
+const [teams, setTeams] = useState<Team[]>([]);
+const [players, setPlayers] = useState<Player[]>([]);
+
+const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+
 export default function PublicTournamentPage() {
   const params = useParams();
   const code = String(params.code || "").toUpperCase();
@@ -35,6 +60,9 @@ export default function PublicTournamentPage() {
     }
 
     setTournament(data);
+    if (data?.id) {
+  fetchLeaderboard(data.id);
+    }
     setLoading(false);
   };
 
@@ -43,6 +71,21 @@ export default function PublicTournamentPage() {
   bunker: false,
   video: false,
 });
+
+const fetchLeaderboard = async (tournamentId: string) => {
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select("*")
+    .eq("tournament_id", tournamentId)
+    .order("net", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setLeaderboard(data || []);
+};
 
 const toggleSection = (section: keyof typeof openSections) => {
   setOpenSections((prev) => ({
@@ -60,7 +103,7 @@ const toggleSection = (section: keyof typeof openSections) => {
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <img
-            src="/ch-logo.png"
+            src="/clubs-n-holes.png"
             alt="Clubs & Holes"
             className="mx-auto h-16 w-auto"
           />
@@ -145,7 +188,38 @@ const toggleSection = (section: keyof typeof openSections) => {
 
                 {openSections.turn && (
                     <div className="mt-5">
-                    {/* leaderboard goes here */}
+                    <div className="mt-5 space-y-3">
+                        {leaderboard.length === 0 ? (
+                            <div className="rounded-2xl border border-white/10 bg-black p-5 text-center text-white/50">
+                            No scores yet.
+                            </div>
+                        ) : (
+                            leaderboard.map((entry, index) => (
+                            <div
+                                key={entry.id}
+                                className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
+                            >
+                                <div>
+                                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
+                                    #{index + 1}
+                                </div>
+
+                                <div className="mt-1 text-lg font-black">
+                                    {entry.name}
+                                </div>
+                                </div>
+
+                                <div className="text-3xl font-black text-[#ff9900]">
+                                {entry.net > 0
+                                    ? `+${entry.net}`
+                                    : entry.net === 0
+                                    ? "E"
+                                    : entry.net}
+                                </div>
+                            </div>
+                            ))
+                        )}
+                        </div>
                     </div>
                 )}
                 </div>
