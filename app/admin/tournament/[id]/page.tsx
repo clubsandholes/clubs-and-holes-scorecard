@@ -112,6 +112,9 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
 
   const [selectedScorecard, setSelectedScorecard] = useState<any[]>([]);
 
+  const [editingScore, setEditingScore] = useState<any | null>(null);
+const [editingValue, setEditingValue] = useState(0);
+
 
 
 
@@ -1307,6 +1310,64 @@ const sortedAdminLeaderboard = adminLeaderboard
     )}
   </div>
 )}
+
+{editingScore && (
+  <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-sm rounded-[2rem] border border-white/10 bg-black p-6 text-white">
+
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Edit Score
+      </div>
+
+      <div className="mt-2 text-2xl font-black">
+        Hole {editingScore.hole_number}
+      </div>
+
+      <div className="mt-6 flex items-center justify-center gap-4">
+
+        <button
+          onClick={() =>
+            setEditingValue(Math.max(1, editingValue - 1))
+          }
+          className="h-12 w-12 rounded-full border border-white/10 text-2xl font-black"
+        >
+          −
+        </button>
+
+        <div className="w-20 text-center text-5xl font-black">
+          {editingValue}
+        </div>
+
+        <button
+          onClick={() =>
+            setEditingValue(editingValue + 1)
+          }
+          className="h-12 w-12 rounded-full border border-white/10 text-2xl font-black"
+        >
+          +
+        </button>
+
+      </div>
+
+      <button
+        onClick={() => {
+          alert("Save comes next");
+        }}
+        className="mt-6 w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
+      >
+        SAVE
+      </button>
+
+      <button
+        onClick={() => setEditingScore(null)}
+        className="mt-3 w-full rounded-full border border-white/10 px-6 py-4 font-black"
+      >
+        CANCEL
+      </button>
+
+    </div>
+  </div>
+)}
      
       {/* PLAYER MANAGER */}
 <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
@@ -1453,7 +1514,17 @@ const sortedAdminLeaderboard = adminLeaderboard
               </div>
 
               <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
-                {score?.strokes ?? "-"}
+                <button
+                  onClick={() => {
+                    if (!score) return;
+
+                    setEditingScore(score);
+                    setEditingValue(score.strokes);
+                  }}
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black transition-all hover:border-[#ff9900]"
+                >
+                  {score?.strokes ?? "-"}
+                </button>
               </div>
             </div>
           );
@@ -1481,7 +1552,17 @@ const sortedAdminLeaderboard = adminLeaderboard
               </div>
 
               <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
-                {score?.strokes ?? "-"}
+                <button
+                  onClick={() => {
+                    if (!score) return;
+
+                    setEditingScore(score);
+                    setEditingValue(score.strokes);
+                  }}
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black transition-all hover:border-[#ff9900]"
+                >
+                  {score?.strokes ?? "-"}
+                </button>
               </div>
             </div>
           );
