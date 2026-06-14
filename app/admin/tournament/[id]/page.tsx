@@ -35,6 +35,13 @@ type TeamPlayer = {
 };
 
 
+type ScoreRow = {
+  tournament_player_id?: string | null;
+  team_id?: string | null;
+  hole_number: number;
+  strokes: number;
+};
+
 export default function TournamentAdminPage() {
 
   // =========================
@@ -44,11 +51,15 @@ export default function TournamentAdminPage() {
   const params = useParams();
   const tournamentId = params.id as string;
 
+  const [allScores, setAllScores] = useState<ScoreRow[]>([]);
+
 
 
 // =========================
 // LIVE CONTROL FUNCTIONS
 // =========================
+
+
 
 const sendAdminAlert = async () => {
   if (!adminMessage.trim()) {
@@ -132,8 +143,9 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
   // =========================
   // SECTION STATE
   // =========================
-  const [openSections, setOpenSections] = useState({
+ const [openSections, setOpenSections] = useState({
   info: true,
+  leaderboard: true,
   live: false,
   teams: false,
   players: false,
@@ -266,6 +278,19 @@ const toggleSection = (section: keyof typeof openSections) => {
     setTeamPlayers(data || []);
   };
 
+  const fetchAllScores = async () => {
+  const { data, error } = await supabase
+    .from("scores")
+    .select("tournament_player_id, team_id, hole_number, strokes");
+
+  if (error) {
+    console.error("Error fetching scores:", error);
+    return;
+  }
+
+  setAllScores(data || []);
+};
+
   // =========================
   // EFFECTS
   // =========================
@@ -277,6 +302,7 @@ const toggleSection = (section: keyof typeof openSections) => {
       fetchPlayers();
       fetchTeams();
       fetchTeamPlayers();
+      fetchAllScores();
     }
   }, [tournamentId]);
 
@@ -724,6 +750,73 @@ const updateTournamentStatus = async (
 
   showAdminNotice(`Tournament marked ${nextStatus}.`);
 };
+
+
+const getAdminScoreMap = (id: string) => {
+  const map: Record<number, number> = {};
+
+  allScores
+    .filter((score) =>
+      formatType === "individual"
+        ? score.tournament_player_id === id
+        : score.team_id === id
+    )
+    .forEach((score) => {
+      map[score.hole_number] = score.strokes;
+    });
+
+  return map;
+};
+
+const getAdminGrossTotal = (scoreMap: Record<number, number>) => {
+  return Object.values(scoreMap).reduce((total, score) => total + score, 0);
+};
+
+const getAdminParPlayed = (scoreMap: Record<number, number>) => {
+  return Object.keys(scoreMap).reduce((total, holeNumber) => {
+    const hole = Number(holeNumber);
+    return total + 4; // temporary default par
+  }, 0);
+};
+
+const adminLeaderboard =
+  formatType === "individual"
+    ? players.map((player) => {
+        const scoreMap = getAdminScoreMap(player.id);
+        const thru = Object.keys(scoreMap).length;
+        const gross = getAdminGrossTotal(scoreMap);
+        const par = getAdminParPlayed(scoreMap);
+
+        return {
+          id: player.id,
+          name: player.name,
+          thru,
+          gross,
+          net: gross - par,
+          submitted: player.scorecard_status === "submitted",
+        };
+      })
+    : teams.map((team) => {
+        const scoreMap = getAdminScoreMap(team.id);
+        const thru = Object.keys(scoreMap).length;
+        const gross = getAdminGrossTotal(scoreMap);
+        const par = getAdminParPlayed(scoreMap);
+
+        return {
+          id: team.id,
+          name: team.name,
+          thru,
+          gross,
+          net: gross - par,
+          submitted: false,
+        };
+      });
+
+const sortedAdminLeaderboard = adminLeaderboard
+  .filter((entry) => entry.thru > 0)
+  .sort((a, b) => a.net - b.net);
+
+
   // =========================
   // UI
   // =========================
@@ -978,6 +1071,66 @@ const updateTournamentStatus = async (
     </div>
   )}
 </div>
+
+
+{/* ADMIN LEADERBOARD */}
+<div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+  <button
+    onClick={() => toggleSection("leaderboard")}
+    className="flex w-full items-center justify-between text-left"
+  >
+    <div>
+      <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+        Leaderboard
+      </div>
+
+      <h2 className="mt-2 text-2xl font-black">Live Standings</h2>
+    </div>
+
+    <div className="text-3xl font-black text-[#ff9900]">
+      {openSections.leaderboard ? "−" : "+"}
+    </div>
+  </button>
+
+  {openSections.leaderboard && (
+    <div className="mt-6 space-y-3">
+      <button
+        onClick={fetchAllScores}
+        className="w-full rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+      >
+        Refresh Leaderboard
+      </button>
+
+      {sortedAdminLeaderboard.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-black p-5 text-center text-white/50">
+          No scores entered yet.
+        </div>
+      ) : (
+        sortedAdminLeaderboard.map((entry, index) => (
+          <div
+            key={entry.id}
+            className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
+          >
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
+                #{index + 1} · Thru {entry.thru}
+              </div>
+
+              <div className="mt-1 text-lg font-black">
+                {entry.name}
+              </div>
+            </div>
+
+            <div className="text-3xl font-black text-[#ff9900]">
+              {entry.net > 0 ? `+${entry.net}` : entry.net === 0 ? "E" : entry.net}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</div>
+
 
 {/* TEAM MANAGER */}
 {formatType !== "individual" && (
