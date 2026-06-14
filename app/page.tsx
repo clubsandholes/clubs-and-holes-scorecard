@@ -2570,62 +2570,103 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
 )}
 
         {view !== "join" && view !== "selectTeam" && view !== "selectPlayer" && (
-          <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between gap-3 bg-black/50 px-4 py-4 backdrop-blur-md">
-            <button
-              onClick={() => openView("scorecard")}
-              className="flex min-w-0 items-center gap-2"
-            >
-              <img src="/ch-logo.png" alt="Clubs & Holes" className="h-9 w-auto" />
+  <>
+    {view === "completedTournament" ? (
+      <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between gap-3 border-b border-white/10 bg-black/90 px-4 py-4 backdrop-blur-md">
+        <button
+          onClick={() => openView("completedTournament")}
+          className="flex min-w-0 items-center gap-3"
+        >
+          <img
+            src="/ch-logo.png"
+            alt="Clubs & Holes"
+            className="h-9 w-auto"
+          />
 
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
-                  {headerImage ? (
-                    <img
-                      src={headerImage}
-                      alt={headerName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-xs font-black text-[#ff9900]">
-                      {getInitials(headerName)}
-                    </div>
-                  )}
-                </div>
-
-                <div className="min-w-0 max-w-[110px] text-left">
-                  <div className="truncate text-xs font-black uppercase tracking-[0.08em] text-white">
-                    {headerName}
-                  </div>
-
-                  {headerSubName && (
-                    <div className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
-                      {headerSubName}
-                    </div>
-                  )}
-                </div>
-
-              <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
-                {formatScore(net)}
-              </div>
-
-              <div className="rounded-full border border-gray-700 px-3 py-1 text-xs font-black uppercase text-gray-300">
-                H{hole.number}
-              </div>
-              <div className="text-sm font-black text-[#ff9900]">
-
-                {scoredHoleCount}/{holes.length}
-
-              </div>
-            </button>
-
-            <button onClick={() => setMenuOpen(true)} className="text-3xl leading-none">
-              ☰
-            </button>
-            <div className="absolute bottom-0 left-0 h-[3px] bg-[#ff9900] transition-all duration-500"
-              style={{ width: `${scoreProgressPercent}%` }}
-            />
+          <div className="min-w-0 text-left">
+            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-[#ff9900]">
+              Tournament Complete
             </div>
-          
-        )}
+
+            <div className="truncate text-sm font-black uppercase tracking-[0.08em] text-white">
+              {tournamentName}
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="text-3xl leading-none"
+        >
+          ☰
+        </button>
+      </div>
+    ) : (
+      <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between gap-3 bg-black/50 px-4 py-4 backdrop-blur-md">
+        <button
+          onClick={() => openView("scorecard")}
+          className="flex min-w-0 items-center gap-2"
+        >
+          <img
+            src="/ch-logo.png"
+            alt="Clubs & Holes"
+            className="h-9 w-auto"
+          />
+
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
+            {headerImage ? (
+              <img
+                src={headerImage}
+                alt={headerName}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="text-xs font-black text-[#ff9900]">
+                {getInitials(headerName)}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 max-w-[110px] text-left">
+            <div className="truncate text-xs font-black uppercase tracking-[0.08em] text-white">
+              {headerName}
+            </div>
+
+            {headerSubName && (
+              <div className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-white/50">
+                {headerSubName}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-full bg-[#ff9900] px-3 py-1 text-sm font-black text-black">
+            {formatScore(net)}
+          </div>
+
+          <div className="rounded-full border border-gray-700 px-3 py-1 text-xs font-black uppercase text-gray-300">
+            H{hole.number}
+          </div>
+
+          <div className="text-sm font-black text-[#ff9900]">
+            {scoredHoleCount}/{holes.length}
+          </div>
+        </button>
+
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="text-3xl leading-none"
+        >
+          ☰
+        </button>
+
+        <div
+          className="absolute bottom-0 left-0 h-[3px] bg-[#ff9900] transition-all duration-500"
+          style={{ width: `${scoreProgressPercent}%` }}
+        />
+      </div>
+    )}
+  </>
+)}
         <div className="h-10" />
         {menuOpen && (
           <div className="absolute inset-0 z-50 bg-black/95 p-6">
