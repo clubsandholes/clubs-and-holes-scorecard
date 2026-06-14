@@ -321,30 +321,28 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
   // COURSE FUNCTIONS
   // =========================
 
-  const handleCourseSelect = async (courseId: string) => {
-    setSelectedCourseId(courseId);
+ const handleCourseSelect = async (courseId: string) => {
+  setSelectedCourseId(courseId);
 
-    if (!courseId) return;
+  if (!courseId) return;
 
-    const { data, error } = await supabase
-      .from("courses")
-      .select("name, address, phone, map_url, background_image_url")
-      .eq("id", courseId)
-      .single();
+  const { data, error } = await supabase
+    .from("courses")
+    .select("name, address, phone, map_url")
+    .eq("id", courseId)
+    .single();
 
-    if (error || !data) {
-      console.error(error);
-      alert("Course details could not be loaded.");
-      return;
-    }
+  if (error || !data) {
+    console.error(error);
+    alert("Course details could not be loaded.");
+    return;
+  }
 
-    setCourseName(data.name || "");
-    setCourseAddress(data.address || "");
-    setCoursePhone(data.phone || "");
-    setCourseMapUrl(data.map_url || "");
-    setBackgroundImageUrl(data.background_image_url || "");
-  };
-
+  setCourseName(data.name || "");
+  setCourseAddress(data.address || "");
+  setCoursePhone(data.phone || "");
+  setCourseMapUrl(data.map_url || "");
+};
   // =========================
   // PLAYER FUNCTIONS
   // =========================
