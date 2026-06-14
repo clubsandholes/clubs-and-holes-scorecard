@@ -2594,12 +2594,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
           </div>
         </button>
 
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="text-3xl leading-none"
-        >
-          ☰
-        </button>
+       
       </div>
     ) : (
       <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between gap-3 bg-black/50 px-4 py-4 backdrop-blur-md">
@@ -3716,7 +3711,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
     </div>
   </div>
 
-  <div className="rounded-[2rem] border border-red-500/30 bg-red-500/10 p-6 text-center">
+  <div className="mt-4 rounded-[1.5rem] border border-red-500/20 bg-red-500/5 p-4 text-center">
     <div className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
       🗑️ Last Place
     </div>
