@@ -967,7 +967,7 @@ const updateTournamentStatus = async (
   )}
 </div>
 
-      {/* PLAYER MANAGER */}
+     
       {/* PLAYER MANAGER */}
 <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
   <button
@@ -988,93 +988,81 @@ const updateTournamentStatus = async (
   </button>
 
   {openSections.players && (
-    <>
-        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-          Players
-        </div>
+    <div className="mt-6">
+      <div className="flex gap-3">
+        <input
+          value={newPlayerName}
+          onChange={(e) => setNewPlayerName(e.target.value)}
+          placeholder="Add player..."
+          className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+        />
 
-        <h2 className="mt-2 text-2xl font-black">Tournament Players</h2>
+        <button
+          onClick={addPlayer}
+          className="rounded-full bg-[#ff9900] px-6 font-black text-black"
+        >
+          ADD
+        </button>
+      </div>
 
-        <div className="mt-5 flex gap-3">
-          <input
-            value={newPlayerName}
-            onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Add player..."
-            className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
-          />
-
-          <button
-            onClick={addPlayer}
-            className="rounded-full bg-[#ff9900] px-6 font-black text-black"
-          >
-            ADD
-          </button>
-        </div>
-
-        <div className="mt-6 space-y-3">
-          {players.map((player) => (
-            <div
+      <div className="mt-6 space-y-3">
+        {players.map((player) => (
+          <div
             key={player.id}
-  
             className="rounded-2xl border border-white/10 bg-black p-4"
           >
-  <div className="flex items-start gap-4">
-    {player.profile_image_url && (
-      <img
-        src={player.profile_image_url}
-        alt={player.name}
-        className="h-16 w-16 shrink-0 rounded-full object-cover"
-      />
-    )}
+            <div className="flex items-start gap-4">
+              {player.profile_image_url && (
+                <img
+                  src={player.profile_image_url}
+                  alt={player.name}
+                  className="h-16 w-16 shrink-0 rounded-full object-cover"
+                />
+              )}
 
-    <div className="min-w-0 flex-1">
-      <div className="text-lg font-black">{player.name}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-lg font-black">{player.name}</div>
 
-      <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
-        {player.claimed ? "Claimed" : "Available"}
+                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
+                  {player.claimed ? "Claimed" : "Available"}
+                </div>
+
+                <label className="mt-4 flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                  Upload Player Photo
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handlePlayerImageUpload(player.id, e)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => unlockSinglePlayer(player.id)}
+                className="rounded-full border border-white/10 px-4 py-3 text-xs font-black uppercase"
+              >
+                Unlock
+              </button>
+
+              <button
+                onClick={() => deletePlayer(player.id)}
+                className="rounded-full border border-red-500/30 px-4 py-3 text-xs font-black uppercase text-red-400"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
-
-      <label className="mt-4 flex w-fit cursor-pointer items-center justify-center whitespace-nowrap rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
-        Upload Player Photo
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handlePlayerImageUpload(player.id, e)}
-          className="hidden"
-        />
-      </label>
     </div>
-  </div>
-
-  <div className="mt-4 grid grid-cols-2 gap-3">
-    <button
-      onClick={() => unlockSinglePlayer(player.id)}
-      className="rounded-full border border-white/10 px-4 py-3 text-xs font-black uppercase"
-    >
-      Unlock
-    </button>
-
-    <button
-      onClick={() => deletePlayer(player.id)}
-      className="rounded-full border border-red-500/30 px-4 py-3 text-xs font-black uppercase text-red-400"
-    >
-      Delete
-    </button>
-    
-  </div>
-  
+  )}
 </div>
-    
-          ))}
-          
-        </div>
-        
-      </div>
-      
-    </div>
 
-    <button
+<button
   onClick={() => setAdminAlertModalOpen(true)}
   className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-red-500 text-4xl font-black leading-none text-white shadow-2xl transition-transform active:scale-95"
 >
