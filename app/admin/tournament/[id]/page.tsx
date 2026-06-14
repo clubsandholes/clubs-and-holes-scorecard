@@ -519,6 +519,45 @@ const [adminAlertModalOpen, setAdminAlertModalOpen] = useState(false);
 
 
   // =========================
+// TOURNAMENT IMAGE UPLOAD
+// =========================
+
+
+const handleTournamentBackgroundUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  const fileExtension = file.name.split(".").pop() || "jpg";
+
+  const filePath = `tournaments/${tournamentId}/background.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("scorecard-media")
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert("Tournament background upload failed.");
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("scorecard-media")
+    .getPublicUrl(filePath);
+
+  const publicUrl = data.publicUrl;
+
+  setBackgroundImageUrl(publicUrl);
+
+  showAdminNotice("Tournament background uploaded.");
+};
+
+  // =========================
 // PLAYER IMAGE UPLOAD
 // =========================
 
@@ -860,17 +899,32 @@ const updateTournamentStatus = async (
             placeholder="Tournament Rules"
             className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
           />
-          <input
+         <div className="rounded-2xl border border-white/10 bg-black p-4">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+              Tournament Background
+            </div>
 
-              value={backgroundImageUrl}
+            <label className="mt-4 flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
+              Upload Background
 
-              onChange={(e) => setBackgroundImageUrl(e.target.value)}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleTournamentBackgroundUpload}
+                className="hidden"
+              />
+            </label>
 
-              placeholder="Tournament Background Image URL"
-
-              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
-
-            />
+            {backgroundImageUrl && (
+              <div className="mt-4 overflow-hidden rounded-xl">
+                <img
+                  src={backgroundImageUrl}
+                  alt="Tournament Background"
+                  className="h-40 w-full object-cover"
+                />
+              </div>
+            )}
+          </div>
           <button
             onClick={saveTournamentSettings}
             className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
