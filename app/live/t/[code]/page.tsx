@@ -38,6 +38,19 @@ export default function PublicTournamentPage() {
     setLoading(false);
   };
 
+  const [openSections, setOpenSections] = useState({
+  turn: true,
+  bunker: false,
+  video: false,
+});
+
+const toggleSection = (section: keyof typeof openSections) => {
+  setOpenSections((prev) => ({
+    ...prev,
+    [section]: !prev[section],
+  }));
+};
+
   useEffect(() => {
     fetchTournament();
   }, [code]);
@@ -110,7 +123,32 @@ export default function PublicTournamentPage() {
             )}
           </div>
         )}
+        <div className="mt-6 rounded-[2rem] border border-white/10 bg-black/60 p-5">
+                <button
+                    onClick={() => toggleSection("turn")}
+                    className="flex w-full items-center justify-between text-left"
+                >
+                    <div>
+                    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+                        🔥 The Turn
+                    </div>
 
+                    <div className="mt-1 text-sm text-white/45">
+                        Live standings
+                    </div>
+                    </div>
+
+                    <div className="text-3xl font-black text-[#ff9900]">
+                    {openSections.turn ? "−" : "+"}
+                    </div>
+                </button>
+
+                {openSections.turn && (
+                    <div className="mt-5">
+                    {/* leaderboard goes here */}
+                    </div>
+                )}
+                </div>
         <Link
           href="/live"
           className="mx-auto mt-8 block w-fit rounded-full border border-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-white/70"
@@ -119,5 +157,8 @@ export default function PublicTournamentPage() {
         </Link>
       </div>
     </div>
+
+
+        
   );
 }
