@@ -1425,40 +1425,71 @@ const sortedAdminLeaderboard = adminLeaderboard
         </button>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-white/10 bg-gray-950 p-5 text-center">
-        <div className="text-sm uppercase tracking-[0.18em] text-white/50">
-          <div className="mt-6 space-y-2">
-              {selectedScorecard.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-gray-950 p-5 text-center text-white/50">
-                  No scores entered.
-                </div>
-              ) : (
-                selectedScorecard.map((score) => (
-                  <div
-                    key={score.id}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-gray-950 p-3"
-                  >
-                    <div className="font-black">
-                      Hole {score.hole_number}
-                    </div>
-
-                    <div className="text-xl font-black text-[#ff9900]">
-                      {score.strokes}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-        </div>
-
-        <div className="mt-3 text-lg font-black">
-          Hole-by-hole scorecard view
-        </div>
-
-        <div className="mt-3 text-white/60">
-          This modal is now connected to the leaderboard.
+      <div className="mt-6">
+  {selectedScorecard.length === 0 ? (
+    <div className="rounded-2xl border border-white/10 bg-gray-950 p-5 text-center text-white/50">
+      No scores entered.
+    </div>
+  ) : (
+    <>
+      <div className="mb-4 text-center">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
+          Out
         </div>
       </div>
+
+      <div className="grid grid-cols-9 gap-2">
+        {Array.from({ length: 9 }, (_, i) => {
+          const holeNumber = i + 1;
+
+          const score = selectedScorecard.find(
+            (s) => s.hole_number === holeNumber
+          );
+
+          return (
+            <div key={holeNumber} className="text-center">
+              <div className="text-xs font-black text-white/40">
+                {holeNumber}
+              </div>
+
+              <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
+                {score?.strokes ?? "-"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 mb-4 text-center">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
+          In
+        </div>
+      </div>
+
+      <div className="grid grid-cols-9 gap-2">
+        {Array.from({ length: 9 }, (_, i) => {
+          const holeNumber = i + 10;
+
+          const score = selectedScorecard.find(
+            (s) => s.hole_number === holeNumber
+          );
+
+          return (
+            <div key={holeNumber} className="text-center">
+              <div className="text-xs font-black text-white/40">
+                {holeNumber}
+              </div>
+
+              <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
+                {score?.strokes ?? "-"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  )}
+</div>
     </div>
   </div>
 )}
