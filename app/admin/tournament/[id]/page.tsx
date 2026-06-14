@@ -860,7 +860,17 @@ const updateTournamentStatus = async (
             placeholder="Tournament Rules"
             className="min-h-40 w-full rounded-2xl bg-black p-4 text-white outline-none"
           />
+          <input
 
+              value={backgroundImageUrl}
+
+              onChange={(e) => setBackgroundImageUrl(e.target.value)}
+
+              placeholder="Tournament Background Image URL"
+
+              className="w-full rounded-2xl bg-black p-4 text-white outline-none"
+
+            />
           <button
             onClick={saveTournamentSettings}
             className="w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
