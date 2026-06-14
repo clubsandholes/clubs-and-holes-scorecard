@@ -967,6 +967,153 @@ const updateTournamentStatus = async (
   )}
 </div>
 
+{/* TEAM MANAGER */}
+{formatType !== "individual" && (
+  <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
+    <button
+      onClick={() => toggleSection("teams")}
+      className="flex w-full items-center justify-between text-left"
+    >
+      <div>
+        <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+          Teams
+        </div>
+
+        <h2 className="mt-2 text-2xl font-black">Team Manager</h2>
+      </div>
+
+      <div className="text-3xl font-black text-[#ff9900]">
+        {openSections.teams ? "−" : "+"}
+      </div>
+    </button>
+
+    {openSections.teams && (
+      <div className="mt-6">
+        <div className="flex gap-3">
+          <input
+            value={newTeamName}
+            onChange={(e) => setNewTeamName(e.target.value)}
+            placeholder="Add team..."
+            className="flex-1 rounded-2xl bg-black p-4 text-white outline-none"
+          />
+
+          <button
+            onClick={addTeam}
+            className="rounded-full bg-[#ff9900] px-6 font-black text-black"
+          >
+            ADD
+          </button>
+        </div>
+
+        <div className="mt-6 space-y-3">
+          {teams.map((team) => (
+            <div
+              key={team.id}
+              className="rounded-2xl border border-white/10 bg-black p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="truncate text-lg font-black">
+                  {team.name}
+                </div>
+
+                <button
+                  onClick={() => deleteTeam(team.id)}
+                  className="rounded-full border border-red-500/30 px-4 py-2 text-xs font-black uppercase text-red-400"
+                >
+                  Delete
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-white/10 bg-gray-950 p-4">
+                <label className="flex cursor-pointer items-center justify-center rounded-full bg-[#ff9900] px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black">
+                  Upload Team Photo
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleTeamImageUpload(team.id, e)}
+                    className="hidden"
+                  />
+                </label>
+
+                {team.image_url && (
+                  <div className="mt-4 flex h-40 items-center justify-center overflow-hidden rounded-xl bg-black p-4">
+                    <img
+                      src={team.image_url}
+                      alt={team.name}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <select
+                  defaultValue=""
+                  onChange={(e) => assignPlayerToTeam(team.id, e.target.value)}
+                  className="w-full rounded-xl bg-gray-950 p-3 text-white outline-none"
+                >
+                  <option value="">Assign player...</option>
+
+                  {players.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="mt-3 space-y-2">
+                  {teamPlayers
+                    .filter((tp) => tp.team_id === team.id)
+                    .map((tp) => {
+                      const player = players.find(
+                        (p) => p.id === tp.tournament_player_id
+                      );
+
+                      return (
+                        <div
+                          key={tp.id}
+                          className="flex items-center justify-between rounded-xl bg-gray-950 p-3"
+                        >
+                          <div>
+                            <div className="font-bold">
+                              {player?.name || "Unknown Player"}
+                            </div>
+
+                            {team.official_scorer_player_id === player?.id ? (
+                              <div className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]">
+                                ⭐ Official Scorer
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  player && setOfficialScorer(team.id, player.id)
+                                }
+                                className="mt-2 rounded-full border border-[#ff9900]/30 bg-[#ff9900]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#ff9900]"
+                              >
+                                Make Official Scorer
+                              </button>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => removePlayerFromTeam(tp.id)}
+                            className="text-xs font-black uppercase text-red-400"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
      
       {/* PLAYER MANAGER */}
 <div className="mt-8 max-w-3xl rounded-[2rem] border border-white/10 bg-gray-950 p-5">
