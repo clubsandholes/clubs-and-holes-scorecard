@@ -1350,9 +1350,30 @@ const sortedAdminLeaderboard = adminLeaderboard
       </div>
 
       <button
-        onClick={() => {
-          alert("Save comes next");
-        }}
+        onClick={async () => {
+  const { error } = await supabase
+    .from("scores")
+    .update({
+      strokes: editingValue,
+    })
+    .eq("id", editingScore.id);
+
+  if (error) {
+    console.error(error);
+    alert("Score could not be updated.");
+    return;
+  }
+
+  await fetchAllScores();
+
+  if (selectedLeaderboardEntry) {
+    await openScorecard(selectedLeaderboardEntry);
+  }
+
+  setEditingScore(null);
+
+  showAdminNotice("Score updated.");
+}}
         className="mt-6 w-full rounded-full bg-[#ff9900] px-6 py-4 font-black text-black"
       >
         SAVE
