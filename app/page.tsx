@@ -3712,39 +3712,35 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
       </h1>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
 
-  <div className="rounded-[2rem] border border-[#ff9900]/30 bg-[#ff9900]/10 p-6 text-center">
-    <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-      🏆 Winner
-    </div>
+      <div className="mt-8 rounded-[2.25rem] border border-[#ff9900]/40 bg-black/65 p-8 text-center shadow-2xl backdrop-blur-md">
+        <div className="text-xs font-black uppercase tracking-[0.3em] text-[#ff9900]">
+          🏆 Winner
+        </div>
 
-    <div className="mt-3 text-3xl font-black">
-      {sortedLeaderboard[0]?.name || "--"}
-    </div>
+        <div className="mt-4 text-5xl font-black text-white">
+          {sortedLeaderboard[0]?.name || "--"}
+        </div>
 
-    <div className="mt-2 text-xl font-black text-[#ff9900]">
-      {sortedLeaderboard[0]
-        ? formatScore(sortedLeaderboard[0].net)
-        : "--"}
-    </div>
-  </div>
+        <div className="mt-3 text-3xl font-black text-[#ff9900]">
+          {sortedLeaderboard[0]
+            ? formatScore(sortedLeaderboard[0].net)
+            : "--"}
+        </div>
+      </div>
 
-  <div className="mt-4 rounded-[1.5rem] border border-red-500/20 bg-red-500/5 p-4 text-center">
-    <div className="text-xs font-black uppercase tracking-[0.25em] text-red-400">
-      🗑️ Last Place
-    </div>
-
-    <div className="mt-3 text-3xl font-black">
-      {sortedLeaderboard[sortedLeaderboard.length - 1]?.name || "--"}
-    </div>
-
-    <div className="mt-2 text-xl font-black text-red-400">
-      {sortedLeaderboard.length > 0
-        ? formatScore(
-            sortedLeaderboard[sortedLeaderboard.length - 1].net
-          )
-        : "--"}
-    </div>
-  </div>
+      <div className="mt-4 rounded-full border border-red-500/25 bg-black/45 px-5 py-4 text-center backdrop-blur-md">
+        <div className="text-sm font-black uppercase tracking-[0.14em] text-red-300">
+          🗑️ Last Place:{" "}
+          <span className="text-white">
+            {sortedLeaderboard[sortedLeaderboard.length - 1]?.name || "--"}
+          </span>{" "}
+          <span className="text-red-300">
+            {sortedLeaderboard.length > 0
+              ? formatScore(sortedLeaderboard[sortedLeaderboard.length - 1].net)
+              : "--"}
+          </span>
+        </div>
+      </div>
 
 </div>
     </div>
@@ -3780,8 +3776,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
   rel="noreferrer"
   className="mt-6 block w-full rounded-full bg-[#ff9900] px-6 py-4 text-center text-sm font-black uppercase tracking-[0.18em] text-black"
 >
-  View Tournament Feed
-</a>
+EXIT TO THE LOT</a>
   </div>
 )}
 
