@@ -137,7 +137,7 @@ export default function Home() {
   // =========================
 
   const [courseName, setCourseName] = useState("Clubs & Holes Championship");
-  const [backgroundImageUrl, setBackgroundImageUrl] = useState("/burn-cart.jpg");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState("/the-lot.png");
   const [courseAddress, setCourseAddress] = useState("");
   const [coursePhone, setCoursePhone] = useState("");
   const [courseMapUrl, setCourseMapUrl] = useState("");
@@ -2703,7 +2703,26 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
           <div className="flex h-screen flex-col items-center justify-center text-center">
             <img src="/clubs-n-holes.png" alt="Clubs & Holes" className="mb-6 h-24 w-auto" />
 
-            <h1 className="text-4xl font-black">Join Tournament</h1>
+            <h1 className="text-5xl font-black">
+              THE LOT
+            </h1>
+
+            <div className="mt-2 text-sm font-black uppercase tracking-[0.22em] text-[#ff9900]">
+              Where golf sh!t happens.
+            </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
+                🏌️ The Score
+              </div>
+
+              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
+                🔥 The Turn
+              </div>
+
+              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
+                🍻 The Bunker
+              </div>
+            </div>
             {activeTournamentSponsorData && (
   <a
     href={activeTournamentSponsorData.website_url || "#"}
@@ -2739,7 +2758,7 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
               onClick={joinTournament}
               className="mt-6 w-full max-w-xs rounded-full bg-white px-6 py-4 font-black text-black"
             >
-              ENTER
+              ENTER THE LOT
             </button>
           </div>
         )}
