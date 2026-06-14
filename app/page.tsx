@@ -2711,15 +2711,13 @@ console.log("Tournament Sponsor:", activeTournamentSponsorData);
               Where golf sh!t happens.
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
+              <div className="mt-4 text-center text-[11px] font-bold uppercase tracking-[0.08em] text-white/60">
                 🏌️ The Score
-              </div>
+                <span className="mx-2 text-white/25">•</span>
 
-              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
                 🔥 The Turn
-              </div>
+                <span className="mx-2 text-white/25">•</span>
 
-              <div className="rounded-full border border-white/10 bg-black/50 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
                 🍻 The Bunker
               </div>
             </div>
