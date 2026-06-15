@@ -32,11 +32,7 @@ type Player = {
 };
 
 
-const [scores, setScores] = useState<ScoreRow[]>([]);
-const [teams, setTeams] = useState<Team[]>([]);
-const [players, setPlayers] = useState<Player[]>([]);
 
-const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
 
 export default function PublicTournamentPage() {
@@ -46,45 +42,85 @@ export default function PublicTournamentPage() {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchTournament = async () => {
-    const { data, error } = await supabase
-      .from("tournaments")
-      .select("id, name, code, status, tournament_date, live_video_url")
-      .eq("code", code)
-      .maybeSingle();
-
-    if (error) {
-      console.error(error);
-      setLoading(false);
-      return;
-    }
-
-    setTournament(data);
-    if (data?.id) {
-  fetchLeaderboard(data.id);
-    }
-    setLoading(false);
-  };
+  const [scores, setScores] = useState<ScoreRow[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   const [openSections, setOpenSections] = useState({
-  turn: true,
-  bunker: false,
-  video: false,
-});
+    turn: true,
+    bunker: false,
+    video: false,
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
 const fetchLeaderboard = async (tournamentId: string) => {
-  const { data, error } = await supabase
-    .from("leaderboard")
-    .select("*")
-    .eq("tournament_id", tournamentId)
-    .order("net", { ascending: true });
+  const { data: scoreData } = await supabase
+    .from("scores")
+    .select("tournament_player_id, team_id, hole_number, strokes")
+    .eq("tournament_id", tournamentId);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  const { data: playerData } = await supabase
+    .from("tournament_players")
+    .select("id, name")
+    .eq("tournament_id", tournamentId);
 
-  setLeaderboard(data || []);
+  const { data: teamData } = await supabase
+    .from("teams")
+    .select("id, name")
+    .eq("tournament_id", tournamentId);
+
+  const safeScores = scoreData || [];
+  const safePlayers = playerData || [];
+  const safeTeams = teamData || [];
+
+  setScores(safeScores);
+  setPlayers(safePlayers);
+  setTeams(safeTeams);
+
+  const hasTeams = safeTeams.length > 0;
+
+  const entries = hasTeams
+    ? safeTeams.map((team) => {
+        const teamScores = safeScores.filter((s) => s.team_id === team.id);
+        const gross = teamScores.reduce((total, s) => total + s.strokes, 0);
+        const thru = teamScores.length;
+        const par = thru * 4;
+
+        return {
+          id: team.id,
+          name: team.name,
+          net: gross - par,
+          thru,
+        };
+      })
+    : safePlayers.map((player) => {
+        const playerScores = safeScores.filter(
+          (s) => s.tournament_player_id === player.id
+        );
+        const gross = playerScores.reduce((total, s) => total + s.strokes, 0);
+        const thru = playerScores.length;
+        const par = thru * 4;
+
+        return {
+          id: player.id,
+          name: player.name,
+          net: gross - par,
+          thru,
+        };
+      });
+
+  setLeaderboard(
+    entries
+      .filter((entry) => entry.thru > 0)
+      .sort((a, b) => a.net - b.net)
+  );
 };
 
 const toggleSection = (section: keyof typeof openSections) => {
