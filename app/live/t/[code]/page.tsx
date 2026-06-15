@@ -53,12 +53,7 @@ export default function PublicTournamentPage() {
     video: false,
   });
 
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
+ 
 
 const fetchLeaderboard = async (tournamentId: string) => {
   const { data: scoreData } = await supabase
