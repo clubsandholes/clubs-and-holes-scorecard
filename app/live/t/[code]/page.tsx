@@ -125,6 +125,28 @@ const toggleSection = (section: keyof typeof openSections) => {
   }));
 };
 
+const fetchTournament = async () => {
+  const { data, error } = await supabase
+    .from("tournaments")
+    .select("id, name, code, status, tournament_date, live_video_url")
+    .eq("code", code)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    setLoading(false);
+    return;
+  }
+
+  setTournament(data);
+
+  if (data?.id) {
+    await fetchLeaderboard(data.id);
+  }
+
+  setLoading(false);
+};
+
   useEffect(() => {
     fetchTournament();
   }, [code]);
