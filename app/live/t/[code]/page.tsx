@@ -118,20 +118,19 @@ const fetchLeaderboard = async (tournamentId: string) => {
 
         const thru = teamScores.length;
 
-        return {
-
+     return {
   id: team.id,
-
   name: team.name,
-
   image_url: team.image_url || null,
-
   profile_image_url: null,
-
   thru,
-
+  gross,
   net: gross - thru * 4,
-
+  lastHole: thru,
+  lastHoleScore: null,
+  last6: 0,
+  last3: 0,
+  last1: 0,
 };
       })
     : safePlayers.map((player) => {
@@ -152,7 +151,13 @@ const fetchLeaderboard = async (tournamentId: string) => {
   image_url: null,
   profile_image_url: player.profile_image_url || null,
   thru,
+  gross,
   net: gross - thru * 4,
+  lastHole: thru,
+  lastHoleScore: null,
+  last6: 0,
+  last3: 0,
+  last1: 0,
 };
       });
 
