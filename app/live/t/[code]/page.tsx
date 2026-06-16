@@ -437,9 +437,20 @@ const formatScore = (score: number) => {
                   {holeNumber}
                 </div>
 
-                <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
-                  {score?.strokes ?? "-"}
-                </div>
+                <div className="mt-1 flex h-12 items-center justify-center rounded-xl border border-white/10 bg-gray-950 text-lg font-black">
+                    {score?.strokes ? (
+                        <div
+                        className={`flex items-center justify-center text-sm font-black ${getScoreStyle(
+                            score.strokes,
+                            holes.find((h) => h.number === holeNumber)?.par || 4
+                        )}`}
+                        >
+                        {score.strokes}
+                        </div>
+                    ) : (
+                        "-"
+                    )}
+                    </div>
               </div>
             );
           })}
@@ -463,8 +474,19 @@ const formatScore = (score: number) => {
                   {holeNumber}
                 </div>
 
-                <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
-                  {score?.strokes ?? "-"}
+                <div className="mt-1 flex h-12 items-center justify-center rounded-xl border border-white/10 bg-gray-950 text-lg font-black">
+                {score?.strokes ? (
+                    <div
+                    className={`flex items-center justify-center text-sm font-black ${getScoreStyle(
+                        score.strokes,
+                        holes.find((h) => h.number === holeNumber)?.par || 4
+                    )}`}
+                    >
+                    {score.strokes}
+                    </div>
+                ) : (
+                    "-"
+                )}
                 </div>
               </div>
             );
