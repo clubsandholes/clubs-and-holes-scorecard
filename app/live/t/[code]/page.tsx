@@ -31,6 +31,18 @@ type Player = {
   name: string;
 };
 
+type Hole = {
+  number: number;
+  par: number;
+  yards: number;
+};
+
+const defaultHoles: Hole[] = Array.from({ length: 18 }, (_, index) => ({
+  number: index + 1,
+  par: 4,
+  yards: 0,
+}));
+
 
 
 
@@ -54,7 +66,7 @@ export default function PublicTournamentPage() {
   });
 const [selectedLeaderboardEntry, setSelectedLeaderboardEntry] = useState<any | null>(null);
 const [selectedScorecard, setSelectedScorecard] = useState<any[]>([]);
- 
+ const [holes, setHoles] = useState<Hole[]>(defaultHoles);
 
 const fetchLeaderboard = async (tournamentId: string) => {
   const { data: playerData } = await supabase
@@ -192,6 +204,36 @@ const inTotal = selectedScorecard
   .reduce((total, s) => total + s.strokes, 0);
 
 const roundTotal = outTotal + inTotal;
+
+const getScoreStyle = (score: number | undefined, par: number) => {
+  if (!score) return "";
+
+  const diff = score - par;
+
+  if (diff <= -2) {
+    return "h-8 w-8 rounded-full border-2 border-yellow-400 outline outline-2 outline-offset-1 outline-yellow-400 text-yellow-400";
+  }
+
+  if (diff === -1) {
+    return "h-8 w-8 rounded-full border-2 border-green-400 text-green-400";
+  }
+
+  if (diff === 1) {
+    return "h-8 w-8 rounded-none border-2 border-orange-400 text-orange-400";
+  }
+
+  if (diff >= 2) {
+    return "h-8 w-8 rounded-none border-2 border-red-500 outline outline-2 outline-offset-1 outline-red-500 text-red-500";
+  }
+
+  return "";
+};
+
+const formatScore = (score: number) => {
+  if (score > 0) return `+${score}`;
+  if (score === 0) return "E";
+  return `${score}`;
+};
 
   return (
     <div className="min-h-screen bg-black px-5 py-8 text-white">
