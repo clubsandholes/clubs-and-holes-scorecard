@@ -1,6 +1,6 @@
 "use client";
 import LeaderboardRow from "@/components/LeaderboardRow";
-
+import ScorecardModal from "@/components/ScorecardModal";
 import AdminNav from "../../AdminNav";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -58,10 +58,16 @@ export default function TournamentAdminPage() {
 
 
 // =========================
-// LIVE CONTROL FUNCTIONS
+// LEADERBOARD 
 // =========================
 
+const [selectedLeaderboardPlayer, setSelectedLeaderboardPlayer] =
+  useState<any | null>(null);
 
+
+  // =========================
+// LIVE CONTROL FUNCTIONS
+// =========================
 
 const sendAdminAlert = async () => {
   if (!adminMessage.trim()) {
@@ -173,6 +179,8 @@ const toggleSection = (section: keyof typeof openSections) => {
   // =========================
 
   const [adminMessage, setAdminMessage] = useState("");
+
+  
 
   // =========================
   // HELPERS
@@ -1146,13 +1154,13 @@ const sortedAdminLeaderboard = adminLeaderboard
         </div>
       ) : (
         sortedAdminLeaderboard.map((entry, index) => (
-  <LeaderboardRow
-    key={entry.id}
-    player={entry}
-    index={index}
-    totalPlayers={sortedAdminLeaderboard.length}
-    onClick={() => {}}
-  />
+<LeaderboardRow
+  key={entry.id}
+  player={entry}
+  index={index}
+  totalPlayers={sortedAdminLeaderboard.length}
+  onClick={() => openScorecard(entry)}
+/>
 ))
       )}
     </div>
@@ -1583,15 +1591,24 @@ const sortedAdminLeaderboard = adminLeaderboard
                 </button>
               </div>
             </div>
+
+            
           );
         })}
       </div>
+      
     </>
   )}
 </div>
     </div>
   </div>
+
+  
 )}
+
+
+
+
 
 <button
   onClick={() => setAdminAlertModalOpen(true)}
@@ -1602,5 +1619,7 @@ const sortedAdminLeaderboard = adminLeaderboard
 
     </div>
   </div>
+
+  
 );
 }
