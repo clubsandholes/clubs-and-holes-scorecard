@@ -2196,12 +2196,17 @@ const leaderboard =
 const activeLeaderboard = leaderboard.filter((entry) => entry.thru > 0);
 
 const sortedLeaderboard = [...activeLeaderboard].sort((a, b) => {
-    if (a.net !== b.net) return a.net - b.net;
-    if (a.last6 !== b.last6) return a.last6 - b.last6;
-    if (a.last3 !== b.last3) return a.last3 - b.last3;
-    if (a.last1 !== b.last1) return a.last1 - b.last1;
-    return a.name.localeCompare(b.name);
-  });
+  if (a.net !== b.net) return a.net - b.net;
+
+  // If scores are tied, the team/player farther through the round ranks higher.
+  if (a.thru !== b.thru) return b.thru - a.thru;
+
+  if (a.last6 !== b.last6) return a.last6 - b.last6;
+  if (a.last3 !== b.last3) return a.last3 - b.last3;
+  if (a.last1 !== b.last1) return a.last1 - b.last1;
+
+  return a.name.localeCompare(b.name);
+});
 
 
   const currentPosition =
