@@ -2195,6 +2195,12 @@ const leaderboard =
 
 const activeLeaderboard = leaderboard.filter((entry) => entry.thru > 0);
 
+
+// Leaderboard Ranking Rules
+// 1. Lowest score wins
+// 2. If tied, farther through the round ranks higher
+// 3. Then apply tie-breakers
+
 const sortedLeaderboard = [...activeLeaderboard].sort((a, b) => {
   if (a.net !== b.net) return a.net - b.net;
 

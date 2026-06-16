@@ -1,9 +1,11 @@
 "use client";
+import LeaderboardRow from "@/components/LeaderboardRow";
 
 import AdminNav from "../../AdminNav";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+
 
 type Tournament = {
   id: string;
@@ -822,7 +824,14 @@ const adminLeaderboard =
 
 const sortedAdminLeaderboard = adminLeaderboard
   .filter((entry) => entry.thru > 0)
-  .sort((a, b) => a.net - b.net);
+  .sort((a, b) => {
+    if (a.net !== b.net) return a.net - b.net;
+
+    // If scores are tied, the team/player farther through the round ranks higher.
+    if (a.thru !== b.thru) return b.thru - a.thru;
+
+    return a.name.localeCompare(b.name);
+  });
 
 
   const openScorecard = async (entry: any) => {
@@ -1137,26 +1146,14 @@ const sortedAdminLeaderboard = adminLeaderboard
         </div>
       ) : (
         sortedAdminLeaderboard.map((entry, index) => (
-          <div
-            key={entry.id}
-            onClick={() => openScorecard(entry)}
-            className="flex cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-black p-4 transition-all hover:border-[#ff9900]"
-          >
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
-                #{index + 1} · Thru {entry.thru}
-              </div>
-
-              <div className="mt-1 text-lg font-black">
-                {entry.name}
-              </div>
-            </div>
-
-            <div className="text-3xl font-black text-[#ff9900]">
-              {entry.net > 0 ? `+${entry.net}` : entry.net === 0 ? "E" : entry.net}
-            </div>
-          </div>
-        ))
+  <LeaderboardRow
+    key={entry.id}
+    player={entry}
+    index={index}
+    totalPlayers={sortedAdminLeaderboard.length}
+    onClick={() => {}}
+  />
+))
       )}
     </div>
   )}
