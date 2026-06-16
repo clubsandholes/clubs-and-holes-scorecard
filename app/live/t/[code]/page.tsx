@@ -1,6 +1,7 @@
 "use client";
 import LeaderboardRow from "@/components/LeaderboardRow";
 import ScorecardModal from "@/components/ScorecardModal";
+import { sortLeaderboard } from "@/lib/leaderboard";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -156,10 +157,10 @@ const fetchLeaderboard = async (tournamentId: string) => {
       });
 
   setLeaderboard(
-    entries
-      .filter((entry) => entry.thru > 0)
-      .sort((a, b) => a.net - b.net)
-  );
+  sortLeaderboard(
+    entries.filter((entry) => entry.thru > 0)
+  )
+);
 };
 
 const openScorecard = async (entry: any) => {
