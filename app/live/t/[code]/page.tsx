@@ -52,15 +52,11 @@ export default function PublicTournamentPage() {
     bunker: false,
     video: false,
   });
-
+const [selectedLeaderboardEntry, setSelectedLeaderboardEntry] = useState<any | null>(null);
+const [selectedScorecard, setSelectedScorecard] = useState<any[]>([]);
  
 
 const fetchLeaderboard = async (tournamentId: string) => {
-  const { data: scoreData } = await supabase
-    .from("scores")
-    .select("tournament_player_id, team_id, hole_number, strokes")
-    .eq("tournament_id", tournamentId);
-
   const { data: playerData } = await supabase
     .from("tournament_players")
     .select("id, name")
@@ -71,43 +67,57 @@ const fetchLeaderboard = async (tournamentId: string) => {
     .select("id, name")
     .eq("tournament_id", tournamentId);
 
-  const safeScores = scoreData || [];
+  const { data: scoreData } = await supabase
+    .from("scores")
+    .select("tournament_player_id, team_id, hole_number, strokes");
+
   const safePlayers = playerData || [];
   const safeTeams = teamData || [];
+  const safeScores = scoreData || [];
 
-  setScores(safeScores);
   setPlayers(safePlayers);
   setTeams(safeTeams);
+  setScores(safeScores);
 
   const hasTeams = safeTeams.length > 0;
 
   const entries = hasTeams
     ? safeTeams.map((team) => {
-        const teamScores = safeScores.filter((s) => s.team_id === team.id);
-        const gross = teamScores.reduce((total, s) => total + s.strokes, 0);
+        const teamScores = safeScores.filter(
+          (score) => score.team_id === team.id
+        );
+
+        const gross = teamScores.reduce(
+          (total, score) => total + score.strokes,
+          0
+        );
+
         const thru = teamScores.length;
-        const par = thru * 4;
 
         return {
           id: team.id,
           name: team.name,
-          net: gross - par,
           thru,
+          net: gross - thru * 4,
         };
       })
     : safePlayers.map((player) => {
         const playerScores = safeScores.filter(
-          (s) => s.tournament_player_id === player.id
+          (score) => score.tournament_player_id === player.id
         );
-        const gross = playerScores.reduce((total, s) => total + s.strokes, 0);
+
+        const gross = playerScores.reduce(
+          (total, score) => total + score.strokes,
+          0
+        );
+
         const thru = playerScores.length;
-        const par = thru * 4;
 
         return {
           id: player.id,
           name: player.name,
-          net: gross - par,
           thru,
+          net: gross - thru * 4,
         };
       });
 
@@ -116,6 +126,28 @@ const fetchLeaderboard = async (tournamentId: string) => {
       .filter((entry) => entry.thru > 0)
       .sort((a, b) => a.net - b.net)
   );
+};
+
+const openScorecard = async (entry: any) => {
+  setSelectedLeaderboardEntry(entry);
+
+  const scoreField =
+    teams.length > 0
+      ? "team_id"
+      : "tournament_player_id";
+
+  const { data, error } = await supabase
+    .from("scores")
+    .select("*")
+    .eq(scoreField, entry.id)
+    .order("hole_number");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setSelectedScorecard(data || []);
 };
 
 const toggleSection = (section: keyof typeof openSections) => {
@@ -250,8 +282,9 @@ const fetchTournament = async () => {
                             leaderboard.map((entry, index) => (
                             <div
                                 key={entry.id}
-                                className="flex items-center justify-between rounded-2xl border border-white/10 bg-black p-4"
-                            >
+                                onClick={() => openScorecard(entry)}
+                                className="flex cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-black p-4 transition-all hover:border-[#ff9900]"
+                                >
                                 <div>
                                 <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
                                     #{index + 1}
@@ -276,6 +309,86 @@ const fetchTournament = async () => {
                     </div>
                 )}
                 </div>
+
+        {selectedLeaderboardEntry && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
+    <div className="w-full max-w-4xl rounded-[2rem] border border-white/10 bg-black p-6 text-white">
+
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
+            Scorecard
+          </div>
+
+          <div className="mt-1 text-2xl font-black">
+            {selectedLeaderboardEntry.name}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setSelectedLeaderboardEntry(null)}
+          className="text-3xl leading-none"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="mt-6">
+        <div className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white/40">
+          Out
+        </div>
+
+        <div className="grid grid-cols-9 gap-2">
+          {Array.from({ length: 9 }, (_, i) => {
+            const holeNumber = i + 1;
+
+            const score = selectedScorecard.find(
+              (s) => s.hole_number === holeNumber
+            );
+
+            return (
+              <div key={holeNumber} className="text-center">
+                <div className="text-xs font-black text-white/40">
+                  {holeNumber}
+                </div>
+
+                <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
+                  {score?.strokes ?? "-"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white/40">
+          In
+        </div>
+
+        <div className="grid grid-cols-9 gap-2">
+          {Array.from({ length: 9 }, (_, i) => {
+            const holeNumber = i + 10;
+
+            const score = selectedScorecard.find(
+              (s) => s.hole_number === holeNumber
+            );
+
+            return (
+              <div key={holeNumber} className="text-center">
+                <div className="text-xs font-black text-white/40">
+                  {holeNumber}
+                </div>
+
+                <div className="mt-1 rounded-xl border border-white/10 bg-gray-950 py-3 text-lg font-black">
+                  {score?.strokes ?? "-"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+)}        
         <Link
           href="/live"
           className="mx-auto mt-8 block w-fit rounded-full border border-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-white/70"
