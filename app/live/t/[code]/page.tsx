@@ -22,13 +22,23 @@ type ScoreRow = {
 };
 
 type Team = {
+
   id: string;
+
   name: string;
+
+  image_url?: string | null;
+
 };
 
 type Player = {
+
   id: string;
+
   name: string;
+
+  profile_image_url?: string | null;
+
 };
 
 type Hole = {
@@ -71,12 +81,12 @@ const [selectedScorecard, setSelectedScorecard] = useState<any[]>([]);
 const fetchLeaderboard = async (tournamentId: string) => {
   const { data: playerData } = await supabase
     .from("tournament_players")
-    .select("id, name")
+    .select("id, name, profile_image_url")
     .eq("tournament_id", tournamentId);
 
   const { data: teamData } = await supabase
     .from("teams")
-    .select("id, name")
+    .select("id, name, image_url")
     .eq("tournament_id", tournamentId);
 
   const { data: scoreData } = await supabase
@@ -107,11 +117,20 @@ const fetchLeaderboard = async (tournamentId: string) => {
         const thru = teamScores.length;
 
         return {
-          id: team.id,
-          name: team.name,
-          thru,
-          net: gross - thru * 4,
-        };
+
+  id: team.id,
+
+  name: team.name,
+
+  image_url: team.image_url || null,
+
+  profile_image_url: null,
+
+  thru,
+
+  net: gross - thru * 4,
+
+};
       })
     : safePlayers.map((player) => {
         const playerScores = safeScores.filter(
@@ -126,11 +145,13 @@ const fetchLeaderboard = async (tournamentId: string) => {
         const thru = playerScores.length;
 
         return {
-          id: player.id,
-          name: player.name,
-          thru,
-          net: gross - thru * 4,
-        };
+  id: player.id,
+  name: player.name,
+  image_url: null,
+  profile_image_url: player.profile_image_url || null,
+  thru,
+  net: gross - thru * 4,
+};
       });
 
   setLeaderboard(
@@ -233,6 +254,15 @@ const formatScore = (score: number) => {
   if (score > 0) return `+${score}`;
   if (score === 0) return "E";
   return `${score}`;
+};
+
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 };
 
   return (
@@ -342,9 +372,31 @@ const formatScore = (score: number) => {
                                     #{index + 1}
                                 </div>
 
-                                <div className="mt-1 text-lg font-black">
-                                    {entry.name}
-                                </div>
+                                <div className="mt-1 flex items-center gap-3">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
+                                        {entry.image_url || entry.profile_image_url ? (
+                                        <img
+                                            src={entry.image_url || entry.profile_image_url}
+                                            alt={entry.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                        ) : (
+                                        <div className="text-sm font-black text-[#ff9900]">
+                                            {getInitials(entry.name)}
+                                        </div>
+                                        )}
+                                    </div>
+
+                                    <div className="min-w-0">
+                                        <div className="truncate text-lg font-black">
+                                        {entry.name}
+                                        </div>
+
+                                        <div className="mt-1 text-xs opacity-70">
+                                        Thru {entry.thru}
+                                        </div>
+                                    </div>
+                                    </div>
                                 </div>
 
                                 <div className="text-3xl font-black text-[#ff9900]">
