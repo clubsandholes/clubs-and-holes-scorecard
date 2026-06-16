@@ -1,5 +1,5 @@
 "use client";
-
+import LeaderboardRow from "@/components/LeaderboardRow";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -362,57 +362,19 @@ const getInitials = (name: string) => {
                             </div>
                         ) : (
                             leaderboard.map((entry, index) => (
-                            <div
+                              <LeaderboardRow
                                 key={entry.id}
+                                player={entry}
+                                index={index}
+                                totalPlayers={leaderboard.length}
                                 onClick={() => openScorecard(entry)}
-                                className="flex cursor-pointer items-center justify-between rounded-2xl border border-white/10 bg-black p-4 transition-all hover:border-[#ff9900]"
-                                >
-                                <div>
-                                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">
-                                    #{index + 1}
-                                </div>
-
-                                <div className="mt-1 flex items-center gap-3">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-950">
-                                        {entry.image_url || entry.profile_image_url ? (
-                                        <img
-                                            src={entry.image_url || entry.profile_image_url}
-                                            alt={entry.name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                        ) : (
-                                        <div className="text-sm font-black text-[#ff9900]">
-                                            {getInitials(entry.name)}
-                                        </div>
-                                        )}
-                                    </div>
-
-                                    <div className="min-w-0">
-                                        <div className="truncate text-lg font-black">
-                                        {entry.name}
-                                        </div>
-
-                                        <div className="mt-1 text-xs opacity-70">
-                                        Thru {entry.thru}
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
-
-                                <div className="text-3xl font-black text-[#ff9900]">
-                                {entry.net > 0
-                                    ? `+${entry.net}`
-                                    : entry.net === 0
-                                    ? "E"
-                                    : entry.net}
-                                </div>
-                            </div>
+                              />
                             ))
-                        )}
-                        </div>
-                    </div>
-                )}
-                </div>
+                                                    )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            </div>
 
 
 
