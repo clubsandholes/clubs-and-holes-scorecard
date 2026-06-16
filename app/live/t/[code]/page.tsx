@@ -1,5 +1,6 @@
 "use client";
 import LeaderboardRow from "@/components/LeaderboardRow";
+import ScorecardModal from "@/components/ScorecardModal";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -378,138 +379,33 @@ const getInitials = (name: string) => {
 
 
 
+        <ScorecardModal
+  player={selectedLeaderboardEntry}
+  onClose={() => setSelectedLeaderboardEntry(null)}
+  formatType={teams.length > 0 ? "team" : "individual"}
+  holes={holes}
+  getPlayerScoreMap={(id) => {
+    const map: Record<number, number> = {};
+
+    selectedScorecard.forEach((score) => {
+      map[score.hole_number] = score.strokes;
+    });
+
+    return map;
+  }}
+  getTeamScoreMap={(id) => {
+    const map: Record<number, number> = {};
+
+    selectedScorecard.forEach((score) => {
+      map[score.hole_number] = score.strokes;
+    });
+
+    return map;
+  }}
+/>
 
 
-
-        {selectedLeaderboardEntry && (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
-    <div className="w-full max-w-4xl rounded-[2rem] border border-white/10 bg-black p-6 text-white">
-
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-[#ff9900]">
-            Scorecard
-          </div>
-
-          <div className="mt-1 text-2xl font-black">
-            {selectedLeaderboardEntry.name}
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-  <div className="rounded-xl border border-white/10 bg-gray-950 p-3 text-center">
-    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
-      Out
-    </div>
-    <div className="mt-1 text-2xl font-black text-[#ff9900]">
-      {outTotal || "-"}
-    </div>
-  </div>
-
-  <div className="rounded-xl border border-white/10 bg-gray-950 p-3 text-center">
-    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
-      In
-    </div>
-    <div className="mt-1 text-2xl font-black text-[#ff9900]">
-      {inTotal || "-"}
-    </div>
-  </div>
-
-  <div className="rounded-xl border border-[#ff9900]/30 bg-[#ff9900]/10 p-3 text-center">
-    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]">
-      Total
-    </div>
-    <div className="mt-1 text-2xl font-black text-[#ff9900]">
-      {roundTotal || "-"}
-    </div>
-  </div>
-</div>
-        </div>
-
-        <button
-          onClick={() => setSelectedLeaderboardEntry(null)}
-          className="text-3xl leading-none"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="mt-6">
-        <div className="mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white/40">
-          Out
-        </div>
-
-        <div className="grid grid-cols-9 gap-2">
-          {Array.from({ length: 9 }, (_, i) => {
-            const holeNumber = i + 1;
-
-            const score = selectedScorecard.find(
-              (s) => s.hole_number === holeNumber
-            );
-
-            return (
-              <div key={holeNumber} className="text-center">
-                <div className="text-xs font-black text-white/40">
-                  {holeNumber}
-                </div>
-
-                <div className="mt-1 flex h-12 items-center justify-center rounded-xl border border-white/10 bg-gray-950 text-lg font-black">
-                    {score?.strokes ? (
-                        <div
-                        className={`flex items-center justify-center text-sm font-black ${getScoreStyle(
-                            score.strokes,
-                            holes.find((h) => h.number === holeNumber)?.par || 4
-                        )}`}
-                        >
-                        {score.strokes}
-                        </div>
-                    ) : (
-                        "-"
-                    )}
-                    </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 mb-4 text-center text-xs font-black uppercase tracking-[0.18em] text-white/40">
-          In
-        </div>
-
-        <div className="grid grid-cols-9 gap-2">
-          {Array.from({ length: 9 }, (_, i) => {
-            const holeNumber = i + 10;
-
-            const score = selectedScorecard.find(
-              (s) => s.hole_number === holeNumber
-            );
-
-            return (
-              <div key={holeNumber} className="text-center">
-                <div className="text-xs font-black text-white/40">
-                  {holeNumber}
-                </div>
-
-                <div className="mt-1 flex h-12 items-center justify-center rounded-xl border border-white/10 bg-gray-950 text-lg font-black">
-                {score?.strokes ? (
-                    <div
-                    className={`flex items-center justify-center text-sm font-black ${getScoreStyle(
-                        score.strokes,
-                        holes.find((h) => h.number === holeNumber)?.par || 4
-                    )}`}
-                    >
-                    {score.strokes}
-                    </div>
-                ) : (
-                    "-"
-                )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  </div>
-)}        
+                
         <Link
           href="/live"
           className="mx-auto mt-8 block w-fit rounded-full border border-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.18em] text-white/70"
