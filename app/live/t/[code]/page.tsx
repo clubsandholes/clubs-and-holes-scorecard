@@ -183,6 +183,16 @@ const fetchTournament = async () => {
     fetchTournament();
   }, [code]);
 
+  const outTotal = selectedScorecard
+  .filter((s) => s.hole_number >= 1 && s.hole_number <= 9)
+  .reduce((total, s) => total + s.strokes, 0);
+
+const inTotal = selectedScorecard
+  .filter((s) => s.hole_number >= 10 && s.hole_number <= 18)
+  .reduce((total, s) => total + s.strokes, 0);
+
+const roundTotal = outTotal + inTotal;
+
   return (
     <div className="min-h-screen bg-black px-5 py-8 text-white">
       <div className="mx-auto max-w-3xl">
@@ -310,6 +320,11 @@ const fetchTournament = async () => {
                 )}
                 </div>
 
+
+
+
+
+
         {selectedLeaderboardEntry && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm">
     <div className="w-full max-w-4xl rounded-[2rem] border border-white/10 bg-black p-6 text-white">
@@ -323,6 +338,34 @@ const fetchTournament = async () => {
           <div className="mt-1 text-2xl font-black">
             {selectedLeaderboardEntry.name}
           </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+  <div className="rounded-xl border border-white/10 bg-gray-950 p-3 text-center">
+    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+      Out
+    </div>
+    <div className="mt-1 text-2xl font-black text-[#ff9900]">
+      {outTotal || "-"}
+    </div>
+  </div>
+
+  <div className="rounded-xl border border-white/10 bg-gray-950 p-3 text-center">
+    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+      In
+    </div>
+    <div className="mt-1 text-2xl font-black text-[#ff9900]">
+      {inTotal || "-"}
+    </div>
+  </div>
+
+  <div className="rounded-xl border border-[#ff9900]/30 bg-[#ff9900]/10 p-3 text-center">
+    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ff9900]">
+      Total
+    </div>
+    <div className="mt-1 text-2xl font-black text-[#ff9900]">
+      {roundTotal || "-"}
+    </div>
+  </div>
+</div>
         </div>
 
         <button
