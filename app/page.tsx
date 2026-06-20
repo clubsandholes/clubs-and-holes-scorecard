@@ -1218,6 +1218,12 @@ const submitBunkerPost = async () => {
   currentCharacterMessage || getCaddieMessage();
 
 
+
+useEffect(() => {
+  document.title = "Clubs & Holes | The Lot";
+}, []);
+
+
 useEffect(() => {
   const message =
   currentCharacterMessage || getCaddieMessage();
