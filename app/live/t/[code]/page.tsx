@@ -223,6 +223,12 @@ const fetchTournament = async () => {
     fetchTournament();
   }, [code]);
 
+  useEffect(() => {
+  if (tournament?.name) {
+    document.title = `${tournament.name} | Admin | Clubs & Holes`;
+  }
+}, [tournament]);
+
   const outTotal = selectedScorecard
   .filter((s) => s.hole_number >= 1 && s.hole_number <= 9)
   .reduce((total, s) => total + s.strokes, 0);

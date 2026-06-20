@@ -26,6 +26,11 @@ export default function AdminPage() {
 
   const router = useRouter();
 
+
+useEffect(() => {
+  document.title = "Admin | Clubs & Holes";
+}, []);
+
   const unlockAdmin = () => {
 
     if (password === "swingreckless") {
