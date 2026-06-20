@@ -324,6 +324,12 @@ const toggleSection = (section: keyof typeof openSections) => {
     }
   }, [tournamentId]);
 
+  useEffect(() => {
+  if (tournament?.name) {
+    document.title = `${tournament.name} | Clubs & Holes`;
+  }
+}, [tournament]);
+
   // =========================
   // TOURNAMENT SAVE
   // =========================
